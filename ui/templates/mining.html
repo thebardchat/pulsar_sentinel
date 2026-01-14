@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Mining{% endblock %}
+{% block nav_mining %}active{% endblock %}
+
+{% block content %}
+<div class="mining-container">
+    <!-- Mining Header -->
+    <header class="mining-header">
+        <div class="header-content">
+            <h1><i class="fas fa-microchip"></i> PULSAR Mining</h1>
+            <p>Secure the network. Earn rewards. Build the quantum-safe future.</p>
+        </div>
+        <div class="mining-toggle">
+            <button id="mining-start-btn" class="btn btn-lg btn-primary btn-glow" onclick="toggleMining()">
+                <i class="fas fa-play"></i> Start Mining
+            </button>
+        </div>
+    </header>
+
+    <!-- Mining Status Dashboard -->
+    <section class="mining-dashboard">
+        <div class="mining-stats-grid">
+            <!-- Hashrate -->
+            <div class="mining-stat card">
+                <div class="stat-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <p class="stat-label">Your Hashrate</p>
+                    <p class="stat-value" id="current-hashrate">0.00 TH/s</p>
+                </div>
+                <div class="stat-indicator inactive" id="hashrate-indicator">
+                    <span class="pulse"></span>
+                </div>
+            </div>
+
+            <!-- Shares -->
+            <div class="mining-stat card">
+                <div class="stat-icon icon-magenta">
+                    <i class="fas fa-cubes"></i>
+                </div>
+                <div class="stat-info">
+                    <p class="stat-label">Valid Shares</p>
+                    <p class="stat-value" id="valid-shares">0</p>
+                </div>
+                <div class="stat-sub">
+                    <span id="rejected-shares">0 rejected</span>
+                </div>
+            </div>
+
+            <!-- Earnings Today -->
+            <div class="mining-stat card">
+                <div class="stat-icon icon-gold">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="stat-info">
+                    <p class="stat-label">Today's Earnings</p>
+                    <p class="stat-value" id="today-earnings">0.00 PLS</p>
+                </div>
+                <div class="stat-sub">
+                    <span>≈ $<span id="today-usd">0.00</span></span>
+                </div>
+            </div>
+
+            <!-- Total Mined -->
+            <div class="mining-stat card">
+                <div class="stat-icon icon-green">
+                    <i class="fas fa-gem"></i>
+                </div>
+                <div class="stat-info">
+                    <p class="stat-label">Total Mined</p>
+                    <p class="stat-value" id="total-mined">48.50 PLS</p>
+                </div>
+                <div class="stat-sub">
+                    <span>12 blocks found</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mining Console & Chart -->
+    <section class="mining-main">
+        <div class="mining-grid">
+            <!-- Hashrate Chart -->
+            <div class="mining-chart card">
+                <div class="card-header">
+                    <h3>Hashrate Performance</h3>
+                    <div class="chart-controls">
+                        <button class="btn btn-sm btn-secondary active">1H</button>
+                        <button class="btn btn-sm btn-secondary">24H</button>
+                        <button class="btn btn-sm btn-secondary">7D</button>
+                    </div>
+                </div>
+                <div class="chart-container" id="hashrate-chart">
+                    <div class="chart-placeholder">
+                        <i class="fas fa-chart-area"></i>
+                        <p>Start mining to see hashrate data</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mining Console -->
+            <div class="mining-console card">
+                <div class="card-header">
+                    <h3><i class="fas fa-terminal"></i> Mining Console</h3>
+                    <button class="btn btn-sm btn-secondary" onclick="clearConsole()">Clear</button>
+                </div>
+                <div class="console-output" id="mining-console">
+                    <div class="console-line info">
+                        [SYSTEM] PULSAR Mining Engine v1.0.0
+                    </div>
+                    <div class="console-line info">
+                        [SYSTEM] Initializing post-quantum mining protocol...
+                    </div>
+                    <div class="console-line info">
+                        [SYSTEM] Connected to Polygon mainnet
+                    </div>
+                    <div class="console-line waiting">
+                        [MINER] Waiting for start command...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mining Configuration -->
+    <section class="mining-config">
+        <div class="config-grid">
+            <!-- Worker Settings -->
+            <div class="config-card card">
+                <h3><i class="fas fa-cogs"></i> Worker Configuration</h3>
+                <div class="config-form">
+                    <div class="form-group">
+                        <label>Worker Name</label>
+                        <input type="text" class="form-input" id="worker-name" value="pulsar-miner-01">
+                    </div>
+                    <div class="form-group">
+                        <label>CPU Threads</label>
+                        <div class="slider-group">
+                            <input type="range" min="1" max="16" value="4" id="cpu-threads" class="form-slider">
+                            <span class="slider-value" id="threads-value">4</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mining Intensity</label>
+                        <div class="slider-group">
+                            <input type="range" min="1" max="100" value="75" id="mining-intensity" class="form-slider">
+                            <span class="slider-value" id="intensity-value">75%</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="auto-tune" checked>
+                            <span>Auto-tune for optimal performance</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pool Settings -->
+            <div class="config-card card">
+                <h3><i class="fas fa-network-wired"></i> Pool Settings</h3>
+                <div class="pool-status">
+                    <div class="pool-indicator connected">
+                        <span class="status-dot"></span>
+                        <span>Connected to PULSAR Pool</span>
+                    </div>
+                </div>
+                <div class="pool-stats">
+                    <div class="pool-stat">
+                        <span class="label">Pool Hashrate</span>
+                        <span class="value">428.5 TH/s</span>
+                    </div>
+                    <div class="pool-stat">
+                        <span class="label">Active Miners</span>
+                        <span class="value">2,847</span>
+                    </div>
+                    <div class="pool-stat">
+                        <span class="label">Blocks Found (24h)</span>
+                        <span class="value">156</span>
+                    </div>
+                    <div class="pool-stat">
+                        <span class="label">Pool Fee</span>
+                        <span class="value">1%</span>
+                    </div>
+                </div>
+                <div class="pool-address">
+                    <label>Pool Endpoint</label>
+                    <div class="address-display">
+                        <code>stratum+tcp://pool.pulsar.cloud:3333</code>
+                        <button class="btn-copy"><i class="fas fa-copy"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payout Settings -->
+            <div class="config-card card">
+                <h3><i class="fas fa-wallet"></i> Payout Settings</h3>
+                <div class="payout-info">
+                    <div class="payout-row">
+                        <span class="label">Payout Address</span>
+                        <span class="value mono">0x742d...f8c9</span>
+                    </div>
+                    <div class="payout-row">
+                        <span class="label">Minimum Payout</span>
+                        <span class="value">10.00 PLS</span>
+                    </div>
+                    <div class="payout-row">
+                        <span class="label">Pending Balance</span>
+                        <span class="value highlight">8.50 PLS</span>
+                    </div>
+                    <div class="payout-row">
+                        <span class="label">Next Payout</span>
+                        <span class="value">~2 hours</span>
+                    </div>
+                </div>
+                <div class="payout-progress">
+                    <div class="progress-header">
+                        <span>Progress to Payout</span>
+                        <span>85%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 85%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hardware Monitor -->
+            <div class="config-card card">
+                <h3><i class="fas fa-thermometer-half"></i> Hardware Monitor</h3>
+                <div class="hardware-stats">
+                    <div class="hw-stat">
+                        <div class="hw-icon">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="hw-info">
+                            <span class="hw-label">CPU Usage</span>
+                            <div class="hw-bar">
+                                <div class="hw-fill" id="cpu-usage" style="width: 45%"></div>
+                            </div>
+                            <span class="hw-value">45%</span>
+                        </div>
+                    </div>
+                    <div class="hw-stat">
+                        <div class="hw-icon">
+                            <i class="fas fa-memory"></i>
+                        </div>
+                        <div class="hw-info">
+                            <span class="hw-label">Memory</span>
+                            <div class="hw-bar">
+                                <div class="hw-fill" id="memory-usage" style="width: 62%"></div>
+                            </div>
+                            <span class="hw-value">4.6 / 7.4 GB</span>
+                        </div>
+                    </div>
+                    <div class="hw-stat">
+                        <div class="hw-icon">
+                            <i class="fas fa-temperature-high"></i>
+                        </div>
+                        <div class="hw-info">
+                            <span class="hw-label">Temperature</span>
+                            <div class="hw-bar temp">
+                                <div class="hw-fill" id="cpu-temp" style="width: 52%"></div>
+                            </div>
+                            <span class="hw-value">52°C</span>
+                        </div>
+                    </div>
+                    <div class="hw-stat">
+                        <div class="hw-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="hw-info">
+                            <span class="hw-label">Power Draw</span>
+                            <div class="hw-bar power">
+                                <div class="hw-fill" id="power-draw" style="width: 35%"></div>
+                            </div>
+                            <span class="hw-value">~85W</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mining History -->
+    <section class="mining-history">
+        <div class="section-header-inline">
+            <h2><i class="fas fa-history"></i> Mining History</h2>
+            <button class="btn btn-sm btn-secondary">Export CSV</button>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Block</th>
+                        <th>Time Found</th>
+                        <th>Hashrate</th>
+                        <th>Reward</th>
+                        <th>Status</th>
+                        <th>TX</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#4,521,789</td>
+                        <td>2 hours ago</td>
+                        <td>42.5 TH/s</td>
+                        <td class="text-success">+12.50 PLS</td>
+                        <td><span class="badge badge-success">Confirmed</span></td>
+                        <td><a href="#" class="tx-link"><i class="fas fa-external-link-alt"></i></a></td>
+                    </tr>
+                    <tr>
+                        <td>#4,520,156</td>
+                        <td>8 hours ago</td>
+                        <td>41.2 TH/s</td>
+                        <td class="text-success">+12.50 PLS</td>
+                        <td><span class="badge badge-success">Confirmed</span></td>
+                        <td><a href="#" class="tx-link"><i class="fas fa-external-link-alt"></i></a></td>
+                    </tr>
+                    <tr>
+                        <td>#4,518,423</td>
+                        <td>Yesterday</td>
+                        <td>43.1 TH/s</td>
+                        <td class="text-success">+12.50 PLS</td>
+                        <td><span class="badge badge-success">Confirmed</span></td>
+                        <td><a href="#" class="tx-link"><i class="fas fa-external-link-alt"></i></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/mining.js"></script>
+{% endblock %}

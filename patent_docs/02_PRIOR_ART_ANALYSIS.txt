@@ -1,0 +1,63 @@
+
+================================================================================
+                    PRIOR ART ANALYSIS
+================================================================================
+
+The following prior art has been identified and analyzed for differentiation:
+
+
+--------------------------------------------------------------------------------
+REFERENCE: NIST Post-Quantum Cryptography Standardization (2024)
+--------------------------------------------------------------------------------
+RELEVANCE: Standardizes ML-KEM algorithm used in hybrid encryption
+
+DIFFERENTIATION: PULSAR SENTINEL uniquely combines ML-KEM with AES-GCM in hybrid mode with automatic scaling
+
+
+--------------------------------------------------------------------------------
+REFERENCE: Ethereum/Polygon Blockchain (2020)
+--------------------------------------------------------------------------------
+RELEVANCE: Provides distributed ledger infrastructure
+
+DIFFERENTIATION: PULSAR SENTINEL adds Merkle-anchored audit trails and dual-layer governance
+
+
+--------------------------------------------------------------------------------
+REFERENCE: MetaMask Wallet (2016)
+--------------------------------------------------------------------------------
+RELEVANCE: Provides wallet signature capability
+
+DIFFERENTIATION: PULSAR SENTINEL uses signatures for authentication, not just transactions
+
+
+--------------------------------------------------------------------------------
+REFERENCE: Traditional SIEM Systems (2000)
+--------------------------------------------------------------------------------
+RELEVANCE: Security event logging and threat detection
+
+DIFFERENTIATION: PULSAR SENTINEL adds quantum risk factor and blockchain immutability
+
+
+--------------------------------------------------------------------------------
+                    NOVELTY STATEMENT
+--------------------------------------------------------------------------------
+
+PULSAR SENTINEL's novelty lies in the COMBINATION and INTEGRATION of:
+
+1. Post-quantum cryptography (ML-KEM) with classical encryption (AES-GCM)
+   in a single hybrid operation with automatic security level scaling.
+
+2. Blockchain-anchored audit trails with Merkle proof verification,
+   enabling independent verification without full on-chain storage.
+
+3. A novel quantum risk factor in threat scoring that specifically
+   tracks and penalizes use of quantum-vulnerable cryptographic operations.
+
+4. Dual-layer governance enforcement in both application code AND
+   smart contracts, with automated heir transfer protocol.
+
+5. Wallet-native authentication that eliminates all credential storage
+   while providing phishing-resistant identity verification.
+
+No prior art combines all five innovations into a unified security framework
+designed to adapt and scale with quantum computing advancements.

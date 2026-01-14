@@ -1,0 +1,534 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card card">
+        <!-- Logo Section -->
+        <div class="auth-header">
+            <div class="auth-logo">
+                <div class="logo-pulse large">
+                    <span class="logo-icon">&#9733;</span>
+                </div>
+            </div>
+            <h1>Welcome Back</h1>
+            <p>Connect your wallet to access PULSAR SENTINEL</p>
+        </div>
+
+        <!-- Wallet Connect Section -->
+        <div class="auth-body">
+            <div id="wallet-connect-section">
+                <button id="metamask-connect" class="btn btn-lg btn-primary btn-glow btn-block wallet-btn">
+                    <i class="fab fa-ethereum"></i>
+                    Connect with MetaMask
+                </button>
+
+                <div class="wallet-alternatives">
+                    <p class="divider-text"><span>or connect with</span></p>
+                    <div class="alt-wallets">
+                        <button class="btn btn-secondary wallet-btn-small" disabled>
+                            <i class="fas fa-wallet"></i> WalletConnect
+                            <span class="coming-soon">Soon</span>
+                        </button>
+                        <button class="btn btn-secondary wallet-btn-small" disabled>
+                            <i class="fab fa-bitcoin"></i> Coinbase
+                            <span class="coming-soon">Soon</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signing Section (shown after wallet connected) -->
+            <div id="signing-section" style="display: none;">
+                <div class="connected-wallet">
+                    <div class="wallet-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="wallet-info">
+                        <p class="wallet-label">Connected Wallet</p>
+                        <p class="wallet-address" id="connected-address">0x0000...0000</p>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" onclick="disconnectWallet()">
+                        <i class="fas fa-unlink"></i>
+                    </button>
+                </div>
+
+                <div class="sign-message-box">
+                    <h4><i class="fas fa-signature"></i> Sign to Authenticate</h4>
+                    <p>Sign the message in your wallet to prove ownership and complete login.</p>
+
+                    <div class="message-preview">
+                        <pre id="sign-message">
+PULSAR SENTINEL Authentication
+
+Wallet: <span id="msg-wallet">0x...</span>
+Nonce: <span id="msg-nonce">loading...</span>
+Timestamp: <span id="msg-timestamp">...</span>
+
+Sign this message to authenticate.
+This request will not trigger a blockchain transaction or cost any gas fees.
+                        </pre>
+                    </div>
+
+                    <button id="sign-btn" class="btn btn-lg btn-primary btn-glow btn-block">
+                        <i class="fas fa-pen-fancy"></i> Sign Message
+                    </button>
+                </div>
+            </div>
+
+            <!-- Verification Section -->
+            <div id="verification-section" style="display: none;">
+                <div class="verification-progress">
+                    <div class="spinner-quantum"></div>
+                    <h4>Verifying Signature...</h4>
+                    <p>Please wait while we verify your authentication</p>
+
+                    <div class="verification-steps">
+                        <div class="step-item" id="step-signature">
+                            <i class="fas fa-circle-notch fa-spin"></i>
+                            <span>Validating signature</span>
+                        </div>
+                        <div class="step-item pending" id="step-blockchain">
+                            <i class="fas fa-circle"></i>
+                            <span>Checking blockchain identity</span>
+                        </div>
+                        <div class="step-item pending" id="step-security">
+                            <i class="fas fa-circle"></i>
+                            <span>Running security checks</span>
+                        </div>
+                        <div class="step-item pending" id="step-session">
+                            <i class="fas fa-circle"></i>
+                            <span>Creating secure session</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="security-notice">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <strong>Zero-Password Authentication</strong>
+                    <p>We never store passwords. Your wallet signature is your secure identity.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Links -->
+        <div class="auth-footer">
+            <p>New to PULSAR SENTINEL? <a href="/register">Create Account</a></p>
+            <p class="terms-link">
+                By connecting, you agree to our <a href="/terms">Terms of Service</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Side Info -->
+    <div class="auth-info">
+        <div class="info-card">
+            <h3><i class="fas fa-lock"></i> Quantum-Safe Login</h3>
+            <ul class="info-list">
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    No passwords to steal or forget
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    Phishing-resistant authentication
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    Blockchain-verified identity
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    Post-quantum secure sessions
+                </li>
+            </ul>
+        </div>
+
+        <div class="info-card">
+            <h3><i class="fas fa-info-circle"></i> How It Works</h3>
+            <ol class="info-steps">
+                <li>Connect your MetaMask wallet</li>
+                <li>Sign a verification message (free, no gas)</li>
+                <li>Server verifies your signature</li>
+                <li>Secure session created with JWT token</li>
+            </ol>
+        </div>
+
+        <div class="pqc-badge-large">
+            <i class="fas fa-atom"></i>
+            <span>Protected by ML-KEM-768</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        display: flex;
+        gap: 3rem;
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .auth-card {
+        flex: 1;
+        max-width: 480px;
+        padding: 2.5rem;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-logo {
+        margin-bottom: 1.5rem;
+    }
+
+    .logo-pulse.large {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+    }
+
+    .logo-pulse.large .logo-icon {
+        font-size: 2.5rem;
+    }
+
+    .auth-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-header p {
+        color: var(--text-secondary);
+    }
+
+    .wallet-btn {
+        padding: 1rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .wallet-btn i {
+        margin-right: 0.75rem;
+        font-size: 1.3rem;
+    }
+
+    .wallet-alternatives {
+        margin-top: 1.5rem;
+    }
+
+    .divider-text {
+        text-align: center;
+        color: var(--text-muted);
+        position: relative;
+        margin: 1.5rem 0;
+    }
+
+    .divider-text::before,
+    .divider-text::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 40%;
+        height: 1px;
+        background: var(--border-color);
+    }
+
+    .divider-text::before { left: 0; }
+    .divider-text::after { right: 0; }
+
+    .divider-text span {
+        background: var(--card-bg);
+        padding: 0 1rem;
+    }
+
+    .alt-wallets {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .wallet-btn-small {
+        flex: 1;
+        position: relative;
+    }
+
+    .coming-soon {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: var(--pulsar-magenta);
+        color: white;
+        font-size: 0.6rem;
+        padding: 2px 6px;
+        border-radius: 10px;
+    }
+
+    .connected-wallet {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(0, 240, 255, 0.05);
+        border: 1px solid var(--quantum-cyan);
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+    }
+
+    .wallet-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .wallet-info {
+        flex: 1;
+    }
+
+    .wallet-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+
+    .wallet-address {
+        font-family: var(--font-mono);
+        color: var(--quantum-cyan);
+    }
+
+    .sign-message-box {
+        text-align: center;
+    }
+
+    .sign-message-box h4 {
+        margin-bottom: 0.5rem;
+    }
+
+    .sign-message-box > p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    .message-preview {
+        background: var(--deep-space);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    .message-preview pre {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        white-space: pre-wrap;
+        margin: 0;
+    }
+
+    .verification-progress {
+        text-align: center;
+        padding: 2rem 0;
+    }
+
+    .verification-progress h4 {
+        margin: 1rem 0 0.5rem;
+    }
+
+    .verification-steps {
+        margin-top: 2rem;
+        text-align: left;
+    }
+
+    .step-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: var(--radius-sm);
+        margin-bottom: 0.5rem;
+    }
+
+    .step-item i {
+        color: var(--quantum-cyan);
+    }
+
+    .step-item.pending {
+        opacity: 0.5;
+    }
+
+    .step-item.pending i {
+        color: var(--text-muted);
+    }
+
+    .step-item.complete {
+        background: rgba(0, 255, 65, 0.1);
+    }
+
+    .step-item.complete i {
+        color: var(--matrix-green);
+    }
+
+    .security-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(0, 240, 255, 0.05);
+        border-radius: var(--radius-md);
+        margin-top: 2rem;
+    }
+
+    .security-notice i {
+        color: var(--quantum-cyan);
+        font-size: 1.5rem;
+    }
+
+    .security-notice strong {
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .security-notice p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .auth-footer p {
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-footer a {
+        color: var(--quantum-cyan);
+    }
+
+    .terms-link {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    /* Auth Info Side */
+    .auth-info {
+        width: 320px;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .info-card {
+        padding: 1.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+    }
+
+    .info-card h3 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-card h3 i {
+        color: var(--quantum-cyan);
+    }
+
+    .info-list, .info-steps {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-list li, .info-steps li {
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .info-list i {
+        color: var(--matrix-green);
+    }
+
+    .info-steps {
+        counter-reset: step;
+    }
+
+    .info-steps li {
+        counter-increment: step;
+    }
+
+    .info-steps li::before {
+        content: counter(step);
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    .pqc-badge-large {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 255, 0.1));
+        border: 1px solid var(--quantum-cyan);
+        border-radius: var(--radius-lg);
+        color: var(--quantum-cyan);
+        font-family: var(--font-display);
+    }
+
+    .pqc-badge-large i {
+        font-size: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+        .auth-container {
+            flex-direction: column;
+        }
+
+        .auth-info {
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .info-card {
+            flex: 1;
+            min-width: 200px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/auth.js"></script>
+{% endblock %}

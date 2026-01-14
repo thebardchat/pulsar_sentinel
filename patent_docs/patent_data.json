@@ -1,0 +1,95 @@
+{
+  "patent_info": {
+    "title": "QUANTUM-ADAPTIVE BLOCKCHAIN-INTEGRATED SECURITY FRAMEWORK WITH AGENT STATE RECORDING AND SELF-GOVERNANCE PROTOCOLS",
+    "short_title": "PULSAR SENTINEL",
+    "filing_date": "2026-01-14",
+    "applicant": "Angel Cloud Technologies",
+    "application_type": "Provisional Patent Application",
+    "technology_field": "Cybersecurity, Cryptography, Blockchain",
+    "version": "1.0.0"
+  },
+  "claims": [
+    {
+      "claim_number": 1,
+      "type": "independent",
+      "title": "Quantum-Adaptive Hybrid Encryption System",
+      "description": "A quantum-adaptive security system comprising:\n- a hybrid encryption module combining lattice-based key encapsulation (ML-KEM) with symmetric authenticated encryption (AES-256-GCM);\n- an adaptive security level controller that adjusts cryptographic parameters from NIST Level 3 (ML-KEM-768) to Level 5 (ML-KEM-1024) based on configuration;\n- a key derivation function (HKDF-SHA256) deriving symmetric keys from encapsulated shared secrets;\n- wherein said system maintains security against both classical computing attacks and quantum computing attacks utilizing Shor's algorithm.",
+      "novel_elements": [
+        "Combination of ML-KEM with AES-256-GCM in single hybrid operation",
+        "Configuration-based security level scaling without code changes",
+        "Defense-in-depth architecture protecting against compromise of either layer"
+      ]
+    },
+    {
+      "claim_number": 2,
+      "type": "independent",
+      "title": "Agent State Record (ASR) Blockchain Anchoring System",
+      "description": "An immutable audit system comprising:\n- an agent state record generator creating cryptographically signed security event records with unique identifiers, timestamps, agent identifiers, action types, threat levels, and quantum safety status;\n- a Merkle tree constructor batching multiple records into a single root hash for efficient blockchain storage;\n- a blockchain interface storing said root hash on a distributed ledger network;\n- a verification module capable of generating and validating Merkle proofs for any individual record against said stored root;\n- wherein any modification to recorded events is cryptographically detectable.",
+      "novel_elements": [
+        "Combination of local storage with blockchain anchoring for efficiency",
+        "PQC status tracking within audit records",
+        "Independent Merkle proof verification for any single record"
+      ]
+    },
+    {
+      "claim_number": 3,
+      "type": "independent",
+      "title": "Points Toward Threat Score (PTS) Algorithm",
+      "description": "A threat assessment method comprising:\n- calculating a weighted threat score from multiple security factors using the formula:\n  PTS = (quantum_risk_factor \u00d7 0.4) + (access_violation_count \u00d7 0.3) + (rate_limit_violations \u00d7 0.2) + (signature_failures \u00d7 0.1);\n- a quantum risk factor specifically measuring operations using quantum-vulnerable cryptographic algorithms;\n- classifying said score into threat tiers: SAFE (PTS < 50), CAUTION (50 \u2264 PTS < 150), CRITICAL (PTS \u2265 150);\n- automatically applying security restrictions based on tier classification;\n- providing numeric outputs suitable for integration with machine learning threat detection systems.",
+      "novel_elements": [
+        "Quantum risk factor as dedicated threat metric",
+        "Tiered response automation based on continuous scoring",
+        "AI/ML integration interface for advanced threat detection"
+      ]
+    },
+    {
+      "claim_number": 4,
+      "type": "independent",
+      "title": "Self-Governance Rule Code (RC) System",
+      "description": "A self-governance system comprising:\n- rule definitions (RC codes) encoded in application software enforcing security policies;\n- corresponding rule enforcement logic deployed as smart contract code on a blockchain network;\n- dual verification ensuring governance rules cannot be bypassed by compromising either application layer or blockchain layer alone;\n- an heir transfer protocol (RC 1.02) automatically transferring account assets and permissions to a designated heir after a configurable inactivity period;\n- a three-strike enforcement mechanism (RC 2.01) automatically restricting accounts after repeated policy violations;\n- a fallback protocol (RC 3.02) directing failed transactions to alternate network infrastructure.",
+      "novel_elements": [
+        "Dual-layer enforcement in application AND smart contract",
+        "Automated heir transfer for digital inheritance",
+        "Hardcoded governance that cannot be modified without redeployment"
+      ]
+    },
+    {
+      "claim_number": 5,
+      "type": "independent",
+      "title": "Wallet-Native Zero-Password Authentication",
+      "description": "A passwordless authentication method comprising:\n- generating a cryptographic challenge containing a unique nonce, wallet address, and timestamp for a blockchain wallet address;\n- receiving a digital signature of said challenge message from a wallet application without incurring blockchain transaction fees;\n- recovering the signer's address from said signature using elliptic curve cryptography;\n- verifying said recovered address matches the claimed wallet address without storing any credentials on the server;\n- issuing a time-limited JSON Web Token upon successful verification for subsequent authenticated requests;\n- wherein authentication is tied to cryptographic proof of private key possession rather than memorized credentials.",
+      "novel_elements": [
+        "Zero credential storage authentication",
+        "Blockchain wallet as identity provider",
+        "Phishing-resistant challenge-response protocol"
+      ]
+    }
+  ],
+  "prior_art": [
+    {
+      "reference": "NIST Post-Quantum Cryptography Standardization",
+      "year": 2024,
+      "relevance": "Standardizes ML-KEM algorithm used in hybrid encryption",
+      "differentiation": "PULSAR SENTINEL uniquely combines ML-KEM with AES-GCM in hybrid mode with automatic scaling"
+    },
+    {
+      "reference": "Ethereum/Polygon Blockchain",
+      "year": 2020,
+      "relevance": "Provides distributed ledger infrastructure",
+      "differentiation": "PULSAR SENTINEL adds Merkle-anchored audit trails and dual-layer governance"
+    },
+    {
+      "reference": "MetaMask Wallet",
+      "year": 2016,
+      "relevance": "Provides wallet signature capability",
+      "differentiation": "PULSAR SENTINEL uses signatures for authentication, not just transactions"
+    },
+    {
+      "reference": "Traditional SIEM Systems",
+      "year": 2000,
+      "relevance": "Security event logging and threat detection",
+      "differentiation": "PULSAR SENTINEL adds quantum risk factor and blockchain immutability"
+    }
+  ],
+  "generated_at": "2026-01-14T16:29:57.494047+00:00"
+}

@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+
+{% block title %}Wallet{% endblock %}
+{% block nav_wallet %}active{% endblock %}
+
+{% block content %}
+<div class="wallet-container">
+    <!-- Wallet Header -->
+    <header class="wallet-header">
+        <div class="wallet-identity">
+            <div class="wallet-avatar-large">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="wallet-details">
+                <h1>PULSAR Wallet</h1>
+                <p class="wallet-address-full" id="wallet-address">
+                    0x742d35Cc6634C0532925a3b844Bc9e7595f8c92f
+                    <button class="btn-copy" onclick="copyAddress()"><i class="fas fa-copy"></i></button>
+                </p>
+                <div class="wallet-badges">
+                    <span class="badge badge-success"><i class="fas fa-check"></i> Verified</span>
+                    <span class="badge badge-primary"><i class="fas fa-crown"></i> Legacy Builder</span>
+                </div>
+            </div>
+        </div>
+        <div class="wallet-actions">
+            <button class="btn btn-primary btn-glow" onclick="showSendModal()">
+                <i class="fas fa-paper-plane"></i> Send
+            </button>
+            <button class="btn btn-secondary" onclick="showReceiveModal()">
+                <i class="fas fa-qrcode"></i> Receive
+            </button>
+            <button class="btn btn-secondary" onclick="showSwapModal()">
+                <i class="fas fa-exchange-alt"></i> Swap
+            </button>
+        </div>
+    </header>
+
+    <!-- Balance Overview -->
+    <section class="balance-section">
+        <div class="balance-cards">
+            <!-- Main PULSAR Balance -->
+            <div class="balance-card card main-balance">
+                <div class="balance-header">
+                    <div class="token-icon pulsar">
+                        <span>P</span>
+                    </div>
+                    <div class="token-info">
+                        <h3>PULSAR Coin</h3>
+                        <p class="token-symbol">PLS</p>
+                    </div>
+                </div>
+                <div class="balance-amount">
+                    <span class="amount-value" id="pls-balance">2,450.00</span>
+                    <span class="amount-symbol">PLS</span>
+                </div>
+                <div class="balance-usd">
+                    <span>≈ $4,900.00 USD</span>
+                    <span class="change positive"><i class="fas fa-arrow-up"></i> +5.2%</span>
+                </div>
+                <div class="balance-chart" id="pls-mini-chart"></div>
+            </div>
+
+            <!-- MATIC Balance -->
+            <div class="balance-card card">
+                <div class="balance-header">
+                    <div class="token-icon matic">
+                        <i class="fab fa-ethereum"></i>
+                    </div>
+                    <div class="token-info">
+                        <h3>Polygon</h3>
+                        <p class="token-symbol">MATIC</p>
+                    </div>
+                </div>
+                <div class="balance-amount">
+                    <span class="amount-value">125.50</span>
+                    <span class="amount-symbol">MATIC</span>
+                </div>
+                <div class="balance-usd">
+                    <span>≈ $112.95 USD</span>
+                    <span class="change negative"><i class="fas fa-arrow-down"></i> -1.3%</span>
+                </div>
+            </div>
+
+            <!-- Staked Balance -->
+            <div class="balance-card card">
+                <div class="balance-header">
+                    <div class="token-icon staked">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="token-info">
+                        <h3>Staked PLS</h3>
+                        <p class="token-symbol">sPLS</p>
+                    </div>
+                </div>
+                <div class="balance-amount">
+                    <span class="amount-value">500.00</span>
+                    <span class="amount-symbol">PLS</span>
+                </div>
+                <div class="balance-usd">
+                    <span>≈ $1,000.00 USD</span>
+                    <span class="stake-apy"><i class="fas fa-percentage"></i> 12.5% APY</span>
+                </div>
+            </div>
+
+            <!-- Mining Rewards -->
+            <div class="balance-card card">
+                <div class="balance-header">
+                    <div class="token-icon mining">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <div class="token-info">
+                        <h3>Mining Rewards</h3>
+                        <p class="token-symbol">Unclaimed</p>
+                    </div>
+                </div>
+                <div class="balance-amount">
+                    <span class="amount-value">48.50</span>
+                    <span class="amount-symbol">PLS</span>
+                </div>
+                <div class="balance-usd">
+                    <button class="btn btn-sm btn-primary" onclick="claimRewards()">
+                        <i class="fas fa-hand-holding-usd"></i> Claim
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transaction History -->
+    <section class="transactions-section">
+        <div class="section-header-inline">
+            <h2><i class="fas fa-history"></i> Transaction History</h2>
+            <div class="header-controls">
+                <select class="form-select" id="tx-filter">
+                    <option value="all">All Transactions</option>
+                    <option value="send">Sent</option>
+                    <option value="receive">Received</option>
+                    <option value="mining">Mining Rewards</option>
+                    <option value="stake">Staking</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="transactions-list">
+            <!-- Transaction Item -->
+            <div class="transaction-item card">
+                <div class="tx-icon receive">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="tx-details">
+                    <div class="tx-main">
+                        <h4>Mining Reward</h4>
+                        <p class="tx-address">Block #4,521,789</p>
+                    </div>
+                    <div class="tx-meta">
+                        <span class="tx-time">2 hours ago</span>
+                        <span class="tx-status confirmed"><i class="fas fa-check"></i> Confirmed</span>
+                    </div>
+                </div>
+                <div class="tx-amount receive">
+                    <span class="amount">+12.50 PLS</span>
+                    <span class="usd">≈ $25.00</span>
+                </div>
+            </div>
+
+            <!-- Transaction Item -->
+            <div class="transaction-item card">
+                <div class="tx-icon send">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <div class="tx-details">
+                    <div class="tx-main">
+                        <h4>Sent PLS</h4>
+                        <p class="tx-address">To: 0x8f3a...2b1c</p>
+                    </div>
+                    <div class="tx-meta">
+                        <span class="tx-time">Yesterday</span>
+                        <span class="tx-status confirmed"><i class="fas fa-check"></i> Confirmed</span>
+                    </div>
+                </div>
+                <div class="tx-amount send">
+                    <span class="amount">-50.00 PLS</span>
+                    <span class="usd">≈ $100.00</span>
+                </div>
+            </div>
+
+            <!-- Transaction Item -->
+            <div class="transaction-item card">
+                <div class="tx-icon stake">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="tx-details">
+                    <div class="tx-main">
+                        <h4>Staked PLS</h4>
+                        <p class="tx-address">90-day lock period</p>
+                    </div>
+                    <div class="tx-meta">
+                        <span class="tx-time">3 days ago</span>
+                        <span class="tx-status confirmed"><i class="fas fa-check"></i> Confirmed</span>
+                    </div>
+                </div>
+                <div class="tx-amount stake">
+                    <span class="amount">500.00 PLS</span>
+                    <span class="usd">Locked until Apr 15</span>
+                </div>
+            </div>
+
+            <!-- Transaction Item -->
+            <div class="transaction-item card">
+                <div class="tx-icon receive">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="tx-details">
+                    <div class="tx-main">
+                        <h4>Received PLS</h4>
+                        <p class="tx-address">From: 0x5c0f...7a2d</p>
+                    </div>
+                    <div class="tx-meta">
+                        <span class="tx-time">1 week ago</span>
+                        <span class="tx-status confirmed"><i class="fas fa-check"></i> Confirmed</span>
+                    </div>
+                </div>
+                <div class="tx-amount receive">
+                    <span class="amount">+1,000.00 PLS</span>
+                    <span class="usd">≈ $2,000.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="load-more">
+            <button class="btn btn-secondary">Load More Transactions</button>
+        </div>
+    </section>
+
+    <!-- Staking Panel -->
+    <section class="staking-section">
+        <div class="section-header-inline">
+            <h2><i class="fas fa-percentage"></i> Staking</h2>
+        </div>
+
+        <div class="staking-grid">
+            <div class="staking-card card">
+                <h3>Stake PULSAR</h3>
+                <p class="staking-desc">Earn rewards by staking your PLS tokens</p>
+
+                <div class="staking-tiers">
+                    <div class="tier-option">
+                        <input type="radio" name="stake-tier" id="stake-30" value="30">
+                        <label for="stake-30">
+                            <span class="tier-duration">30 Days</span>
+                            <span class="tier-apy">8% APY</span>
+                        </label>
+                    </div>
+                    <div class="tier-option">
+                        <input type="radio" name="stake-tier" id="stake-60" value="60">
+                        <label for="stake-60">
+                            <span class="tier-duration">60 Days</span>
+                            <span class="tier-apy">10% APY</span>
+                        </label>
+                    </div>
+                    <div class="tier-option selected">
+                        <input type="radio" name="stake-tier" id="stake-90" value="90" checked>
+                        <label for="stake-90">
+                            <span class="tier-duration">90 Days</span>
+                            <span class="tier-apy">12.5% APY</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="staking-input">
+                    <label>Amount to Stake</label>
+                    <div class="input-with-max">
+                        <input type="number" class="form-input" placeholder="0.00" id="stake-amount">
+                        <button class="btn btn-sm btn-secondary" onclick="setMaxStake()">MAX</button>
+                    </div>
+                    <p class="input-hint">Available: 1,950.00 PLS</p>
+                </div>
+
+                <div class="staking-preview">
+                    <div class="preview-row">
+                        <span>Estimated Rewards (90d)</span>
+                        <span class="preview-value">+61.25 PLS</span>
+                    </div>
+                    <div class="preview-row">
+                        <span>Unlock Date</span>
+                        <span class="preview-value">April 15, 2024</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-glow btn-block" onclick="stakeTokens()">
+                    <i class="fas fa-lock"></i> Stake PLS
+                </button>
+            </div>
+
+            <div class="staking-stats card">
+                <h3>Your Staking Stats</h3>
+                <div class="stats-list">
+                    <div class="stat-row">
+                        <span class="stat-label">Total Staked</span>
+                        <span class="stat-value">500.00 PLS</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Rewards Earned</span>
+                        <span class="stat-value text-success">+24.50 PLS</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Current APY</span>
+                        <span class="stat-value">12.5%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Time Remaining</span>
+                        <span class="stat-value">67 days</span>
+                    </div>
+                </div>
+
+                <div class="staking-progress">
+                    <div class="progress-header">
+                        <span>Staking Progress</span>
+                        <span>26%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 26%"></div>
+                    </div>
+                    <p class="progress-note">23 days completed of 90 days</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Send Modal -->
+<div id="send-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content card">
+        <button class="modal-close" onclick="hideSendModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-header">
+            <h3><i class="fas fa-paper-plane"></i> Send PULSAR</h3>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Recipient Address</label>
+                <input type="text" class="form-input" placeholder="0x..." id="send-recipient">
+            </div>
+            <div class="form-group">
+                <label>Amount</label>
+                <div class="input-with-max">
+                    <input type="number" class="form-input" placeholder="0.00" id="send-amount">
+                    <button class="btn btn-sm btn-secondary" onclick="setSendMax()">MAX</button>
+                </div>
+                <p class="input-hint">Available: 1,950.00 PLS</p>
+            </div>
+            <div class="tx-preview">
+                <div class="preview-row">
+                    <span>Network Fee</span>
+                    <span>~0.002 MATIC</span>
+                </div>
+                <div class="preview-row total">
+                    <span>Total</span>
+                    <span id="send-total">0.00 PLS</span>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-glow btn-block" onclick="confirmSend()">
+                <i class="fas fa-check"></i> Confirm Send
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Receive Modal -->
+<div id="receive-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content card">
+        <button class="modal-close" onclick="hideReceiveModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-header">
+            <h3><i class="fas fa-qrcode"></i> Receive PULSAR</h3>
+        </div>
+        <div class="modal-body receive-body">
+            <div class="qr-code" id="receive-qr">
+                <div class="qr-placeholder">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+            </div>
+            <div class="receive-address">
+                <p class="address-label">Your Address</p>
+                <p class="address-value" id="receive-address">0x742d35Cc6634C0532925a3b844Bc9e7595f8c92f</p>
+                <button class="btn btn-secondary btn-block" onclick="copyReceiveAddress()">
+                    <i class="fas fa-copy"></i> Copy Address
+                </button>
+            </div>
+            <div class="receive-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Only send PULSAR (PLS) or Polygon network tokens to this address.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/wallet.js"></script>
+{% endblock %}

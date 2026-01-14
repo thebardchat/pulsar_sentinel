@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-user">
+            <div class="user-avatar">
+                <i class="fas fa-user-astronaut"></i>
+            </div>
+            <div class="user-info">
+                <p class="user-tier badge badge-primary">Legacy Builder</p>
+                <p class="user-address" id="user-wallet-address">0x742d...f8c9</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#overview" class="sidebar-link active">
+                <i class="fas fa-th-large"></i> Overview
+            </a>
+            <a href="#deployment" class="sidebar-link">
+                <i class="fas fa-server"></i> Deployment
+            </a>
+            <a href="#security" class="sidebar-link">
+                <i class="fas fa-shield-alt"></i> Security
+            </a>
+            <a href="#asr-logs" class="sidebar-link">
+                <i class="fas fa-scroll"></i> ASR Logs
+            </a>
+            <a href="#settings" class="sidebar-link">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+        </nav>
+
+        <div class="sidebar-status">
+            <div class="status-item">
+                <span class="status-dot safe"></span>
+                <span>PQC Active</span>
+            </div>
+            <div class="status-item">
+                <span class="status-dot active"></span>
+                <span>Node Online</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard-main">
+        <!-- Dashboard Header -->
+        <header class="dashboard-header">
+            <div class="header-title">
+                <h1>Dashboard</h1>
+                <p>Welcome back to PULSAR SENTINEL</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-primary btn-glow" onclick="showDeployModal()">
+                    <i class="fas fa-plus"></i> New Deployment
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <section class="stats-grid">
+            <div class="stat-card card">
+                <div class="stat-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label">Security Score</p>
+                    <p class="stat-value text-success" id="security-score">98.5%</p>
+                    <p class="stat-change positive"><i class="fas fa-arrow-up"></i> +2.3%</p>
+                </div>
+            </div>
+
+            <div class="stat-card card">
+                <div class="stat-icon icon-magenta">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label">Encrypted Today</p>
+                    <p class="stat-value" id="encrypted-today">1,247</p>
+                    <p class="stat-change positive"><i class="fas fa-arrow-up"></i> +156</p>
+                </div>
+            </div>
+
+            <div class="stat-card card">
+                <div class="stat-icon icon-gold">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label">PULSAR Balance</p>
+                    <p class="stat-value" id="pulsar-balance">2,450.00</p>
+                    <p class="stat-change positive"><i class="fas fa-arrow-up"></i> +48.5 today</p>
+                </div>
+            </div>
+
+            <div class="stat-card card">
+                <div class="stat-icon icon-green">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label">PTS Score</p>
+                    <p class="stat-value text-success" id="pts-score">32</p>
+                    <p class="stat-tier badge badge-success">SAFE</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deployment Section -->
+        <section id="deployment" class="dashboard-section">
+            <div class="section-header-inline">
+                <h2><i class="fas fa-server"></i> Your Deployments</h2>
+                <button class="btn btn-sm btn-secondary">View All</button>
+            </div>
+
+            <div class="deployments-grid">
+                <!-- Deployment Card 1 -->
+                <div class="deployment-card card">
+                    <div class="deployment-header">
+                        <div class="deployment-status online">
+                            <span class="status-pulse"></span>
+                            ONLINE
+                        </div>
+                        <div class="deployment-actions">
+                            <button class="btn-icon" title="Settings"><i class="fas fa-cog"></i></button>
+                            <button class="btn-icon" title="Restart"><i class="fas fa-redo"></i></button>
+                        </div>
+                    </div>
+                    <div class="deployment-info">
+                        <h3>Primary Sentinel Node</h3>
+                        <p class="deployment-id">sentinel-node-7f3a2b</p>
+                    </div>
+                    <div class="deployment-specs">
+                        <div class="spec-item">
+                            <i class="fas fa-microchip"></i>
+                            <span>ML-KEM-768</span>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-memory"></i>
+                            <span>4.2 GB</span>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-clock"></i>
+                            <span>14d 7h</span>
+                        </div>
+                    </div>
+                    <div class="deployment-metrics">
+                        <div class="metric">
+                            <span class="metric-label">Requests/min</span>
+                            <span class="metric-value">247</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Latency</span>
+                            <span class="metric-value">12ms</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deployment Card 2 -->
+                <div class="deployment-card card">
+                    <div class="deployment-header">
+                        <div class="deployment-status online">
+                            <span class="status-pulse"></span>
+                            MINING
+                        </div>
+                        <div class="deployment-actions">
+                            <button class="btn-icon" title="Settings"><i class="fas fa-cog"></i></button>
+                            <button class="btn-icon" title="Stop"><i class="fas fa-stop"></i></button>
+                        </div>
+                    </div>
+                    <div class="deployment-info">
+                        <h3>Mining Node Alpha</h3>
+                        <p class="deployment-id">miner-alpha-9c4d1e</p>
+                    </div>
+                    <div class="deployment-specs">
+                        <div class="spec-item">
+                            <i class="fas fa-fire"></i>
+                            <span>42 TH/s</span>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-temperature-high"></i>
+                            <span>62°C</span>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-bolt"></i>
+                            <span>145W</span>
+                        </div>
+                    </div>
+                    <div class="deployment-metrics">
+                        <div class="metric">
+                            <span class="metric-label">Blocks Found</span>
+                            <span class="metric-value">12</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Rewards</span>
+                            <span class="metric-value">48.5 PLS</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add New Deployment -->
+                <div class="deployment-card card add-new" onclick="showDeployModal()">
+                    <div class="add-new-content">
+                        <i class="fas fa-plus-circle"></i>
+                        <h3>Add Deployment</h3>
+                        <p>Deploy a new Sentinel node</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Overview -->
+        <section id="security" class="dashboard-section">
+            <div class="section-header-inline">
+                <h2><i class="fas fa-shield-alt"></i> Security Overview</h2>
+                <button class="btn btn-sm btn-secondary">Full Report</button>
+            </div>
+
+            <div class="security-grid">
+                <!-- PTS Gauge -->
+                <div class="security-card card pts-card">
+                    <h3>Points Toward Threat Score</h3>
+                    <div class="pts-gauge">
+                        <div class="gauge-ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="gauge-bg" cx="50" cy="50" r="45"/>
+                                <circle class="gauge-fill safe" cx="50" cy="50" r="45"
+                                        stroke-dasharray="283" stroke-dashoffset="192"/>
+                            </svg>
+                            <div class="gauge-value">
+                                <span class="value">32</span>
+                                <span class="label">PTS</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pts-breakdown">
+                        <div class="pts-factor">
+                            <span class="factor-name">Quantum Risk</span>
+                            <div class="factor-bar">
+                                <div class="factor-fill" style="width: 5%"></div>
+                            </div>
+                            <span class="factor-value">2</span>
+                        </div>
+                        <div class="pts-factor">
+                            <span class="factor-name">Access Violations</span>
+                            <div class="factor-bar">
+                                <div class="factor-fill" style="width: 20%"></div>
+                            </div>
+                            <span class="factor-value">18</span>
+                        </div>
+                        <div class="pts-factor">
+                            <span class="factor-name">Rate Limits</span>
+                            <div class="factor-bar">
+                                <div class="factor-fill" style="width: 10%"></div>
+                            </div>
+                            <span class="factor-value">8</span>
+                        </div>
+                        <div class="pts-factor">
+                            <span class="factor-name">Signature Fails</span>
+                            <div class="factor-bar">
+                                <div class="factor-fill" style="width: 4%"></div>
+                            </div>
+                            <span class="factor-value">4</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PQC Status -->
+                <div class="security-card card pqc-card">
+                    <h3>PQC Encryption Status</h3>
+                    <div class="pqc-status-display">
+                        <div class="pqc-icon safe">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="pqc-info">
+                            <p class="pqc-level">ML-KEM-768</p>
+                            <p class="pqc-label">NIST Level 3 Active</p>
+                        </div>
+                    </div>
+                    <div class="pqc-stats">
+                        <div class="pqc-stat">
+                            <span class="stat-num">14,247</span>
+                            <span class="stat-label">PQC Operations</span>
+                        </div>
+                        <div class="pqc-stat">
+                            <span class="stat-num">0</span>
+                            <span class="stat-label">Vulnerabilities</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm btn-block">
+                        <i class="fas fa-arrow-up"></i> Upgrade to ML-KEM-1024
+                    </button>
+                </div>
+
+                <!-- Recent Threats -->
+                <div class="security-card card threats-card">
+                    <h3>Recent Security Events</h3>
+                    <div class="threats-list">
+                        <div class="threat-item info">
+                            <div class="threat-icon"><i class="fas fa-info-circle"></i></div>
+                            <div class="threat-info">
+                                <p class="threat-title">Encryption completed</p>
+                                <p class="threat-time">2 minutes ago</p>
+                            </div>
+                        </div>
+                        <div class="threat-item warning">
+                            <div class="threat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="threat-info">
+                                <p class="threat-title">Rate limit approached (80%)</p>
+                                <p class="threat-time">15 minutes ago</p>
+                            </div>
+                        </div>
+                        <div class="threat-item success">
+                            <div class="threat-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="threat-info">
+                                <p class="threat-title">ASR batch anchored to blockchain</p>
+                                <p class="threat-time">1 hour ago</p>
+                            </div>
+                        </div>
+                        <div class="threat-item info">
+                            <div class="threat-icon"><i class="fas fa-key"></i></div>
+                            <div class="threat-info">
+                                <p class="threat-title">Key rotation completed</p>
+                                <p class="threat-time">6 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ASR Logs Section -->
+        <section id="asr-logs" class="dashboard-section">
+            <div class="section-header-inline">
+                <h2><i class="fas fa-scroll"></i> Agent State Records</h2>
+                <div class="header-controls">
+                    <select class="form-select" id="asr-filter">
+                        <option value="all">All Events</option>
+                        <option value="encrypt">Encryption</option>
+                        <option value="auth">Authentication</option>
+                        <option value="violation">Violations</option>
+                    </select>
+                    <button class="btn btn-sm btn-secondary">Export</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ASR ID</th>
+                            <th>Timestamp</th>
+                            <th>Action</th>
+                            <th>Threat Level</th>
+                            <th>PQC Status</th>
+                            <th>Verified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="mono">asr_8f3a2b1c...</td>
+                            <td>2024-01-15 10:30:45</td>
+                            <td>encrypt_hybrid</td>
+                            <td><span class="badge badge-success">INFO</span></td>
+                            <td><span class="badge badge-primary">SAFE</span></td>
+                            <td><i class="fas fa-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="mono">asr_7e2b9c4d...</td>
+                            <td>2024-01-15 10:28:12</td>
+                            <td>auth_wallet</td>
+                            <td><span class="badge badge-success">INFO</span></td>
+                            <td><span class="badge badge-primary">SAFE</span></td>
+                            <td><i class="fas fa-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="mono">asr_6d1a8b3e...</td>
+                            <td>2024-01-15 10:15:33</td>
+                            <td>rate_limit_warn</td>
+                            <td><span class="badge badge-warning">WARNING</span></td>
+                            <td><span class="badge badge-warning">CAUTION</span></td>
+                            <td><i class="fas fa-check-circle text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="mono">asr_5c0f7a2d...</td>
+                            <td>2024-01-15 10:00:00</td>
+                            <td>merkle_anchor</td>
+                            <td><span class="badge badge-success">INFO</span></td>
+                            <td><span class="badge badge-primary">SAFE</span></td>
+                            <td><i class="fas fa-link text-primary"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-pagination">
+                <span class="pagination-info">Showing 1-4 of 1,247 records</span>
+                <div class="pagination-controls">
+                    <button class="btn btn-sm btn-secondary" disabled><i class="fas fa-chevron-left"></i></button>
+                    <button class="btn btn-sm btn-primary">1</button>
+                    <button class="btn btn-sm btn-secondary">2</button>
+                    <button class="btn btn-sm btn-secondary">3</button>
+                    <span>...</span>
+                    <button class="btn btn-sm btn-secondary">312</button>
+                    <button class="btn btn-sm btn-secondary"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

@@ -1,0 +1,54 @@
+
+================================================================================
+                    INVENTOR DECLARATION
+================================================================================
+
+PATENT APPLICATION: QUANTUM-ADAPTIVE BLOCKCHAIN-INTEGRATED SECURITY FRAMEWORK WITH AGENT STATE RECORDING AND SELF-GOVERNANCE PROTOCOLS
+
+FILING DATE: 2026-01-14
+
+--------------------------------------------------------------------------------
+
+I, the undersigned inventor, hereby declare that:
+
+1. I am the original and first inventor of the subject matter which is claimed
+   and for which a patent is sought.
+
+2. I have reviewed and understand the contents of the above-identified
+   application, including the claims.
+
+3. I acknowledge the duty to disclose to the United States Patent and
+   Trademark Office all information known to me to be material to
+   patentability as defined in 37 CFR 1.56.
+
+4. I hereby declare that all statements made herein of my own knowledge are
+   true and that all statements made on information and belief are believed
+   to be true.
+
+5. I acknowledge that any willful false statement made in this declaration
+   is punishable under 18 U.S.C. 1001 by fine or imprisonment of not more
+   than 5 years, or both.
+
+--------------------------------------------------------------------------------
+
+INVENTOR INFORMATION:
+
+Full Legal Name: _________________________________________________
+
+Residence (City, State, Country): ________________________________
+
+Citizenship: _____________________________________________________
+
+Mailing Address: _________________________________________________
+
+Email: __________________________________________________________
+
+Phone: __________________________________________________________
+
+--------------------------------------------------------------------------------
+
+SIGNATURE: _______________________________________________________
+
+DATE: ___________________________________________________________
+
+================================================================================

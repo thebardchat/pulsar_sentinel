@@ -1,0 +1,58 @@
+
+================================================================================
+                TECHNICAL SPECIFICATIONS
+================================================================================
+
+CRYPTOGRAPHIC ALGORITHMS:
+--------------------------------------------------------------------------------
+| Component          | Algorithm         | Parameters                          |
+|-------------------|-------------------|-------------------------------------|
+| Key Encapsulation | ML-KEM-768/1024   | NIST Level 3/5                      |
+| Symmetric Encrypt | AES-256-GCM       | 256-bit key, 12-byte nonce          |
+| Key Derivation    | HKDF-SHA256       | 32-byte output                      |
+| Legacy Encrypt    | AES-256-CBC       | PKCS7 padding, HMAC-SHA256          |
+| Signatures        | ECDSA secp256k1   | Polygon-compatible                  |
+| Hashing           | SHA-256           | 32-byte output                      |
+| Transport         | TLS 1.3           | AES-256-GCM cipher suites           |
+--------------------------------------------------------------------------------
+
+BLOCKCHAIN INTEGRATION:
+--------------------------------------------------------------------------------
+| Parameter         | Value                                                   |
+|-------------------|--------------------------------------------------------|
+| Network           | Polygon (Mainnet: 137, Testnet: 80002)                 |
+| Smart Contract    | Solidity 0.8.20+                                       |
+| Gas Optimization  | Merkle root only (32 bytes per batch)                  |
+| Confirmation      | 2 blocks                                               |
+--------------------------------------------------------------------------------
+
+THREAT SCORING (PTS):
+--------------------------------------------------------------------------------
+| Factor                    | Weight | Multiplier | Max Contribution |
+|--------------------------|--------|------------|------------------|
+| Quantum Risk             | 0.4    | 50.0       | Unlimited        |
+| Access Violations        | 0.3    | 25.0       | Unlimited        |
+| Rate Limit Violations    | 0.2    | 10.0       | Unlimited        |
+| Signature Failures       | 0.1    | 30.0       | Unlimited        |
+--------------------------------------------------------------------------------
+
+PERFORMANCE TARGETS:
+--------------------------------------------------------------------------------
+| Operation          | Target Time | Memory Usage                        |
+|-------------------|-------------|-------------------------------------|
+| Key Generation    | < 500ms     | < 10MB                              |
+| Encryption        | < 100ms     | < 5MB + payload                     |
+| Decryption        | < 100ms     | < 5MB + payload                     |
+| ASR Creation      | < 10ms      | < 1KB per record                    |
+| Merkle Proof      | < 50ms      | O(log n) hashes                     |
+--------------------------------------------------------------------------------
+
+SYSTEM REQUIREMENTS:
+--------------------------------------------------------------------------------
+| Requirement       | Minimum                                                 |
+|-------------------|--------------------------------------------------------|
+| RAM               | 7.4 GB                                                 |
+| Python            | 3.11+                                                  |
+| Storage           | 1 GB + data                                            |
+| Network           | HTTPS connectivity                                     |
+--------------------------------------------------------------------------------

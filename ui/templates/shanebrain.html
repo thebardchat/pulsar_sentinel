@@ -1,0 +1,561 @@
+{% extends "base.html" %}
+
+{% block title %}SHANEBRAIN AI{% endblock %}
+{% block nav_ai %}active{% endblock %}
+
+{% block content %}
+<div class="shanebrain-container">
+    <!-- SHANEBRAIN Header -->
+    <header class="ai-header">
+        <div class="ai-logo">
+            <div class="brain-visual">
+                <div class="brain-core">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="brain-ring ring-1"></div>
+                <div class="brain-ring ring-2"></div>
+                <div class="brain-particles"></div>
+            </div>
+        </div>
+        <div class="ai-title">
+            <h1>SHANE<span class="accent">BRAIN</span></h1>
+            <p class="tagline">Quantum-Enhanced Artificial Intelligence</p>
+            <div class="ai-status">
+                <span class="status-indicator online"></span>
+                <span>AI Core Active</span>
+                <span class="separator">|</span>
+                <span>ML-KEM Protected</span>
+            </div>
+        </div>
+        <div class="ai-tier-badge">
+            <span class="badge badge-gold"><i class="fas fa-crown"></i> Guild Access</span>
+        </div>
+    </header>
+
+    <!-- AI Features Grid -->
+    <section class="ai-features">
+        <div class="features-intro">
+            <h2>AI-Powered Security & Creation</h2>
+            <p>SHANEBRAIN integrates with PULSAR SENTINEL to provide intelligent threat analysis, automated security recommendations, and creative tools for the Angel Cloud ecosystem.</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Threat Analysis -->
+            <div class="feature-panel card" onclick="openAIPanel('threat')">
+                <div class="panel-icon">
+                    <i class="fas fa-shield-virus"></i>
+                </div>
+                <h3>Threat Analysis</h3>
+                <p>AI-powered security threat detection and analysis</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> Real-time threat identification</li>
+                    <li><i class="fas fa-check"></i> Pattern recognition</li>
+                    <li><i class="fas fa-check"></i> Predictive risk scoring</li>
+                </ul>
+                <button class="btn btn-secondary btn-block">
+                    <i class="fas fa-arrow-right"></i> Launch
+                </button>
+            </div>
+
+            <!-- Code Review -->
+            <div class="feature-panel card" onclick="openAIPanel('code')">
+                <div class="panel-icon icon-magenta">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3>Security Audit</h3>
+                <p>Automated smart contract and code security review</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> Vulnerability scanning</li>
+                    <li><i class="fas fa-check"></i> Best practice analysis</li>
+                    <li><i class="fas fa-check"></i> Fix recommendations</li>
+                </ul>
+                <button class="btn btn-secondary btn-block">
+                    <i class="fas fa-arrow-right"></i> Launch
+                </button>
+            </div>
+
+            <!-- NFT Generator -->
+            <div class="feature-panel card" onclick="openAIPanel('art')">
+                <div class="panel-icon icon-gold">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <h3>Art Generator</h3>
+                <p>Create unique NFT art with AI assistance</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> Style generation</li>
+                    <li><i class="fas fa-check"></i> Quantum-inspired visuals</li>
+                    <li><i class="fas fa-check"></i> One-click minting</li>
+                </ul>
+                <button class="btn btn-secondary btn-block">
+                    <i class="fas fa-arrow-right"></i> Launch
+                </button>
+            </div>
+
+            <!-- Chat Assistant -->
+            <div class="feature-panel card" onclick="openAIPanel('chat')">
+                <div class="panel-icon icon-green">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h3>AI Assistant</h3>
+                <p>Get help with PULSAR SENTINEL and security</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> 24/7 support</li>
+                    <li><i class="fas fa-check"></i> Configuration help</li>
+                    <li><i class="fas fa-check"></i> Troubleshooting</li>
+                </ul>
+                <button class="btn btn-secondary btn-block">
+                    <i class="fas fa-arrow-right"></i> Launch
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Chat Interface -->
+    <section class="ai-chat-section" id="chat-panel">
+        <div class="chat-container card">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <i class="fas fa-robot"></i>
+                    <span>SHANEBRAIN Assistant</span>
+                </div>
+                <div class="chat-actions">
+                    <button class="btn-icon" onclick="clearChat()" title="Clear Chat">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <button class="btn-icon" onclick="exportChat()" title="Export">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <!-- AI Welcome Message -->
+                <div class="message ai">
+                    <div class="message-avatar">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="sender">SHANEBRAIN</span>
+                            <span class="time">Just now</span>
+                        </div>
+                        <div class="message-text">
+                            <p>Welcome to SHANEBRAIN AI! I'm your quantum-enhanced security assistant. I can help you with:</p>
+                            <ul>
+                                <li><strong>Threat Analysis:</strong> Analyze security events and ASR logs</li>
+                                <li><strong>Configuration:</strong> Optimize your PULSAR SENTINEL setup</li>
+                                <li><strong>Smart Contracts:</strong> Review and audit your contracts</li>
+                                <li><strong>NFT Creation:</strong> Generate unique artwork</li>
+                            </ul>
+                            <p>How can I assist you today?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="sendQuickMessage('Analyze my threat score')">
+                        <i class="fas fa-chart-line"></i> Analyze Threat Score
+                    </button>
+                    <button class="quick-btn" onclick="sendQuickMessage('Check my PQC status')">
+                        <i class="fas fa-shield-alt"></i> Check PQC Status
+                    </button>
+                    <button class="quick-btn" onclick="sendQuickMessage('Optimize my mining settings')">
+                        <i class="fas fa-microchip"></i> Optimize Mining
+                    </button>
+                    <button class="quick-btn" onclick="sendQuickMessage('Generate NFT art')">
+                        <i class="fas fa-palette"></i> Create Art
+                    </button>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="input-tools">
+                    <button class="tool-btn" title="Attach File">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <button class="tool-btn" title="Voice Input">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+                <div class="input-wrapper">
+                    <textarea id="chat-input" placeholder="Ask SHANEBRAIN anything..." rows="1"></textarea>
+                </div>
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Analytics Dashboard -->
+    <section class="ai-analytics">
+        <div class="section-header-inline">
+            <h2><i class="fas fa-chart-bar"></i> AI Analytics</h2>
+            <select class="form-select" id="analytics-period">
+                <option value="24h">Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+            </select>
+        </div>
+
+        <div class="analytics-grid">
+            <!-- Threat Detection Stats -->
+            <div class="analytics-card card">
+                <h3>Threat Detection</h3>
+                <div class="analytics-stat">
+                    <span class="stat-value text-success">247</span>
+                    <span class="stat-label">Threats Detected</span>
+                </div>
+                <div class="analytics-breakdown">
+                    <div class="breakdown-item">
+                        <span class="item-label">Critical</span>
+                        <span class="item-value danger">3</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="item-label">Warning</span>
+                        <span class="item-value warning">28</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="item-label">Info</span>
+                        <span class="item-value info">216</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Recommendations -->
+            <div class="analytics-card card">
+                <h3>Recommendations Applied</h3>
+                <div class="analytics-stat">
+                    <span class="stat-value">89%</span>
+                    <span class="stat-label">Implementation Rate</span>
+                </div>
+                <div class="recommendation-list">
+                    <div class="rec-item completed">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Upgraded to ML-KEM-768</span>
+                    </div>
+                    <div class="rec-item completed">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Enabled rate limiting</span>
+                    </div>
+                    <div class="rec-item pending">
+                        <i class="fas fa-clock"></i>
+                        <span>Configure heir transfer</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Art Generated -->
+            <div class="analytics-card card">
+                <h3>Art Generated</h3>
+                <div class="analytics-stat">
+                    <span class="stat-value">42</span>
+                    <span class="stat-label">NFTs Created</span>
+                </div>
+                <div class="art-preview">
+                    <div class="art-thumb gradient-1"><i class="fas fa-image"></i></div>
+                    <div class="art-thumb gradient-2"><i class="fas fa-image"></i></div>
+                    <div class="art-thumb gradient-3"><i class="fas fa-image"></i></div>
+                    <div class="art-thumb more">+39</div>
+                </div>
+            </div>
+
+            <!-- Chat Stats -->
+            <div class="analytics-card card">
+                <h3>AI Interactions</h3>
+                <div class="analytics-stat">
+                    <span class="stat-value">1,247</span>
+                    <span class="stat-label">Messages Processed</span>
+                </div>
+                <div class="interaction-stats">
+                    <div class="int-stat">
+                        <span class="label">Avg Response</span>
+                        <span class="value">1.2s</span>
+                    </div>
+                    <div class="int-stat">
+                        <span class="label">Accuracy</span>
+                        <span class="value">98.7%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Models Info -->
+    <section class="ai-models">
+        <div class="section-header-inline">
+            <h2><i class="fas fa-microchip"></i> AI Models</h2>
+        </div>
+
+        <div class="models-grid">
+            <div class="model-card card">
+                <div class="model-header">
+                    <div class="model-icon active">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="model-status">
+                        <span class="status-dot online"></span>
+                        Active
+                    </div>
+                </div>
+                <h3>ThreatNet v2.1</h3>
+                <p>Real-time threat detection and classification model</p>
+                <div class="model-specs">
+                    <span><i class="fas fa-database"></i> 2.1B parameters</span>
+                    <span><i class="fas fa-clock"></i> 12ms latency</span>
+                </div>
+            </div>
+
+            <div class="model-card card">
+                <div class="model-header">
+                    <div class="model-icon active">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="model-status">
+                        <span class="status-dot online"></span>
+                        Active
+                    </div>
+                </div>
+                <h3>AuditLLM v1.5</h3>
+                <p>Smart contract security analysis model</p>
+                <div class="model-specs">
+                    <span><i class="fas fa-database"></i> 780M parameters</span>
+                    <span><i class="fas fa-clock"></i> 250ms latency</span>
+                </div>
+            </div>
+
+            <div class="model-card card">
+                <div class="model-header">
+                    <div class="model-icon active">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <div class="model-status">
+                        <span class="status-dot online"></span>
+                        Active
+                    </div>
+                </div>
+                <h3>QuantumArt v3.0</h3>
+                <p>Quantum-inspired generative art model</p>
+                <div class="model-specs">
+                    <span><i class="fas fa-database"></i> 4.5B parameters</span>
+                    <span><i class="fas fa-clock"></i> 3.2s generation</span>
+                </div>
+            </div>
+
+            <div class="model-card card">
+                <div class="model-header">
+                    <div class="model-icon active">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="model-status">
+                        <span class="status-dot online"></span>
+                        Active
+                    </div>
+                </div>
+                <h3>AssistantCore v4.2</h3>
+                <p>Conversational AI for support and guidance</p>
+                <div class="model-specs">
+                    <span><i class="fas fa-database"></i> 13B parameters</span>
+                    <span><i class="fas fa-clock"></i> 180ms latency</span>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .brain-visual {
+        position: relative;
+        width: 120px;
+        height: 120px;
+    }
+
+    .brain-core {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 60px;
+        background: var(--gradient-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        z-index: 3;
+        animation: brain-pulse 2s ease-in-out infinite;
+    }
+
+    .brain-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 2px solid var(--quantum-cyan);
+        border-radius: 50%;
+        opacity: 0.5;
+    }
+
+    .brain-ring.ring-1 {
+        width: 80px;
+        height: 80px;
+        animation: brain-ring 3s ease-in-out infinite;
+    }
+
+    .brain-ring.ring-2 {
+        width: 100px;
+        height: 100px;
+        border-color: var(--pulsar-magenta);
+        animation: brain-ring 3s ease-in-out infinite 0.5s;
+    }
+
+    @keyframes brain-pulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.05); }
+    }
+
+    @keyframes brain-ring {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+        50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+    }
+
+    .chat-messages {
+        height: 400px;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .message {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .message-content {
+        flex: 1;
+    }
+
+    .message-header {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .message-header .sender {
+        font-weight: 600;
+        color: var(--quantum-cyan);
+    }
+
+    .message-header .time {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .message-text ul {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+    }
+
+    .quick-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .quick-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(0, 240, 255, 0.1);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .quick-btn:hover {
+        border-color: var(--quantum-cyan);
+        background: rgba(0, 240, 255, 0.2);
+    }
+
+    .chat-input-area {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .input-wrapper {
+        flex: 1;
+    }
+
+    .input-wrapper textarea {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        resize: none;
+        font-family: inherit;
+    }
+
+    .send-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        border: none;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .send-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .art-thumb {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .art-thumb.more {
+        background: rgba(255, 255, 255, 0.1);
+        font-size: 0.75rem;
+    }
+
+    .art-preview {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/shanebrain.js"></script>
+{% endblock %}

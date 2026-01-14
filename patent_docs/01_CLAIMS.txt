@@ -1,0 +1,122 @@
+
+================================================================================
+                        PATENT CLAIMS
+================================================================================
+
+INDEPENDENT CLAIMS:
+
+--------------------------------------------------------------------------------
+CLAIM 1: Quantum-Adaptive Hybrid Encryption System
+--------------------------------------------------------------------------------
+
+A quantum-adaptive security system comprising:
+- a hybrid encryption module combining lattice-based key encapsulation (ML-KEM) with symmetric authenticated encryption (AES-256-GCM);
+- an adaptive security level controller that adjusts cryptographic parameters from NIST Level 3 (ML-KEM-768) to Level 5 (ML-KEM-1024) based on configuration;
+- a key derivation function (HKDF-SHA256) deriving symmetric keys from encapsulated shared secrets;
+- wherein said system maintains security against both classical computing attacks and quantum computing attacks utilizing Shor's algorithm.
+
+NOVEL ELEMENTS:
+  1. Combination of ML-KEM with AES-256-GCM in single hybrid operation
+  2. Configuration-based security level scaling without code changes
+  3. Defense-in-depth architecture protecting against compromise of either layer
+
+--------------------------------------------------------------------------------
+CLAIM 2: Agent State Record (ASR) Blockchain Anchoring System
+--------------------------------------------------------------------------------
+
+An immutable audit system comprising:
+- an agent state record generator creating cryptographically signed security event records with unique identifiers, timestamps, agent identifiers, action types, threat levels, and quantum safety status;
+- a Merkle tree constructor batching multiple records into a single root hash for efficient blockchain storage;
+- a blockchain interface storing said root hash on a distributed ledger network;
+- a verification module capable of generating and validating Merkle proofs for any individual record against said stored root;
+- wherein any modification to recorded events is cryptographically detectable.
+
+NOVEL ELEMENTS:
+  1. Combination of local storage with blockchain anchoring for efficiency
+  2. PQC status tracking within audit records
+  3. Independent Merkle proof verification for any single record
+
+--------------------------------------------------------------------------------
+CLAIM 3: Points Toward Threat Score (PTS) Algorithm
+--------------------------------------------------------------------------------
+
+A threat assessment method comprising:
+- calculating a weighted threat score from multiple security factors using the formula:
+  PTS = (quantum_risk_factor × 0.4) + (access_violation_count × 0.3) + (rate_limit_violations × 0.2) + (signature_failures × 0.1);
+- a quantum risk factor specifically measuring operations using quantum-vulnerable cryptographic algorithms;
+- classifying said score into threat tiers: SAFE (PTS < 50), CAUTION (50 ≤ PTS < 150), CRITICAL (PTS ≥ 150);
+- automatically applying security restrictions based on tier classification;
+- providing numeric outputs suitable for integration with machine learning threat detection systems.
+
+NOVEL ELEMENTS:
+  1. Quantum risk factor as dedicated threat metric
+  2. Tiered response automation based on continuous scoring
+  3. AI/ML integration interface for advanced threat detection
+
+--------------------------------------------------------------------------------
+CLAIM 4: Self-Governance Rule Code (RC) System
+--------------------------------------------------------------------------------
+
+A self-governance system comprising:
+- rule definitions (RC codes) encoded in application software enforcing security policies;
+- corresponding rule enforcement logic deployed as smart contract code on a blockchain network;
+- dual verification ensuring governance rules cannot be bypassed by compromising either application layer or blockchain layer alone;
+- an heir transfer protocol (RC 1.02) automatically transferring account assets and permissions to a designated heir after a configurable inactivity period;
+- a three-strike enforcement mechanism (RC 2.01) automatically restricting accounts after repeated policy violations;
+- a fallback protocol (RC 3.02) directing failed transactions to alternate network infrastructure.
+
+NOVEL ELEMENTS:
+  1. Dual-layer enforcement in application AND smart contract
+  2. Automated heir transfer for digital inheritance
+  3. Hardcoded governance that cannot be modified without redeployment
+
+--------------------------------------------------------------------------------
+CLAIM 5: Wallet-Native Zero-Password Authentication
+--------------------------------------------------------------------------------
+
+A passwordless authentication method comprising:
+- generating a cryptographic challenge containing a unique nonce, wallet address, and timestamp for a blockchain wallet address;
+- receiving a digital signature of said challenge message from a wallet application without incurring blockchain transaction fees;
+- recovering the signer's address from said signature using elliptic curve cryptography;
+- verifying said recovered address matches the claimed wallet address without storing any credentials on the server;
+- issuing a time-limited JSON Web Token upon successful verification for subsequent authenticated requests;
+- wherein authentication is tied to cryptographic proof of private key possession rather than memorized credentials.
+
+NOVEL ELEMENTS:
+  1. Zero credential storage authentication
+  2. Blockchain wallet as identity provider
+  3. Phishing-resistant challenge-response protocol
+
+--------------------------------------------------------------------------------
+                    DEPENDENT CLAIMS
+--------------------------------------------------------------------------------
+
+Claim 6: The system of Claim 1, wherein said lattice-based key encapsulation
+         is ML-KEM at NIST security levels 3 (ML-KEM-768) or 5 (ML-KEM-1024).
+
+Claim 7: The system of Claim 1, wherein said symmetric authenticated encryption
+         is AES-256-GCM with 12-byte nonce and 16-byte authentication tag.
+
+Claim 8: The system of Claim 2, wherein said distributed ledger is the
+         Polygon blockchain network (Chain ID 137 mainnet, 80002 testnet).
+
+Claim 9: The method of Claim 3, wherein said quantum risk factor is weighted
+         at 40% of total threat score calculation.
+
+Claim 10: The system of Claim 4, wherein said inactivity period for heir
+          transfer is 90 days, configurable by account holder.
+
+Claim 11: The method of Claim 5, wherein said wallet application is
+          MetaMask or compatible EIP-712 signing wallet.
+
+Claim 12: The system of Claim 1, further comprising a rate limiting module
+          enforcing configurable request quotas per user and per endpoint.
+
+Claim 13: The system of Claim 2, further comprising a local cache storing
+          complete ASR records while blockchain stores only Merkle root hashes.
+
+Claim 14: The method of Claim 3, further comprising an AI integration
+          interface outputting numeric threat scores for machine learning.
+
+Claim 15: The system of Claim 4, further comprising a Gryphon fallback
+          protocol (RC 3.02) directing failed transactions to backup network.
