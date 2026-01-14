@@ -8,6 +8,356 @@ Unlike existing blockchain security solutions that will become obsolete when qua
 
 ---
 
+## Table of Contents
+
+1. [What Powers The Security](#what-powers-the-security)
+2. [Mining vs Security - Independence Explained](#mining-vs-security---independence-explained)
+3. [How To Get It Working](#how-to-get-it-working)
+4. [Mobile Deployment](#mobile-deployment)
+5. [What Makes PULSAR SENTINEL Unique](#what-makes-pulsar-sentinel-unique)
+6. [Angel Cloud Ecosystem Integration](#angel-cloud-ecosystem-integration)
+7. [Technical Specifications](#technical-specifications)
+
+---
+
+## What Powers The Security
+
+### The Security Engine - No Mining Required
+
+**CRITICAL UNDERSTANDING:** PULSAR SENTINEL's security operates **INDEPENDENTLY** from blockchain mining. The security is powered by:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    PULSAR SENTINEL SECURITY STACK                        │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  LAYER 1: POST-QUANTUM CRYPTOGRAPHY (LOCAL PROCESSING)          │   │
+│  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │   │
+│  │  ► ML-KEM-768/1024 (Lattice-based key encapsulation)            │   │
+│  │  ► AES-256-GCM (Symmetric encryption)                           │   │
+│  │  ► ECDSA secp256k1 (Digital signatures)                         │   │
+│  │  ► SHA-256 / SHA3-256 (Hashing)                                 │   │
+│  │                                                                  │   │
+│  │  ★ RUNS 100% LOCALLY ON YOUR DEVICE                             │   │
+│  │  ★ NO INTERNET REQUIRED FOR ENCRYPTION                          │   │
+│  │  ★ NO MINING REQUIRED                                           │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                              │                                          │
+│                              ▼                                          │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  LAYER 2: AGENT STATE RECORDS (LOCAL + OPTIONAL BLOCKCHAIN)     │   │
+│  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │   │
+│  │  ► Cryptographic signing of all events                          │   │
+│  │  ► Merkle tree batching for efficiency                          │   │
+│  │  ► Local SQLite storage (offline capable)                       │   │
+│  │  ► OPTIONAL: Polygon blockchain anchoring                       │   │
+│  │                                                                  │   │
+│  │  ★ WORKS OFFLINE - SYNCS WHEN CONNECTED                         │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                              │                                          │
+│                              ▼                                          │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  LAYER 3: GOVERNANCE & THREAT SCORING (LOCAL PROCESSING)        │   │
+│  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │   │
+│  │  ► PTS (Points Toward Threat) algorithm                         │   │
+│  │  ► Rule Code (RC) enforcement                                   │   │
+│  │  ► Access control with rate limiting                            │   │
+│  │                                                                  │   │
+│  │  ★ ALL CALCULATIONS DONE LOCALLY                                │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### What Each Component Does
+
+| Component | What It Does | Requires Mining? | Requires Internet? |
+|-----------|-------------|------------------|-------------------|
+| **ML-KEM Encryption** | Encrypts data using quantum-resistant algorithms | **NO** | **NO** |
+| **AES-256 Encryption** | Fast symmetric encryption | **NO** | **NO** |
+| **Digital Signatures** | Proves data authenticity | **NO** | **NO** |
+| **ASR Logging** | Records all security events | **NO** | **NO** (syncs later) |
+| **PTS Scoring** | Calculates threat levels | **NO** | **NO** |
+| **Blockchain Anchor** | Permanent audit proof | **NO** | Yes (for anchoring) |
+| **PULSAR Mining** | Earns rewards, supports network | N/A | Yes |
+
+---
+
+## Mining vs Security - Independence Explained
+
+### Critical Concept: Security and Mining Are SEPARATE
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                          │
+│   SECURITY SYSTEM                    MINING/REWARDS SYSTEM              │
+│   ═══════════════                    ════════════════════               │
+│                                                                          │
+│   ┌─────────────┐                    ┌─────────────┐                    │
+│   │ Encryption  │                    │ PULSAR Coin │                    │
+│   │   Engine    │    INDEPENDENT     │   Mining    │                    │
+│   │             │◄────────────────►  │             │                    │
+│   │ Works       │                    │ Optional    │                    │
+│   │ Offline     │                    │ Earns $$    │                    │
+│   └─────────────┘                    └─────────────┘                    │
+│         │                                   │                            │
+│         │ ALWAYS ON                         │ OPTIONAL                   │
+│         │ NO FEES                           │ NETWORK FEES               │
+│         ▼                                   ▼                            │
+│   ┌─────────────┐                    ┌─────────────┐                    │
+│   │ Your Data   │                    │ Blockchain  │                    │
+│   │ Protected   │                    │ Network     │                    │
+│   └─────────────┘                    └─────────────┘                    │
+│                                                                          │
+│   ╔═══════════════════════════════════════════════════════════════════╗ │
+│   ║  YOU DO NOT NEED TO MINE TO USE PULSAR SENTINEL SECURITY         ║ │
+│   ║  Mining is a BONUS feature to earn income while securing network ║ │
+│   ╚═══════════════════════════════════════════════════════════════════╝ │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### FAQ: Mining Questions
+
+**Q: Does the blockchain need miners for security to work?**
+> **A: NO.** Your local encryption works with zero miners. The blockchain is only used for optional audit trail anchoring and PULSAR Coin transactions.
+
+**Q: What happens if no one is mining?**
+> **A: Your security still works 100%.** Mining is for:
+> 1. Earning PULSAR Coin rewards
+> 2. Validating network transactions
+> 3. Strengthening the overall ecosystem
+> Your encrypted data remains encrypted regardless.
+
+**Q: Can I use PULSAR SENTINEL without ever mining?**
+> **A: YES.** Use the Sentinel Core tier ($16.99/mo) for full security without mining.
+
+**Q: What does mining actually do?**
+> **A: Mining in PULSAR SENTINEL:**
+> - Validates transactions on the PULSAR network
+> - Earns PULSAR Coin (PLS) rewards
+> - Contributes to network decentralization
+> - Enables NFT/MINT marketplace operations
+
+---
+
+## How To Get It Working
+
+### Quick Start Guide (5 Minutes)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    PULSAR SENTINEL QUICK START                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  STEP 1: INSTALL                                                        │
+│  ─────────────────                                                      │
+│  Windows:  Double-click PULSAR_SENTINEL.bat                             │
+│  macOS:    ./scripts/run_sentinel.sh                                    │
+│  Linux:    ./scripts/run_sentinel.sh                                    │
+│  Docker:   docker run -p 8000:8000 angelcloud/pulsar-sentinel           │
+│                                                                          │
+│  STEP 2: CONFIGURE                                                      │
+│  ──────────────────                                                     │
+│  Copy .env.template to .env and set:                                    │
+│    - POLYGON_RPC_URL (or use default public RPC)                        │
+│    - JWT_SECRET (auto-generated if empty)                               │
+│    - PQC_SECURITY_LEVEL=768 (or 1024 for maximum)                       │
+│                                                                          │
+│  STEP 3: START                                                          │
+│  ──────────────                                                         │
+│  Run the server: uvicorn api.server:app --host 0.0.0.0 --port 8000     │
+│  Open browser: http://localhost:8000                                    │
+│                                                                          │
+│  STEP 4: CONNECT WALLET                                                 │
+│  ───────────────────────                                                │
+│  Click "Connect Wallet" → Sign message in MetaMask → Done!              │
+│                                                                          │
+│  ★ SECURITY IS NOW ACTIVE ★                                            │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### System Requirements
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       MINIMUM REQUIREMENTS                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌───────────────────────────────────────────────────────────────┐     │
+│  │  HARDWARE                                                      │     │
+│  │  ────────                                                      │     │
+│  │  • RAM: 8GB minimum (7.4GB runtime usage)                     │     │
+│  │  • Storage: 2GB free space                                    │     │
+│  │  • CPU: Any modern processor (2+ cores recommended)           │     │
+│  │  • GPU: Not required (CPU-based encryption)                   │     │
+│  └───────────────────────────────────────────────────────────────┘     │
+│                                                                          │
+│  ┌───────────────────────────────────────────────────────────────┐     │
+│  │  SOFTWARE                                                      │     │
+│  │  ────────                                                      │     │
+│  │  • Python 3.10+ OR Docker                                     │     │
+│  │  • MetaMask browser extension                                 │     │
+│  │  • Modern web browser (Chrome, Firefox, Edge)                 │     │
+│  └───────────────────────────────────────────────────────────────┘     │
+│                                                                          │
+│  ┌───────────────────────────────────────────────────────────────┐     │
+│  │  NETWORK (OPTIONAL)                                            │     │
+│  │  ───────────────────                                           │     │
+│  │  • Internet: Only for blockchain features                     │     │
+│  │  • Port 8000: Local API server                                │     │
+│  │  • Security works 100% OFFLINE                                │     │
+│  └───────────────────────────────────────────────────────────────┘     │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Installation Methods
+
+#### Method 1: Windows Desktop (Easiest)
+```batch
+1. Download PULSAR_SENTINEL.zip
+2. Extract to any folder
+3. Double-click PULSAR_SENTINEL.bat
+4. Select option [1] Quick Start
+5. Open browser to http://localhost:8000
+```
+
+#### Method 2: Python (Any OS)
+```bash
+# Clone repository
+git clone https://github.com/angelcloud/pulsar-sentinel.git
+cd pulsar-sentinel
+
+# Setup virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure
+cp .env.template .env
+
+# Run
+uvicorn src.api.server:app --host 0.0.0.0 --port 8000
+```
+
+#### Method 3: Docker (Recommended for Servers)
+```bash
+# Pull and run
+docker pull angelcloud/pulsar-sentinel:latest
+docker run -d -p 8000:8000 --name pulsar angelcloud/pulsar-sentinel
+
+# With persistent data
+docker run -d -p 8000:8000 \
+  -v pulsar-data:/app/data \
+  --name pulsar angelcloud/pulsar-sentinel
+```
+
+---
+
+## Mobile Deployment
+
+### YES - PULSAR SENTINEL Can Go Mobile!
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    MOBILE DEPLOYMENT OPTIONS                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  OPTION 1: PROGRESSIVE WEB APP (PWA) - AVAILABLE NOW            │   │
+│  │  ═══════════════════════════════════════════════════════════════│   │
+│  │                                                                  │   │
+│  │  The Cyberpunk UI is designed as a responsive PWA:              │   │
+│  │                                                                  │   │
+│  │  • Works on ANY mobile browser (iOS Safari, Chrome Android)     │   │
+│  │  • Install to home screen like native app                       │   │
+│  │  • Full wallet integration via MetaMask Mobile                  │   │
+│  │  • Offline-capable for viewing data                             │   │
+│  │                                                                  │   │
+│  │  HOW TO USE:                                                    │   │
+│  │  1. Open https://your-server:8000 on mobile browser             │   │
+│  │  2. Click "Add to Home Screen"                                  │   │
+│  │  3. Use MetaMask Mobile app for wallet signing                  │   │
+│  │                                                                  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  OPTION 2: NATIVE MOBILE APP - ROADMAP Q3 2024                  │   │
+│  │  ═══════════════════════════════════════════════════════════════│   │
+│  │                                                                  │   │
+│  │  Planned native apps using React Native:                        │   │
+│  │                                                                  │   │
+│  │  ┌──────────────┐        ┌──────────────┐                       │   │
+│  │  │    iOS       │        │   Android    │                       │   │
+│  │  │   App Store  │        │  Play Store  │                       │   │
+│  │  │              │        │              │                       │   │
+│  │  │  • Biometric │        │  • Biometric │                       │   │
+│  │  │  • Push      │        │  • Push      │                       │   │
+│  │  │  • Offline   │        │  • Offline   │                       │   │
+│  │  │  • WalletCon │        │  • WalletCon │                       │   │
+│  │  └──────────────┘        └──────────────┘                       │   │
+│  │                                                                  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  OPTION 3: API-ONLY MODE (FOR CUSTOM MOBILE APPS)               │   │
+│  │  ═══════════════════════════════════════════════════════════════│   │
+│  │                                                                  │   │
+│  │  Build your own mobile app using PULSAR SENTINEL API:           │   │
+│  │                                                                  │   │
+│  │  POST /api/v1/encrypt  - Encrypt data                           │   │
+│  │  POST /api/v1/decrypt  - Decrypt data                           │   │
+│  │  GET  /api/v1/pts      - Get threat score                       │   │
+│  │  POST /api/v1/auth/*   - Wallet authentication                  │   │
+│  │                                                                  │   │
+│  │  All endpoints return JSON, perfect for mobile integration      │   │
+│  │                                                                  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Mobile Security Considerations
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    MOBILE SECURITY ARCHITECTURE                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Your Phone                          PULSAR SENTINEL Server             │
+│  ══════════                          ══════════════════════             │
+│                                                                          │
+│  ┌─────────────┐    TLS 1.3         ┌─────────────────────┐            │
+│  │ MetaMask    │◄──────────────────►│ Authentication      │            │
+│  │ Mobile      │    Encrypted       │ Endpoint            │            │
+│  └─────────────┘                    └─────────────────────┘            │
+│         │                                    │                          │
+│         │ Signs                              │ Validates                │
+│         ▼                                    ▼                          │
+│  ┌─────────────┐                    ┌─────────────────────┐            │
+│  │ Private Key │                    │ ML-KEM Encryption   │            │
+│  │ (Never      │                    │ Engine              │            │
+│  │  Leaves     │                    │                     │            │
+│  │  Phone)     │                    │ ► Quantum-Safe      │            │
+│  └─────────────┘                    │ ► 7.4GB Max RAM     │            │
+│                                     │ ► Hybrid Mode       │            │
+│                                     └─────────────────────┘            │
+│                                                                          │
+│  ╔═══════════════════════════════════════════════════════════════════╗ │
+│  ║  KEY SECURITY: Private keys NEVER leave your mobile device        ║ │
+│  ║  Server only sees signatures, never the actual keys               ║ │
+│  ╚═══════════════════════════════════════════════════════════════════╝ │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## What Makes PULSAR SENTINEL Unique
 
 ### 1. QUANTUM-ADAPTIVE CRYPTOGRAPHIC ARCHITECTURE
@@ -73,12 +423,6 @@ ASR Record Structure:
 └─────────────────────────────────────────────────────┘
 ```
 
-**Why This Is Different:**
-- **Existing Solutions:** Logs stored in centralized databases, easily modified
-- **PULSAR SENTINEL:** Every action creates tamper-evident blockchain proof
-- **Merkle Proofs:** Any single ASR can be independently verified against blockchain
-- **Legal Admissibility:** Cryptographic proof chain for compliance/litigation
-
 ### 3. POINTS TOWARD THREAT SCORE (PTS) ALGORITHM
 
 **The Innovation:**
@@ -107,16 +451,7 @@ PTS Formula:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Why This Is Different:**
-- **Existing Solutions:** Binary pass/fail security checks
-- **PULSAR SENTINEL:** Continuous risk assessment with graduated response
-- **Quantum Risk Factor:** Unique metric tracking quantum-vulnerable cipher usage
-- **AI Integration Ready:** Numeric scores feed directly into ML models
-
 ### 4. SELF-GOVERNANCE RULE CODES (RC SYSTEM)
-
-**The Innovation:**
-**Hardcoded, tamper-proof governance rules** embedded in both application logic AND smart contracts, creating dual-layer enforcement.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -140,194 +475,89 @@ PTS Formula:
 └──────────┴──────────────────────┴────────────────────────────────┘
 ```
 
-**Why This Is Different:**
-- **Existing Solutions:** Governance rules stored in databases, can be modified
-- **PULSAR SENTINEL:** Rules hardcoded in application AND verified on-chain
-- **Dual Enforcement:** Even if application is compromised, smart contract enforces rules
-- **Heir Transfer:** Unique digital inheritance feature for 90-day unresponsive accounts
-
 ### 5. METAMASK-NATIVE AUTHENTICATION
 
-**The Innovation:**
 **Passwordless, wallet-based authentication** that ties security to blockchain identity rather than vulnerable credentials.
 
+---
+
+## Angel Cloud Ecosystem Integration
+
+### Complete Ecosystem Overview
+
 ```
-Authentication Flow:
-┌────────────────────────────────────────────────────────────────┐
-│                                                                 │
-│  1. Client requests nonce:                                      │
-│     POST /auth/nonce {"wallet_address": "0x..."}               │
-│                                                                 │
-│  2. Server returns challenge message:                           │
-│     ┌─────────────────────────────────────────────────────┐    │
-│     │ PULSAR SENTINEL Authentication                       │    │
-│     │                                                      │    │
-│     │ Wallet: 0x742d35Cc6634C0532925a3b844Bc9e7595f...    │    │
-│     │ Nonce: 8f3a2b1c9d4e5f6a7b8c9d0e1f2a3b4c5d...       │    │
-│     │ Timestamp: 2024-01-15T10:30:00Z                      │    │
-│     │                                                      │    │
-│     │ Sign this message to authenticate.                   │    │
-│     └─────────────────────────────────────────────────────┘    │
-│                                                                 │
-│  3. User signs with MetaMask (no gas fee)                      │
-│                                                                 │
-│  4. Server verifies signature, issues JWT                       │
-│                                                                 │
-│  5. JWT used for all subsequent requests                        │
-│                                                                 │
-└────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     ANGEL CLOUD ECOSYSTEM                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│                        ┌─────────────────┐                               │
+│                        │  SHANEBRAIN AI  │                               │
+│                        │  ─────────────  │                               │
+│                        │  • Threat Intel │                               │
+│                        │  • Art Gen      │                               │
+│                        │  • Support Bot  │                               │
+│                        └────────┬────────┘                               │
+│                                 │                                        │
+│       ┌─────────────────────────┼─────────────────────────┐             │
+│       │                         │                         │             │
+│       ▼                         ▼                         ▼             │
+│  ┌─────────┐            ┌─────────────┐           ┌───────────┐        │
+│  │ PULSAR  │◄──────────►│   PULSAR    │◄─────────►│  NFT/MINT │        │
+│  │SENTINEL │  Security  │    COIN     │  Rewards  │MARKETPLACE│        │
+│  │         │            │   (PLS)     │           │           │        │
+│  │► PQC    │            │             │           │► Art      │        │
+│  │► ASR    │            │► Mining     │           │► Passes   │        │
+│  │► PTS    │            │► Staking    │           │► Domains  │        │
+│  │► RC     │            │► Transfers  │           │► Security │        │
+│  └─────────┘            └─────────────┘           └───────────┘        │
+│       │                         │                         │             │
+│       └─────────────────────────┼─────────────────────────┘             │
+│                                 │                                        │
+│                        ┌────────┴────────┐                               │
+│                        │ POLYGON         │                               │
+│                        │ BLOCKCHAIN      │                               │
+│                        │ ─────────────   │                               │
+│                        │ • Immutable     │                               │
+│                        │ • Decentralized │                               │
+│                        │ • Low Gas Fees  │                               │
+│                        └─────────────────┘                               │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Why This Is Different:**
-- **Existing Solutions:** Username/password, easily phished
-- **PULSAR SENTINEL:** Wallet signature cannot be phished (requires private key)
-- **No Password Storage:** Server never stores credentials
-- **Blockchain Identity:** User identity is their Polygon wallet address
+### Subscription Tiers
+
+| Tier | Price | Security Features | Mining | AI Access |
+|------|-------|-------------------|--------|-----------|
+| **Sentinel Core** | $16.99/mo | ML-KEM-768, Basic ASR, PTS | ❌ | ❌ |
+| **Legacy Builder** | $10.99/mo | + Hybrid Mode, Full ASR, NFT Tools | ✅ | ❌ |
+| **Autonomous Guild** | $29.99/mo | + ML-KEM-1024, SHANEBRAIN, Heir Transfer | ✅ | ✅ |
 
 ---
 
-## Competitive Analysis
+## Technical Specifications
 
-### Existing AI-Blockchain Security Systems
-
-| Feature | Traditional Solutions | PULSAR SENTINEL |
-|---------|----------------------|-----------------|
-| **Encryption** | RSA/ECDSA (quantum-vulnerable) | ML-KEM-768/1024 (quantum-safe) |
-| **Future-Proofing** | None | Hybrid PQC + classical layers |
-| **Audit Trail** | Database logs | Blockchain-anchored Merkle proofs |
-| **Threat Assessment** | Binary pass/fail | Continuous PTS scoring |
-| **Authentication** | Passwords | MetaMask wallet signatures |
-| **Governance** | Software-only | Smart contract + application dual enforcement |
-| **Digital Inheritance** | Not available | RC 1.02 heir transfer protocol |
-| **Quantum Timeline** | Obsolete by 2035 | Designed for 2035+ quantum era |
-
-### Specific Competitor Gaps
-
-**1. Traditional Blockchain Security (Fireblocks, BitGo):**
-- Use ECDSA signatures that quantum computers will break
-- No post-quantum migration path
-- Centralized key management
-
-**2. Enterprise Security (Okta, Auth0):**
-- Password-based authentication
-- No blockchain immutability
-- No quantum-resistant encryption
-
-**3. Crypto Wallets (MetaMask, Ledger):**
-- Only protect wallet operations
-- No application-layer security
-- No threat scoring system
-
----
-
-## Quantum Computing Growth Alignment
-
-### Timeline Projection
+### API Endpoints Summary
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                 QUANTUM COMPUTER TIMELINE                        │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  2024  │████░░░░░░░░░░░│ 1,000 qubits - Current                │
-│        │ PULSAR SENTINEL: ML-KEM-768 protection active          │
-│                                                                  │
-│  2027  │█████████░░░░░░│ 10,000 qubits - Near-term              │
-│        │ PULSAR SENTINEL: ML-KEM-768 remains secure             │
-│                                                                  │
-│  2030  │████████████░░░│ 100,000 qubits - Medium-term           │
-│        │ PULSAR SENTINEL: Upgrade to ML-KEM-1024 available      │
-│                                                                  │
-│  2035  │███████████████│ 1M+ qubits - Cryptographic relevance   │
-│        │ PULSAR SENTINEL: ML-KEM-1024 + future NIST standards   │
-│        │ Classical RSA/ECDSA BROKEN at this point               │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
+Authentication:
+  POST /api/v1/auth/nonce      - Request authentication nonce
+  POST /api/v1/auth/verify     - Verify wallet signature
 
-### Adaptive Security Model
+Encryption:
+  POST /api/v1/encrypt         - Encrypt data with PQC
+  POST /api/v1/decrypt         - Decrypt data
 
-**PULSAR SENTINEL's "Quantum Growth" Architecture:**
+Security:
+  GET  /api/v1/status          - System status
+  GET  /api/v1/pts/{user_id}   - Get threat score
+  GET  /api/v1/asr/{user_id}   - Get audit records
 
-1. **Configuration-Based Upgrade:**
-   ```
-   PQC_SECURITY_LEVEL=768   # Current
-   PQC_SECURITY_LEVEL=1024  # Enhanced (single config change)
-   ```
-
-2. **Algorithm Agility:**
-   - Core design supports swapping ML-KEM for future NIST PQC standards
-   - Hybrid mode ensures classical backup during transitions
-
-3. **Key Rotation:**
-   - 90-day automatic key rotation (configurable)
-   - Forces adoption of latest security parameters
-
-4. **Quantum Risk Tracking:**
-   - PTS formula includes `quantum_risk_factor`
-   - Alerts when users employ quantum-vulnerable ciphers
-
----
-
-## Patent-Worthy Innovations
-
-### Primary Claims
-
-1. **Quantum-Adaptive Hybrid Encryption System**
-   - Combination of ML-KEM lattice-based cryptography with AES-256-GCM
-   - Automatic security level scaling via configuration
-   - Defense-in-depth against both classical and quantum attacks
-
-2. **Agent State Record (ASR) Blockchain Anchoring**
-   - Cryptographically signed security event records
-   - Merkle tree batching for efficient blockchain storage
-   - Independent verification via Merkle proofs
-
-3. **Points Toward Threat Score (PTS) Algorithm**
-   - Multi-factor weighted threat calculation
-   - Quantum risk factor integration
-   - Tiered response automation
-
-4. **Self-Governance Rule Code (RC) System**
-   - Dual enforcement via application + smart contract
-   - Heir transfer protocol (RC 1.02)
-   - Tamper-proof governance
-
-5. **Wallet-Native Zero-Password Authentication**
-   - MetaMask signature-based authentication
-   - Challenge-response nonce protocol
-   - JWT token issuance without credential storage
-
----
-
-## Technical Specifications for AI/RAG Systems
-
-### API Endpoints for RAG Integration
-
-```python
-# Get threat assessment for AI analysis
-GET /api/v1/pts/{user_id}
-Returns: {
-    "total_score": 45.5,
-    "tier": "safe",
-    "factors": {
-        "quantum_risk_count": 1,
-        "access_violation_count": 2,
-        "rate_limit_violations": 0,
-        "signature_failures": 0
-    }
-}
-
-# Get security events for AI training
-GET /api/v1/asr/{user_id}?threat_level_min=3
-Returns: [
-    {
-        "action": "signature_failure",
-        "threat_level": 4,
-        "pqc_status": "warning",
-        "timestamp": "2024-01-15T..."
-    }
-]
+UI Portal:
+  GET  /api/v1/ui/dashboard/stats   - Dashboard data
+  GET  /api/v1/ui/wallet/balance    - Wallet balance
+  GET  /api/v1/ui/mining/stats      - Mining statistics
+  POST /api/v1/ui/ai/chat           - SHANEBRAIN chat
 ```
 
 ### Data Schema for ML Models
@@ -348,6 +578,23 @@ Returns: [
 
 ---
 
+## Competitive Analysis
+
+| Feature | Traditional Solutions | PULSAR SENTINEL |
+|---------|----------------------|-----------------|
+| **Encryption** | RSA/ECDSA (quantum-vulnerable) | ML-KEM-768/1024 (quantum-safe) |
+| **Future-Proofing** | None | Hybrid PQC + classical layers |
+| **Audit Trail** | Database logs | Blockchain-anchored Merkle proofs |
+| **Threat Assessment** | Binary pass/fail | Continuous PTS scoring |
+| **Authentication** | Passwords | MetaMask wallet signatures |
+| **Governance** | Software-only | Smart contract + application dual enforcement |
+| **Digital Inheritance** | Not available | RC 1.02 heir transfer protocol |
+| **Quantum Timeline** | Obsolete by 2035 | Designed for 2035+ quantum era |
+| **Mobile Support** | Limited | PWA + Native roadmap |
+| **Mining Dependency** | N/A | **NONE - Security works independently** |
+
+---
+
 ## Conclusion
 
 **PULSAR SENTINEL** represents a paradigm shift in blockchain security:
@@ -357,6 +604,8 @@ Returns: [
 3. **Intelligent:** PTS algorithm enables AI-driven threat response
 4. **Self-Governing:** Tamper-proof rules enforced at multiple layers
 5. **Accessible:** MetaMask authentication eliminates password vulnerabilities
+6. **Independent:** Security works WITHOUT mining or blockchain connectivity
+7. **Mobile-Ready:** PWA today, native apps coming soon
 
 **"Build it once. Secure it forever."**
 
