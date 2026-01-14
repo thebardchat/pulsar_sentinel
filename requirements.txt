@@ -1,0 +1,48 @@
+# PULSAR SENTINEL - Post-Quantum Cryptography Security Framework
+# Core Dependencies
+
+# Post-Quantum Cryptography
+liboqs-python>=0.8.0
+
+# Blockchain Integration
+web3>=6.11.0
+eth-account>=0.10.0
+eth-typing>=3.5.0
+
+# REST API Framework
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+
+# Data Validation & Serialization
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Classical Cryptography
+cryptography>=41.0.0
+pycryptodome>=3.19.0
+
+# Configuration Management
+python-dotenv>=1.0.0
+
+# Async HTTP Client
+httpx>=0.26.0
+aiohttp>=3.9.0
+
+# Logging & Monitoring
+structlog>=24.1.0
+
+# Utilities
+python-dateutil>=2.8.2
+typing-extensions>=4.9.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+
+# Development
+black>=24.1.0
+mypy>=1.8.0
+ruff>=0.1.0
