@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PULSAR SENTINEL - Post-Quantum Security Framework for the Angel Cloud Ecosystem">
+    <meta name="theme-color" content="#00f0ff">
+    <title>{% block title %}PULSAR SENTINEL{% endblock %} | Quantum-Safe Security</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/quantum-theme.css">
+    {% block extra_css %}{% endblock %}
+
+    <!-- Web3 -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@4.0.3/dist/web3.min.js"></script>
+</head>
+<body class="quantum-grid-bg">
+    <!-- Quantum Particle Canvas -->
+    <canvas id="quantum-particles" class="quantum-particles"></canvas>
+
+    <!-- Navigation -->
+    <nav class="nav-main">
+        <div class="nav-brand">
+            <div class="logo-pulse">
+                <span class="logo-icon">&#9733;</span>
+            </div>
+            <span class="brand-text">PULSAR<span class="brand-accent">SENTINEL</span></span>
+        </div>
+
+        <div class="nav-links">
+            <a href="/" class="nav-link {% block nav_home %}{% endblock %}">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="/dashboard" class="nav-link {% block nav_dashboard %}{% endblock %}">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+            <a href="/wallet" class="nav-link {% block nav_wallet %}{% endblock %}">
+                <i class="fas fa-wallet"></i> Wallet
+            </a>
+            <a href="/mining" class="nav-link {% block nav_mining %}{% endblock %}">
+                <i class="fas fa-microchip"></i> Mining
+            </a>
+            <a href="/marketplace" class="nav-link {% block nav_marketplace %}{% endblock %}">
+                <i class="fas fa-store"></i> Marketplace
+            </a>
+            <a href="/shanebrain" class="nav-link {% block nav_ai %}{% endblock %}">
+                <i class="fas fa-brain"></i> SHANEBRAIN
+            </a>
+        </div>
+
+        <div class="nav-actions">
+            <div id="wallet-status" class="wallet-status disconnected">
+                <i class="fas fa-plug"></i>
+                <span>Not Connected</span>
+            </div>
+            <button id="connect-wallet-btn" class="btn btn-primary btn-glow">
+                <i class="fab fa-ethereum"></i> Connect Wallet
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-main">
+        <div class="footer-grid">
+            <div class="footer-section">
+                <h4>PULSAR SENTINEL</h4>
+                <p>Post-Quantum Security Framework</p>
+                <p class="footer-tagline">"Build it once. Secure it forever."</p>
+            </div>
+            <div class="footer-section">
+                <h4>Angel Cloud Ecosystem</h4>
+                <ul>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/security">Security</a></li>
+                    <li><a href="/docs">Documentation</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="/api/docs">API Reference</a></li>
+                    <li><a href="/whitepaper">Whitepaper</a></li>
+                    <li><a href="/support">Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Angel Cloud Technologies. Patent Pending. All Rights Reserved.</p>
+            <p class="pqc-badge"><i class="fas fa-shield-alt"></i> Protected by ML-KEM-768 Post-Quantum Cryptography</p>
+        </div>
+    </footer>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <!-- Modal Container -->
+    <div id="modal-container"></div>
+
+    <!-- Core Scripts -->
+    <script src="/static/js/quantum-effects.js"></script>
+    <script src="/static/js/wallet-connect.js"></script>
+    <script src="/static/js/notifications.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

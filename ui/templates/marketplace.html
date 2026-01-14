@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+
+{% block title %}Marketplace{% endblock %}
+{% block nav_marketplace %}active{% endblock %}
+
+{% block content %}
+<div class="marketplace-container">
+    <!-- Marketplace Header -->
+    <header class="marketplace-header">
+        <div class="header-content">
+            <h1><i class="fas fa-store"></i> PULSAR Marketplace</h1>
+            <p>Trade NFTs, MINTs, and digital assets secured by post-quantum cryptography</p>
+        </div>
+        <div class="header-stats">
+            <div class="header-stat">
+                <span class="stat-value">12.4K</span>
+                <span class="stat-label">Items</span>
+            </div>
+            <div class="header-stat">
+                <span class="stat-value">847</span>
+                <span class="stat-label">Owners</span>
+            </div>
+            <div class="header-stat">
+                <span class="stat-value">24.5K PLS</span>
+                <span class="stat-label">Volume</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Marketplace Navigation -->
+    <nav class="marketplace-nav">
+        <div class="nav-tabs">
+            <button class="tab-btn active" data-tab="all">
+                <i class="fas fa-th"></i> All Items
+            </button>
+            <button class="tab-btn" data-tab="nfts">
+                <i class="fas fa-image"></i> NFTs
+            </button>
+            <button class="tab-btn" data-tab="mints">
+                <i class="fas fa-coins"></i> MINTs
+            </button>
+            <button class="tab-btn" data-tab="security">
+                <i class="fas fa-shield-alt"></i> Security Passes
+            </button>
+            <button class="tab-btn" data-tab="domains">
+                <i class="fas fa-globe"></i> Domains
+            </button>
+        </div>
+        <div class="nav-actions">
+            <button class="btn btn-primary btn-glow" onclick="showCreateModal()">
+                <i class="fas fa-plus"></i> Create
+            </button>
+        </div>
+    </nav>
+
+    <!-- Filters & Search -->
+    <div class="marketplace-filters">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search items, collections, accounts..." id="marketplace-search">
+        </div>
+        <div class="filter-group">
+            <select class="form-select" id="filter-category">
+                <option value="">All Categories</option>
+                <option value="art">Art</option>
+                <option value="collectibles">Collectibles</option>
+                <option value="security">Security</option>
+                <option value="utility">Utility</option>
+            </select>
+            <select class="form-select" id="filter-sort">
+                <option value="recent">Recently Listed</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="popular">Most Popular</option>
+            </select>
+            <select class="form-select" id="filter-price">
+                <option value="">Any Price</option>
+                <option value="0-100">0 - 100 PLS</option>
+                <option value="100-500">100 - 500 PLS</option>
+                <option value="500-1000">500 - 1,000 PLS</option>
+                <option value="1000+">1,000+ PLS</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Featured Collections -->
+    <section class="featured-section">
+        <h2><i class="fas fa-star"></i> Featured Collections</h2>
+        <div class="featured-grid">
+            <div class="featured-card card" onclick="viewCollection('quantum-guardians')">
+                <div class="featured-banner" style="background: linear-gradient(135deg, #00f0ff, #ff00ff);">
+                    <div class="collection-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                </div>
+                <div class="featured-info">
+                    <h3>Quantum Guardians</h3>
+                    <p>PQC-verified security NFTs</p>
+                    <div class="collection-stats">
+                        <span>247 items</span>
+                        <span>Floor: 50 PLS</span>
+                    </div>
+                </div>
+            </div>
+            <div class="featured-card card" onclick="viewCollection('sentinel-keys')">
+                <div class="featured-banner" style="background: linear-gradient(135deg, #ffd700, #ff6b35);">
+                    <div class="collection-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                </div>
+                <div class="featured-info">
+                    <h3>Sentinel Access Keys</h3>
+                    <p>Tier upgrade passes</p>
+                    <div class="collection-stats">
+                        <span>100 items</span>
+                        <span>Floor: 200 PLS</span>
+                    </div>
+                </div>
+            </div>
+            <div class="featured-card card" onclick="viewCollection('neural-art')">
+                <div class="featured-banner" style="background: linear-gradient(135deg, #00ff41, #00f0ff);">
+                    <div class="collection-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                </div>
+                <div class="featured-info">
+                    <h3>Neural Art</h3>
+                    <p>SHANEBRAIN generated art</p>
+                    <div class="collection-stats">
+                        <span>1,024 items</span>
+                        <span>Floor: 25 PLS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NFT Grid -->
+    <section class="nft-grid-section">
+        <div class="nft-grid">
+            <!-- NFT Card 1 -->
+            <div class="nft-card card" onclick="viewNFT('qg-001')">
+                <div class="nft-image">
+                    <div class="nft-placeholder gradient-1">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="nft-badges">
+                        <span class="badge badge-primary">PQC Verified</span>
+                    </div>
+                </div>
+                <div class="nft-info">
+                    <div class="nft-collection">Quantum Guardians</div>
+                    <h3 class="nft-name">Guardian #001</h3>
+                    <div class="nft-price">
+                        <span class="price-label">Price</span>
+                        <span class="price-value">75 PLS</span>
+                    </div>
+                    <div class="nft-meta">
+                        <span class="rarity legendary">Legendary</span>
+                        <span class="likes"><i class="fas fa-heart"></i> 142</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block btn-buy">
+                    <i class="fas fa-shopping-cart"></i> Buy Now
+                </button>
+            </div>
+
+            <!-- NFT Card 2 -->
+            <div class="nft-card card" onclick="viewNFT('sk-042')">
+                <div class="nft-image">
+                    <div class="nft-placeholder gradient-2">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div class="nft-badges">
+                        <span class="badge badge-gold">MINT</span>
+                    </div>
+                </div>
+                <div class="nft-info">
+                    <div class="nft-collection">Sentinel Keys</div>
+                    <h3 class="nft-name">Guild Access Pass</h3>
+                    <div class="nft-price">
+                        <span class="price-label">Price</span>
+                        <span class="price-value">250 PLS</span>
+                    </div>
+                    <div class="nft-meta">
+                        <span class="rarity epic">Epic</span>
+                        <span class="likes"><i class="fas fa-heart"></i> 89</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block btn-buy">
+                    <i class="fas fa-shopping-cart"></i> Buy Now
+                </button>
+            </div>
+
+            <!-- NFT Card 3 -->
+            <div class="nft-card card" onclick="viewNFT('na-512')">
+                <div class="nft-image">
+                    <div class="nft-placeholder gradient-3">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                </div>
+                <div class="nft-info">
+                    <div class="nft-collection">Neural Art</div>
+                    <h3 class="nft-name">Quantum Dreams #512</h3>
+                    <div class="nft-price">
+                        <span class="price-label">Price</span>
+                        <span class="price-value">35 PLS</span>
+                    </div>
+                    <div class="nft-meta">
+                        <span class="rarity rare">Rare</span>
+                        <span class="likes"><i class="fas fa-heart"></i> 56</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block btn-buy">
+                    <i class="fas fa-shopping-cart"></i> Buy Now
+                </button>
+            </div>
+
+            <!-- NFT Card 4 -->
+            <div class="nft-card card" onclick="viewNFT('dom-pulsar')">
+                <div class="nft-image">
+                    <div class="nft-placeholder gradient-4">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="nft-badges">
+                        <span class="badge badge-success">Domain</span>
+                    </div>
+                </div>
+                <div class="nft-info">
+                    <div class="nft-collection">PULSAR Domains</div>
+                    <h3 class="nft-name">quantum.pls</h3>
+                    <div class="nft-price">
+                        <span class="price-label">Price</span>
+                        <span class="price-value">500 PLS</span>
+                    </div>
+                    <div class="nft-meta">
+                        <span class="rarity legendary">Premium</span>
+                        <span class="likes"><i class="fas fa-heart"></i> 234</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block btn-buy">
+                    <i class="fas fa-shopping-cart"></i> Buy Now
+                </button>
+            </div>
+
+            <!-- NFT Card 5 -->
+            <div class="nft-card card" onclick="viewNFT('qg-042')">
+                <div class="nft-image">
+                    <div class="nft-placeholder gradient-5">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="nft-badges">
+                        <span class="badge badge-primary">PQC Verified</span>
+                    </div>
+                </div>
+                <div class="nft-info">
+                    <div class="nft-collection">Quantum Guardians</div>
+                    <h3 class="nft-name">Guardian #042</h3>
+                    <div class="nft-price">
+                        <span class="price-label">Price</span>
+                        <span class="price-value">55 PLS</span>
+                    </div>
+                    <div class="nft-meta">
+                        <span class="rarity epic">Epic</span>
+                        <span class="likes"><i class="fas fa-heart"></i> 78</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block btn-buy">
+                    <i class="fas fa-shopping-cart"></i> Buy Now
+                </button>
+            </div>
+
+            <!-- NFT Card 6 - Security Pass -->
+            <div class="nft-card card" onclick="viewNFT('sp-legacy')">
+                <div class="nft-image">
+                    <div class="nft-placeholder gradient-6">
+                        <i class="fas fa-id-badge"></i>
+                    </div>
+                    <div class="nft-badges">
+                        <span class="badge badge-info">Security</span>
+                    </div>
+                </div>
+                <div class="nft-info">
+                    <div class="nft-collection">Security Passes</div>
+                    <h3 class="nft-name">Legacy Builder Pass</h3>
+                    <div class="nft-price">
+                        <span class="price-label">Price</span>
+                        <span class="price-value">150 PLS</span>
+                    </div>
+                    <div class="nft-meta">
+                        <span class="rarity rare">Verified</span>
+                        <span class="likes"><i class="fas fa-heart"></i> 167</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block btn-buy">
+                    <i class="fas fa-shopping-cart"></i> Buy Now
+                </button>
+            </div>
+        </div>
+
+        <!-- Load More -->
+        <div class="load-more">
+            <button class="btn btn-lg btn-secondary">
+                <i class="fas fa-chevron-down"></i> Load More Items
+            </button>
+        </div>
+    </section>
+</div>
+
+<!-- Create NFT Modal -->
+<div id="create-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content card modal-large">
+        <button class="modal-close" onclick="hideCreateModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-header">
+            <h3><i class="fas fa-plus-circle"></i> Create New Item</h3>
+        </div>
+        <div class="modal-body">
+            <div class="create-tabs">
+                <button class="create-tab active" data-type="nft">
+                    <i class="fas fa-image"></i> NFT
+                </button>
+                <button class="create-tab" data-type="mint">
+                    <i class="fas fa-coins"></i> MINT
+                </button>
+                <button class="create-tab" data-type="collection">
+                    <i class="fas fa-layer-group"></i> Collection
+                </button>
+            </div>
+
+            <div class="create-form">
+                <div class="form-row">
+                    <div class="form-group upload-group">
+                        <label>Upload File</label>
+                        <div class="upload-zone" id="upload-zone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag & drop or click to upload</p>
+                            <span>PNG, JPG, GIF, MP4 (Max 100MB)</span>
+                            <input type="file" id="nft-file" accept="image/*,video/*">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" class="form-input" id="nft-name" placeholder="Item name">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-textarea" id="nft-description" placeholder="Tell the story behind your creation..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Collection</label>
+                        <select class="form-select" id="nft-collection">
+                            <option value="">Select collection</option>
+                            <option value="new">+ Create New Collection</option>
+                            <option value="quantum-guardians">Quantum Guardians</option>
+                            <option value="neural-art">Neural Art</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select class="form-select" id="nft-category">
+                            <option value="art">Art</option>
+                            <option value="collectibles">Collectibles</option>
+                            <option value="security">Security</option>
+                            <option value="utility">Utility</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price (PLS)</label>
+                        <input type="number" class="form-input" id="nft-price" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Royalties (%)</label>
+                        <input type="number" class="form-input" id="nft-royalties" placeholder="10" max="25">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="pqc-sign" checked>
+                        <span><i class="fas fa-shield-alt"></i> Sign with PQC (ML-KEM-768)</span>
+                    </label>
+                </div>
+
+                <div class="create-summary">
+                    <div class="summary-row">
+                        <span>Listing Fee</span>
+                        <span>Free</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Gas Fee (estimated)</span>
+                        <span>~0.01 MATIC</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>PQC Signature</span>
+                        <span class="text-success"><i class="fas fa-check"></i> Included</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-glow btn-block btn-lg" onclick="createNFT()">
+                    <i class="fas fa-magic"></i> Create Item
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .nft-placeholder {
+        width: 100%;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .gradient-1 { background: linear-gradient(135deg, #00f0ff, #ff00ff); }
+    .gradient-2 { background: linear-gradient(135deg, #ffd700, #ff6b35); }
+    .gradient-3 { background: linear-gradient(135deg, #00ff41, #00f0ff); }
+    .gradient-4 { background: linear-gradient(135deg, #9945ff, #14f195); }
+    .gradient-5 { background: linear-gradient(135deg, #ff00ff, #00f0ff); }
+    .gradient-6 { background: linear-gradient(135deg, #00f0ff, #0066ff); }
+
+    .rarity {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .rarity.legendary {
+        background: linear-gradient(135deg, #ffd700, #ff6b35);
+        color: #000;
+    }
+
+    .rarity.epic {
+        background: linear-gradient(135deg, #9945ff, #ff00ff);
+        color: #fff;
+    }
+
+    .rarity.rare {
+        background: linear-gradient(135deg, #00f0ff, #0066ff);
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/marketplace.js"></script>
+{% endblock %}
