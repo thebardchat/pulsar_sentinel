@@ -1,0 +1,45 @@
+
+================================================================================
+                    PATENT APPLICATION SUMMARY
+================================================================================
+
+TITLE: QUANTUM-ADAPTIVE BLOCKCHAIN-INTEGRATED SECURITY FRAMEWORK WITH AGENT STATE RECORDING AND SELF-GOVERNANCE PROTOCOLS
+
+SHORT TITLE: PULSAR SENTINEL
+
+FILING DATE: 2026-01-14
+
+APPLICANT: Angel Cloud Technologies
+
+APPLICATION TYPE: Provisional Patent Application
+
+TECHNOLOGY FIELD: Cybersecurity, Cryptography, Blockchain
+
+--------------------------------------------------------------------------------
+                         ABSTRACT
+--------------------------------------------------------------------------------
+
+A quantum-adaptive blockchain-integrated security framework providing protection
+against both classical and quantum computing threats. The system comprises:
+
+(1) A hybrid encryption module combining ML-KEM lattice-based key encapsulation
+    with AES-256-GCM symmetric encryption for quantum-resistant data protection;
+
+(2) An Agent State Record (ASR) system creating immutable, blockchain-anchored
+    audit trails with Merkle proof verification for tamper-evident logging;
+
+(3) A Points Toward Threat Score (PTS) algorithm providing continuous threat
+    assessment with a novel quantum risk factor for incentivizing PQC adoption;
+
+(4) A Self-Governance Rule Code (RC) system enforcing tamper-proof policies
+    through dual application/smart-contract layers with heir transfer capability;
+
+(5) A wallet-native authentication system eliminating password vulnerabilities
+    through cryptographic challenge-response tied to blockchain identity.
+
+The framework is designed to scale security parameters as quantum computing
+capabilities increase, ensuring long-term protection of digital assets.
+
+--------------------------------------------------------------------------------
+                    CLAIMS SUMMARY
+--------------------------------------------------------------------------------
