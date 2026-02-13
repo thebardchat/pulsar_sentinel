@@ -78,12 +78,13 @@ echo   [6] [94mSetup / Install[0m
 echo   [7] [33mRun Tests[0m
 echo   [8] [33mGenerate Keys[0m
 echo   [9] [33mCheck Status[0m
+echo  [10] [35mDiscord Bot[0m
 echo   [0] [91mExit[0m
 echo.
 echo  [96m========================================[0m
 echo.
 
-set /p CHOICE="  Select option [0-9]: "
+set /p CHOICE="  Select option [0-10]: "
 
 if "%CHOICE%"=="1" goto :quick_start
 if "%CHOICE%"=="2" goto :dev_server
@@ -94,10 +95,11 @@ if "%CHOICE%"=="6" goto :setup_menu
 if "%CHOICE%"=="7" goto :run_tests
 if "%CHOICE%"=="8" goto :gen_keys
 if "%CHOICE%"=="9" goto :check_status
+if "%CHOICE%"=="10" goto :discord_bot
 if "%CHOICE%"=="0" goto :exit_app
 
 echo.
-echo  [91m[X] Invalid option. Please select 0-9.[0m
+echo  [91m[X] Invalid option. Please select 0-10.[0m
 timeout /t 2 >nul
 goto :menu
 
@@ -538,6 +540,25 @@ if exist ".env" (
 )
 
 echo.
+pause
+goto :menu
+
+REM ============================================================================
+REM DISCORD BOT
+REM ============================================================================
+:discord_bot
+cls
+echo.
+echo  [35m============== DISCORD BOT ==============[0m
+echo.
+call :activate_env
+echo  [93m  Starting PULSAR SENTINEL Discord Bot...[0m
+echo.
+echo  [96m  Bot Commands: !help, !status, !pricing, !pts, !docs, !invite[0m
+echo.
+echo  [33m  Press Ctrl+C to stop the bot[0m
+echo.
+python scripts\run_discord_bot.py
 pause
 goto :menu
 

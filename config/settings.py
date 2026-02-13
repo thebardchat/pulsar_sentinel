@@ -152,6 +152,28 @@ class Settings(BaseSettings):
         description="Max PTS for Tier 2 (Caution)",
     )
 
+    # Discord Configuration
+    discord_bot_token: str = Field(
+        default="",
+        description="Discord bot token",
+    )
+    discord_webhook_url: str = Field(
+        default="",
+        description="Discord webhook URL for notifications",
+    )
+    discord_general_channel_id: int = Field(
+        default=0,
+        description="Discord general channel ID",
+    )
+    discord_alerts_channel_id: int = Field(
+        default=0,
+        description="Discord alerts channel ID",
+    )
+    discord_invite_url: str = Field(
+        default="",
+        description="Discord server invite link",
+    )
+
     # Logging Configuration
     log_level: str = Field(
         default="INFO",
