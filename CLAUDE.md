@@ -1,359 +1,272 @@
-# CLAUDE.md - Pulsar Sentinel Project Context
+# CLAUDE.md - Pulsar Sentinel
 
-> **Last Updated:** February 13, 2026
-> **Version:** 2.1
+> **Last Updated:** February 14, 2026
+> **Version:** 3.0
 > **Owner:** Shane Brazelton (SRM Dispatch, Alabama)
 > **Repo:** github.com/thebardchat/pulsar_sentinel
+
+---
+
+## Project Overview
+
+**Pulsar Sentinel** is a production-grade Post-Quantum Cryptography (PQC) security framework for the Angel Cloud ecosystem. It provides quantum-resistant encryption (ML-KEM-768/1024), immutable blockchain audit trails (Polygon), AI-driven threat scoring (PTS), and self-governance rule codes.
+
+**Mission:** Protect 800 million Windows users losing security updates with affordable, local-first security infrastructure.
 
 ---
 
 ## Quick Start
 
 ```bash
-# Start Weaviate (from weaviate-config folder)
-cd D:\Angel_Cloud\shanebrain-core\weaviate-config
-docker-compose up -d
+# Create virtual environment
+python -m venv venv
+venv\Scripts\activate  # Windows
 
-# Run ShaneBrain Agent
-python langchain-chains/shanebrain_agent.py
+# Install dependencies
+pip install -r requirements.txt
 
-# Run Angel Cloud CLI (Interactive)
-python langchain-chains/angel_cloud_cli.py
+# Configure
+copy .env.template .env
+# Edit .env with your values
+
+# Run the server
+uvicorn src.api.server:app --host 0.0.0.0 --port 8000
+
+# Run Discord bot (standalone)
+python scripts/run_discord_bot.py
+
+# Run tests
+pytest
+
+# Windows launcher (does everything)
+PULSAR_SENTINEL.bat
 ```
-
----
-
-## Current Status (January 11, 2026)
-
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Ollama LLM | ✅ Installed | v0.13.5, using `llama3.2:1b` (1.3GB - fits 8GB RAM) |
-| Weaviate | ✅ Connected | localhost:8080, v1.28.0 |
-| LangChain | ✅ Installed | langchain, langchain-ollama, langchain-community |
-| Python Deps | ✅ Installed | weaviate-client v4, pymongo, rich, prompt_toolkit |
-| Crisis Detection | ✅ Enabled | Integrated into Angel Cloud CLI |
-| Docker | ✅ Running | shanebrain-weaviate, shanebrain-qna containers |
-
-**Known Limitation:** 8GB RAM system - using `llama3.2:1b` instead of larger 3B model.
-
----
-
-## Project Vision
-
-**ShaneBrain** = Central AI orchestrator for the entire ecosystem:
-- **Angel Cloud** - Mental wellness platform (named for daughter-in-law Angel)
-- **Pulsar AI** - Blockchain security layer (eventually Pulsar Sentinel)
-- **Legacy AI** - Personal "TheirNameBrain" for each user's family legacy
-- **LogiBot** - Business automation for SRM Dispatch
-
-**Mission:** Serve 800 million Windows users losing security updates with affordable, secure AI infrastructure.
 
 ---
 
 ## File Structure
 
 ```
-D:\Angel_Cloud\shanebrain-core\
-├── .env                          # Credentials (NEVER commit)
-├── requirements.txt              # Python dependencies
-├── langchain-chains/
-│   ├── shanebrain_agent.py       # Central agent (CHAT, MEMORY, WELLNESS, SECURITY, DISPATCH, CODE modes)
-│   ├── angel_cloud_cli.py        # Interactive CLI for mental wellness
-│   ├── crisis_detection_chain.py # Mental health crisis detection
-│   ├── qa_retrieval_chain.py     # RAG-based question answering
-│   └── code_generation_chain.py  # Code generation support
-├── weaviate-config/
-│   ├── docker-compose.yml        # Weaviate + transformers containers
-│   ├── data/                     # Persistent vector database storage
-│   └── schemas/
-│       ├── shanebrain-memory.json
-│       ├── angel-cloud-conversations.json
-│       └── pulsar-security-events.json
-├── mongodb-schemas/
-│   ├── conversations.json
-│   ├── user_sessions.json
-│   └── crisis_logs.json
-├── planning-system/
-│   ├── templates/                # Planning templates (tracked in git)
-│   └── active-projects/          # Personal project data (gitignored)
-├── scripts/
-│   ├── start-shanebrain.bat      # Master launcher script
-│   ├── health_check.py           # System health verification
-│   └── setup_credentials.py      # Credential management
-└── angel-cloud/
-    ├── docs/
-    │   └── crisis-intervention-flow.md
-    ├── config/
-    │   └── crisis-settings.json
-    └── modules/
-        └── crisis-handler.py
-```
-
----
-
-## Common Commands
-
-### Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### Start/Stop Services
-```bash
-# Start Weaviate
-cd weaviate-config && docker-compose up -d
-
-# Stop Weaviate
-cd weaviate-config && docker-compose down
-
-# View Weaviate logs
-docker logs shanebrain-weaviate -f
-```
-
-### Ollama (Local LLM)
-```bash
-# Check Ollama status
-ollama list
-
-# Pull the lightweight model (for 8GB RAM systems)
-ollama pull llama3.2:1b
-
-# Pull the larger model (needs 16GB+ RAM)
-ollama pull llama3.2
-
-# Run Ollama server
-ollama serve
-```
-
-### Health Check
-```bash
-python scripts/health_check.py
-```
-
-### Verify Credentials
-```bash
-python scripts/setup_credentials.py --verify
-```
-
----
-
-## Agent Modes
-
-The ShaneBrain agent supports multiple operational modes:
-
-| Mode | Purpose | Trigger |
-|------|---------|---------|
-| `CHAT` | General conversation | Default |
-| `MEMORY` | Shane's knowledge/legacy retrieval | "Tell me about Shane's..." |
-| `WELLNESS` | Angel Cloud mental health support | Emotional/mental health queries |
-| `SECURITY` | Pulsar AI threat detection | Security/blockchain analysis |
-| `DISPATCH` | SRM trucking operations | Logistics/dispatch queries |
-| `CODE` | Code generation/debugging | Programming tasks |
-
----
-
-## Angel Cloud CLI Commands
-
-```
-/help    - Show available commands
-/status  - System health check
-/crisis  - Test crisis detection
-/mode    - Switch agent modes
-/clear   - Clear screen
-/exit    - Exit CLI
+pulsar_sentinel/
+├── CLAUDE.md                    # This file
+├── README.md                    # Project documentation
+├── LICENSE                      # MIT License
+├── requirements.txt             # Python dependencies
+├── setup.py                     # Package setup
+├── pytest.ini                   # Test configuration
+├── .env.template                # Environment variable template
+├── .gitignore                   # Git ignore rules
+├── PULSAR_SENTINEL.bat          # Windows launcher
+├── landing.html                 # Marketing landing page (standalone)
+│
+├── src/
+│   ├── api/
+│   │   ├── server.py            # FastAPI application + Jinja2 UI routes
+│   │   ├── auth.py              # MetaMask wallet authentication
+│   │   └── routes.py            # API endpoint definitions
+│   ├── core/
+│   │   ├── pqc.py               # ML-KEM + hybrid encryption engine
+│   │   ├── legacy.py            # AES-256, ECDSA, TLS classical crypto
+│   │   └── asr_engine.py        # Agent State Records (audit trail)
+│   ├── blockchain/
+│   │   ├── polygon_client.py    # Polygon network integration
+│   │   ├── smart_contract.py    # Governance smart contract interface
+│   │   └── event_logger.py      # Blockchain event logging
+│   ├── governance/
+│   │   ├── rules_engine.py      # RC codes enforcement
+│   │   ├── pts_calculator.py    # Points Toward Threat scoring
+│   │   └── access_control.py    # RBAC + rate limiting
+│   └── discord_bot/
+│       ├── bot.py               # Discord bot initialization
+│       ├── commands.py          # Bot commands (!help, !status, !pricing, !pts, !docs, !invite)
+│       ├── embeds.py            # Message formatting
+│       └── alerts.py            # Threat alert system
+│
+├── ui/
+│   ├── templates/               # Jinja2 HTML templates
+│   │   ├── base.html            # Base layout (nav, footer)
+│   │   ├── index.html           # Home/feature overview
+│   │   ├── login.html           # MetaMask wallet auth
+│   │   ├── dashboard.html       # User dashboard (stats, deployments, security)
+│   │   ├── wallet.html          # Wallet management
+│   │   ├── mining.html          # Mining dashboard
+│   │   ├── marketplace.html     # NFT/MINT marketplace
+│   │   └── shanebrain.html      # SHANEBRAIN AI interface
+│   └── static/
+│       ├── css/
+│       │   └── quantum-theme.css  # Complete design system (30KB)
+│       └── js/
+│           ├── auth.js            # MetaMask authentication flow
+│           ├── dashboard.js       # Dashboard data management
+│           ├── landing.js         # Landing page modals
+│           ├── marketplace.js     # Marketplace filtering/trading
+│           ├── mining.js          # Mining stats/charts
+│           ├── notifications.js   # Toast notification system
+│           ├── quantum-effects.js # Particle background engine
+│           ├── shanebrain.js      # AI panel management
+│           ├── wallet.js          # Wallet operations
+│           └── wallet-connect.js  # Web3 integration, JWT auth
+│
+├── tests/                       # Pytest test suite
+├── config/                      # Configuration files
+├── docs/                        # Documentation
+│   ├── RAG.md                   # RAG knowledge base (659 lines)
+│   ├── API.md                   # API endpoint docs
+│   ├── ARCHITECTURE.md          # System architecture
+│   ├── DEPLOYMENT.md            # Deployment guide
+│   ├── SECURITY.md              # Security specifications
+│   └── PATENT.md                # Patent documentation
+├── patent_docs/                 # Patent-related documents
+├── scripts/                     # Utility scripts
+│   └── run_discord_bot.py       # Standalone bot launcher
+├── .github/workflows/           # CI/CD + Discord notification
+└── coverage_html/               # Test coverage reports
 ```
 
 ---
 
 ## Architecture
 
-### Core Components
+### Security Stack (3 Layers)
 
-1. **Ollama LLM** (localhost:11434)
-   - Local LLM inference via Ollama
-   - Default model: `llama3.2:1b` (for 8GB RAM systems)
-   - Configured via `OLLAMA_HOST` and `OLLAMA_MODEL` env vars
+1. **Layer 1: Post-Quantum Cryptography** (local, no internet required)
+   - ML-KEM-768/1024 lattice-based key encapsulation
+   - AES-256-GCM symmetric encryption
+   - ECDSA secp256k1 digital signatures
+   - Hybrid mode: ML-KEM + AES defense-in-depth
 
-2. **Weaviate Vector Database** (localhost:8080)
-   - Requires Weaviate 1.27.0+ for Python client v4 compatibility
-   - Local embeddings via `text2vec-transformers` (sentence-transformers-all-MiniLM-L6-v2)
-   - QnA module via `qna-transformers`
-   - Data persisted in `weaviate-config/data/`
-   - Docker containers: `shanebrain-weaviate`, `shanebrain-t2v`, `shanebrain-qna`
+2. **Layer 2: Agent State Records** (local + optional blockchain)
+   - Cryptographic signing of all security events
+   - Merkle tree batching for efficiency
+   - Local SQLite storage (offline capable)
+   - Optional Polygon blockchain anchoring
 
-3. **LangChain Chains** (`langchain-chains/`)
-   - `shanebrain_agent.py` - Central agent integrating all components
-   - `angel_cloud_cli.py` - Interactive CLI for Angel Cloud
-   - `crisis_detection_chain.py` - Mental health crisis detection
-   - `qa_retrieval_chain.py` - RAG-based question answering
-   - `code_generation_chain.py` - Code generation support
+3. **Layer 3: Governance & Threat Scoring** (local)
+   - PTS algorithm: `(quantum_risk * 0.4) + (access_violations * 0.3) + (rate_limits * 0.2) + (signature_failures * 0.1)`
+   - Tiers: Safe (<50), Caution (50-149), Critical (>=150)
+   - Rule Codes: RC 1.01 (Signature Required), RC 1.02 (Heir Transfer), RC 2.01 (Three-Strike), RC 3.02 (Fallback)
 
-4. **Planning System** (`planning-system/`)
-   - Markdown-based persistent planning for multi-session continuity
-   - Templates in `templates/` (tracked in git)
-   - Active projects in `active-projects/` (gitignored)
-   - Checkbox markers: `[ ]` not started, `[x]` completed, `[~]` in progress, `[!]` blocked
+### Authentication
+- MetaMask wallet-based (zero password)
+- JWT session tokens after wallet signature verification
+- Web3.js v4.0.3 browser integration
 
-5. **MongoDB Schemas** (`mongodb-schemas/`)
-   - `conversations.json`, `user_sessions.json`, `crisis_logs.json`
+### Subscription Tiers
 
-6. **Weaviate Schemas** (`weaviate-config/schemas/`)
-   - `shanebrain-memory.json` - Shane's personal knowledge/legacy
-   - `angel-cloud-conversations.json` - User mental wellness data
-   - `pulsar-security-events.json` - Security threat patterns
+| Tier | Price | PQC Level | Ops/Month |
+|------|-------|-----------|-----------|
+| Legacy Builder | $10.99 | AES-256 | 5M |
+| Sentinel Core | $16.99 | ML-KEM-768 | 10M |
+| Autonomous Guild | $29.99 | ML-KEM-1024 | Unlimited |
 
 ---
 
-## Multi-Project Support
+## API Endpoints
 
-This repository supports multiple AI projects under the ShaneBrain umbrella:
+```
+POST /api/v1/auth/nonce      - Request authentication nonce
+POST /api/v1/auth/verify     - Verify wallet signature
+POST /api/v1/encrypt         - Encrypt data with PQC
+POST /api/v1/decrypt         - Decrypt data
+GET  /api/v1/status          - System status
+GET  /api/v1/pts/{user_id}   - Get threat score
+GET  /api/v1/asr/{user_id}   - Get audit records
+GET  /api/v1/health          - Health check
+```
 
-| Project | Description | Status |
-|---------|-------------|--------|
-| ShaneBrain Core | Central orchestration layer | ✅ Active |
-| Angel Cloud | Mental wellness platform | 🔨 Building |
-| Pulsar AI | Blockchain security | 📋 Planned |
-| Pulsar Sentinel | Advanced threat detection | 📋 Planned |
-| Legacy AI | Personal family legacy system | 📋 Planned |
-| LogiBot | SRM Dispatch automation | 📋 Planned |
+---
+
+## UI Design System
+
+- **Colors:** Quantum Cyan (#00f0ff), Pulsar Magenta (#ff00ff), Matrix Green, Gold
+- **Fonts:** Orbitron (display), Rajdhani (body), Share Tech Mono (code)
+- **Effects:** Canvas particle background, glow animations, scroll reveals
+- **Responsive:** Mobile breakpoints at 1024px, 768px
+
+---
+
+## Discord Bot
+
+Lightweight standalone process (~30-50MB RAM).
+
+| Command | Action |
+|---------|--------|
+| `!help` | Show all commands |
+| `!status` | API health + PQC status |
+| `!pricing` | Subscription tiers |
+| `!pts` | Explain threat scoring |
+| `!docs` | Documentation links |
+| `!invite` | Server invite |
+
+**Automated:** Welcome embeds, threat alerts (5s poll), GitHub push notifications via Actions webhook.
 
 ---
 
 ## Environment Variables
 
-Required in `.env`:
+See `.env.template` for full list. Key variables:
+
 ```env
-# Weaviate
-WEAVIATE_URL=http://localhost:8080
-WEAVIATE_API_KEY=your-api-key-if-using-cloud
-
-# Ollama
-OLLAMA_HOST=http://localhost:11434
-OLLAMA_MODEL=llama3.2:1b
-
-# MongoDB (when enabled)
-MONGODB_URI=mongodb+srv://...
-
-# Crisis Intervention (Twilio)
-TWILIO_ACCOUNT_SID=your-sid
-TWILIO_AUTH_TOKEN=your-token
-TWILIO_PHONE_NUMBER=+1...
+POLYGON_NETWORK=testnet
+PQC_SECURITY_LEVEL=768
+API_PORT=8000
+JWT_SECRET_KEY=
+DISCORD_BOT_TOKEN=
+DISCORD_WEBHOOK_URL=
 ```
 
 ---
 
-## Security Reminders
-
-- ⚠️ NEVER commit `.env` files
-- ⚠️ NEVER paste connection strings in chat
-- ⚠️ Keep repo PRIVATE until production ready
-- ⚠️ Use Tailscale for remote access, not port forwarding
-- ⚠️ Crisis logs store metadata only (privacy protection)
-
----
-
-## Git Workflow
+## Testing
 
 ```bash
-# Status check
-git status
+# Run all tests
+pytest
 
-# Stage and commit
-git add .
-git commit -m "descriptive message"
+# With coverage
+pytest --cov=src --cov-report=html
 
-# Push to GitHub
-git push origin main
+# View coverage report
+open coverage_html/index.html
 ```
 
-**Rules:**
-- Commit frequently
-- Push after every session
-- Use descriptive commit messages
-- Never let work go unpushed
+---
+
+## Key Dependencies
+
+- `liboqs-python` — Post-quantum cryptography (ML-KEM)
+- `web3>=6.11.0` — Polygon blockchain integration
+- `fastapi>=0.109.0` — REST API + UI serving
+- `cryptography>=41.0.0` — Classical crypto (AES, ECDSA)
+- `discord.py>=2.3.0` — Discord bot
+- `pydantic>=2.5.0` — Data validation
 
 ---
 
-## Troubleshooting
+## Security Rules
 
-### Docker Not Running
-```cmd
-# Start Docker Desktop, then:
-docker-compose up -d
-```
-
-### Weaviate Connection Failed
-```bash
-# Check container status
-docker ps
-
-# View logs
-docker logs shanebrain-weaviate
-```
-
-### Ollama Not Responding
-```bash
-# Restart Ollama
-ollama serve
-
-# Check if model is pulled
-ollama list
-```
-
-### Out of Memory (8GB RAM)
-- Use `llama3.2:1b` instead of `llama3.2`
-- Consider stopping other applications
-- t2v-transformer may fail on low RAM - use Ollama for embeddings instead
+- NEVER commit `.env` files
+- NEVER expose private keys or wallet secrets
+- Keep repo PRIVATE until production ready
+- Security works 100% offline (no mining dependency)
+- Private keys never leave the user's device
 
 ---
 
-## Ports Reference
+## Part of the Angel Cloud Ecosystem
 
-| Service | Port | Protocol |
-|---------|------|----------|
-| Weaviate REST | 8080 | HTTP |
-| Weaviate gRPC | 50051 | gRPC |
-| Ollama | 11434 | HTTP |
-| MongoDB | 27017 | TCP |
-| Open WebUI | 3000 | HTTP |
-
----
-
-## External Resources
-
-- **GitHub Repo:** https://github.com/thebardchat/shanebrain-core
-- **Weaviate Docs:** https://weaviate.io/developers/weaviate
-- **LangChain Docs:** https://python.langchain.com
-- **Ollama Docs:** https://ollama.com/library
-
----
-
-## Shane's Development Philosophy
-
-1. **"File structure first"** - Always establish directory architecture before coding
-2. **"Load my RAG files"** - Simple commands over complex file names
-3. **Action over theory** - Build, don't just plan
-4. **Family-first** - All projects serve the family's future
-5. **ADHD as superpower** - Parallel processing, rapid context switching
-6. **No fluff** - Direct solutions, minimal explanation
-
----
-
-## Next Steps (TODO)
-
-- [ ] Complete Angel Cloud MVP with user authentication
-- [ ] Implement full crisis intervention flow with Twilio integration
-- [ ] Set up MongoDB Atlas for conversation persistence
-- [ ] Build user progression system (New Born → Angel)
-- [ ] Integrate Pulsar AI blockchain security layer
-- [ ] Create "Legendary Sticks" USB distribution for family
-- [ ] Develop mobile access via Tailscale + Open WebUI
+| Project | Repo | Status |
+|---------|------|--------|
+| ShaneBrain Core | thebardchat/shanebrain-core | Active |
+| Pulsar Sentinel | thebardchat/pulsar_sentinel | Active |
+| Loudon/DeSarro | thebardchat/loudon-desarro | Active |
+| Mini-ShaneBrain | thebardchat/mini-shanebrain | Active |
 
 ---
 
 ## Contact
 
-**Owner:** Shane  
-**Company:** SRM Dispatch (Alabama)  
-**Project:** Angel Cloud Ecosystem  
-**Mission:** 800 million users. Digital legacy for generations.
+**Owner:** Shane Brazelton
+**Company:** SRM Dispatch (Alabama)
+**Ko-fi:** ko-fi.com/shanebrain
+**Discord:** discord.gg/xbHQZkggU7
