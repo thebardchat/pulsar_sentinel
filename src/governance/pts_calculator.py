@@ -458,7 +458,7 @@ class PTSMonitor:
     def __init__(
         self,
         calculator: PTSCalculator | None = None,
-        alert_callback: callable | None = None,
+        alert_callback: object = None,
     ) -> None:
         """Initialize PTS monitor.
 
