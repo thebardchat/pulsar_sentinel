@@ -11,10 +11,9 @@ Lightweight process (~30-50MB RAM), runs separately from the FastAPI server.
 import sys
 from pathlib import Path
 
-# Add project root and src to path
+# Add project root and src to path (do NOT add config/ directly - it shadows stdlib logging)
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root / "src"))
-sys.path.insert(0, str(project_root / "config"))
 sys.path.insert(0, str(project_root))
 
 from discord_bot.bot import run_bot

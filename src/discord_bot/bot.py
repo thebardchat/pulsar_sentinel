@@ -6,10 +6,9 @@ from pathlib import Path
 import discord
 from discord.ext import commands
 
-# Add project root to path for config imports
+# Add project root to path for config imports (do NOT add config/ directly - it shadows stdlib logging)
 _project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_project_root))
-sys.path.insert(0, str(_project_root / "config"))
 
 from config.settings import get_settings
 from discord_bot import embeds
