@@ -1,8 +1,9 @@
-# CLAUDE.md - ShaneBrain Core
+# CLAUDE.md - Pulsar Sentinel Project Context
 
-> **Last Updated:** January 11, 2026  
-> **Location:** `D:\Angel_Cloud\shanebrain-core`  
-> **Owner:** Shane (SRM Dispatch, Alabama)
+> **Last Updated:** February 13, 2026
+> **Version:** 2.1
+> **Owner:** Shane Brazelton (SRM Dispatch, Alabama)
+> **Repo:** github.com/thebardchat/pulsar_sentinel
 
 ---
 
