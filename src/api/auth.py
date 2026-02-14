@@ -480,3 +480,43 @@ def extract_token_from_header(authorization: str | None) -> str | None:
         return None
 
     return token
+
+
+# Global auth instance for dependency injection
+_auth_instance: MetaMaskAuth | None = None
+
+
+def get_auth_instance() -> MetaMaskAuth:
+    """Get or create the global MetaMaskAuth instance."""
+    global _auth_instance
+    if _auth_instance is None:
+        _auth_instance = MetaMaskAuth()
+    return _auth_instance
+
+
+async def get_current_user(
+    authorization: str | None = None,
+) -> WalletSession:
+    """FastAPI dependency to get current authenticated user.
+
+    Args:
+        authorization: Authorization header value
+
+    Returns:
+        WalletSession for the authenticated user
+
+    Raises:
+        HTTPException: If not authenticated
+    """
+    from fastapi import HTTPException
+
+    token = extract_token_from_header(authorization)
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    auth = get_auth_instance()
+    session = auth.get_session(token)
+    if not session:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    return session
