@@ -13,7 +13,7 @@ from enum import Enum
 import uuid
 import os
 
-from ..api.auth import get_current_user, WalletSession
+from api.auth import get_current_user, WalletSession
 
 
 # Router for UI endpoints
