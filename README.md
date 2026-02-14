@@ -111,6 +111,30 @@ GET /api/v1/pts/{user_id}
 GET /api/v1/asr/{user_id}
 ```
 
+## Discord Community
+
+Join the PULSAR SENTINEL Discord for real-time threat alerts and community support.
+
+**Bot Commands:**
+| Command | Description |
+|---------|-------------|
+| `!help` | Show all commands |
+| `!status` | System health check |
+| `!pricing` | View subscription tiers |
+| `!pts` | PTS formula & thresholds |
+| `!docs` | Documentation links |
+| `!invite` | Get Discord invite link |
+
+**Automated Features:**
+- Push notifications on every commit to `main` (via GitHub Actions webhook)
+- Welcome messages for new members
+- Real-time PTS threat tier change alerts
+
+```bash
+# Run the Discord bot
+python scripts/run_discord_bot.py
+```
+
 ## Architecture
 
 ```
@@ -128,6 +152,11 @@ pulsar_sentinel/
 │   │   ├── rules_engine.py   # RC codes
 │   │   ├── pts_calculator.py # Threat scoring
 │   │   └── access_control.py # RBAC
+│   ├── discord_bot/    # Discord community bot
+│   │   ├── bot.py      # Main bot + events
+│   │   ├── commands.py # !help, !status, !pricing, etc.
+│   │   ├── embeds.py   # Themed embed builders
+│   │   └── alerts.py   # PTS threat alert system
 │   └── api/           # REST API
 │       ├── server.py
 │       ├── auth.py
@@ -184,6 +213,10 @@ Key environment variables (see `.env.template`):
 | `KEY_ROTATION_DAYS` | Key rotation interval | 90 |
 | `RATE_LIMIT_DEFAULT` | Requests per minute | 5 |
 | `STRIKE_THRESHOLD` | Strikes before ban | 3 |
+| `DISCORD_BOT_TOKEN` | Discord bot token | |
+| `DISCORD_WEBHOOK_URL` | Discord webhook URL | |
+| `DISCORD_GENERAL_CHANNEL_ID` | General channel ID | |
+| `DISCORD_ALERTS_CHANNEL_ID` | Alerts channel ID | |
 
 ## Requirements
 

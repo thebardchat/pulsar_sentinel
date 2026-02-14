@@ -595,6 +595,48 @@ UI Portal:
 
 ---
 
+## Discord Community Integration
+
+### Discord Bot
+
+PULSAR SENTINEL includes a community Discord bot that runs as a standalone lightweight process (~30-50MB RAM), designed for 8GB RAM systems.
+
+**Bot Commands:**
+
+| Command | What It Does |
+|---------|-------------|
+| `!help` | Shows all available commands |
+| `!status` | Hits local FastAPI `/api/v1/health`, shows server online/offline + PQC engine status |
+| `!pricing` | Reads `TIER_CONFIGS` from `config/constants.py`, displays all 3 subscription tiers with prices |
+| `!pts` | Explains PTS formula weights and tier thresholds (Safe < 50, Caution 50-149, Critical >= 150) |
+| `!docs` | Links to landing page, GitHub repo, and API docs |
+| `!invite` | Shows Discord server invite link |
+
+**Automated Features:**
+- **Welcome Messages:** Cyberpunk-themed embed greeting when new members join the server
+- **Threat Alerts:** Async queue system polls every 5 seconds and sends PTS tier change notifications to a dedicated alerts channel
+- **Push Notifications:** GitHub Actions workflow auto-posts to Discord on every push to `main` with commit info, author, and files changed
+
+**How To Run:**
+```bash
+# Standalone launcher
+python scripts/run_discord_bot.py
+
+# Or via Windows launcher
+PULSAR_SENTINEL.bat → Option [10] Discord Bot
+```
+
+**Configuration Required:**
+```
+DISCORD_BOT_TOKEN=         # From Discord Developer Portal
+DISCORD_WEBHOOK_URL=       # From channel Integrations > Webhooks
+DISCORD_GENERAL_CHANNEL_ID= # Right-click channel > Copy Channel ID
+DISCORD_ALERTS_CHANNEL_ID=  # Right-click channel > Copy Channel ID
+DISCORD_INVITE_URL=         # Server invite link
+```
+
+---
+
 ## Conclusion
 
 **PULSAR SENTINEL** represents a paradigm shift in blockchain security:
@@ -606,6 +648,7 @@ UI Portal:
 5. **Accessible:** MetaMask authentication eliminates password vulnerabilities
 6. **Independent:** Security works WITHOUT mining or blockchain connectivity
 7. **Mobile-Ready:** PWA today, native apps coming soon
+8. **Community-Connected:** Discord bot with real-time threat alerts and community commands
 
 **"Build it once. Secure it forever."**
 

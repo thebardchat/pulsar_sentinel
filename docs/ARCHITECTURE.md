@@ -281,23 +281,57 @@ Recovery:
 └── Circuit breaker (external services)
 ```
 
+## Discord Integration Layer
+
+### Discord Bot (`discord_bot/`)
+
+Standalone community bot running as a separate lightweight process (~30-50MB RAM).
+
+```
+Discord Bot Architecture:
+├── bot.py          # Main bot, on_ready, on_member_join (welcome embeds)
+├── commands.py     # Cog: !help, !status, !pricing, !pts, !docs, !invite
+├── embeds.py       # Themed embed builders (cyan/magenta/gold/green/red)
+└── alerts.py       # Async queue + polling cog for PTS threat alerts
+```
+
+#### Bot Commands
+```
+!help    → Shows all commands (embeds.help_embed)
+!status  → Hits /api/v1/health, shows online/offline + PQC status
+!pricing → Reads TIER_CONFIGS from constants.py, shows all 3 tiers
+!pts     → Shows PTS formula weights + tier thresholds
+!docs    → Links to landing page, GitHub, API docs
+!invite  → Shows Discord server invite link
+```
+
+#### Threat Alert System
+```
+Alert Flow:
+1. Any part of the app calls push_alert(pts_score, tier, details)
+2. Alert added to asyncio.Queue
+3. AlertsCog polls queue every 5 seconds
+4. Sends themed embed to configured alerts channel
+```
+
+### GitHub Actions Webhook (`.github/workflows/discord-notify.yml`)
+- Triggers on push to `main`
+- Sends cyan-themed Discord embed with commit info
+- Zero dependencies (curl only)
+- Requires `DISCORD_WEBHOOK_URL` GitHub Actions secret
+
 ## Future Extensions
 
-1. **Webhook Notifications**
-   - PTS tier changes
-   - Strike events
-   - Ban events
-
-2. **Multi-chain Support**
+1. **Multi-chain Support**
    - Ethereum mainnet
    - Arbitrum
    - Base
 
-3. **HSM Integration**
+2. **HSM Integration**
    - Hardware key storage
    - PKCS#11 support
 
-4. **Metrics & Monitoring**
+3. **Metrics & Monitoring**
    - Prometheus metrics
    - Grafana dashboards
    - Alert manager integration
