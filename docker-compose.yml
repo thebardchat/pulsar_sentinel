@@ -1,0 +1,32 @@
+services:
+  pulsar-sentinel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulsar-sentinel
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - pulsar-data:/app/data
+      - pulsar-logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 2G
+
+volumes:
+  pulsar-data:
+    driver: local
+  pulsar-logs:
+    driver: local

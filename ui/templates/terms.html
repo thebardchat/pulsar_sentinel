@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service{% endblock %}
+
+{% block content %}
+<style>
+    .legal-container {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 60px 30px;
+    }
+    .legal-container h1 {
+        font-family: 'Orbitron', monospace;
+        font-size: 2.2rem;
+        color: var(--quantum-cyan, #00f0ff);
+        margin-bottom: 0.5rem;
+    }
+    .legal-container .effective {
+        color: var(--text-muted, #8899aa);
+        font-size: 0.9rem;
+        margin-bottom: 2.5rem;
+        border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+        padding-bottom: 1.5rem;
+    }
+    .legal-container h2 {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1.4rem;
+        color: #ffffff;
+        margin-top: 2.5rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .legal-container p, .legal-container li {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #ccccdd;
+        margin-bottom: 0.75rem;
+    }
+    .legal-container ul {
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .legal-container li { margin-bottom: 0.4rem; }
+    .tier-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+    }
+    .tier-table th, .tier-table td {
+        padding: 10px 16px;
+        text-align: left;
+        border: 1px solid rgba(255,255,255,0.08);
+        font-family: 'Rajdhani', sans-serif;
+    }
+    .tier-table th {
+        background: rgba(0, 240, 255, 0.08);
+        color: var(--quantum-cyan, #00f0ff);
+        font-weight: 600;
+    }
+    .tier-table td { color: #ccccdd; }
+</style>
+
+<div class="legal-container">
+    <h1>Terms of Service</h1>
+    <p class="effective">Effective Date: March 1, 2026 &mdash; Last Updated: March 2026</p>
+
+    <h2>1. Acceptance of Terms</h2>
+    <p>By accessing or using Pulsar Sentinel ("the Service"), operated by Angel Cloud ("we", "us", "our"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+
+    <h2>2. Service Description</h2>
+    <p>Pulsar Sentinel is a post-quantum cryptography (PQC) security framework providing:</p>
+    <ul>
+        <li>ML-KEM lattice-based encryption (NIST Level 3/5)</li>
+        <li>AES-256-GCM hybrid encryption</li>
+        <li>Immutable Agent State Records (ASR) with optional Polygon blockchain anchoring</li>
+        <li>AI-driven threat scoring (PTS algorithm)</li>
+        <li>Self-governance rule codes</li>
+        <li>MetaMask wallet-based authentication</li>
+        <li>REST API access for cryptographic operations</li>
+    </ul>
+
+    <h2>3. Subscription Tiers &amp; Billing</h2>
+    <p>The Service offers three paid subscription tiers:</p>
+    <table class="tier-table">
+        <tr><th>Tier</th><th>Price</th><th>PQC Level</th><th>Operations/Month</th></tr>
+        <tr><td>Legacy Builder</td><td>$10.99/mo</td><td>AES-256</td><td>5 million</td></tr>
+        <tr><td>Sentinel Core</td><td>$16.99/mo</td><td>ML-KEM-768</td><td>10 million</td></tr>
+        <tr><td>Autonomous Guild</td><td>$29.99/mo</td><td>ML-KEM-1024</td><td>Unlimited</td></tr>
+    </table>
+    <ul>
+        <li>Billing is processed through Stripe. By subscribing, you also agree to <a href="https://stripe.com/legal" target="_blank" rel="noopener">Stripe's Terms of Service</a>.</li>
+        <li>Subscriptions renew automatically each month unless cancelled.</li>
+        <li>You may cancel at any time through the billing portal; access continues through the end of the current billing period.</li>
+        <li>We reserve the right to adjust pricing with 30 days' notice.</li>
+    </ul>
+
+    <h2>4. Acceptable Use</h2>
+    <p>You agree not to:</p>
+    <ul>
+        <li>Use the Service for any unlawful purpose or in violation of any applicable law</li>
+        <li>Attempt to bypass rate limits, access controls, or security measures</li>
+        <li>Reverse-engineer, decompile, or disassemble any part of the Service</li>
+        <li>Use the Service to encrypt, store, or transmit content that violates third-party rights</li>
+        <li>Share API keys, authentication tokens, or wallet credentials with unauthorized parties</li>
+        <li>Resell access to the Service without written authorization</li>
+    </ul>
+    <p>Violations may result in immediate suspension under our three-strike policy (RC 2.01).</p>
+
+    <h2>5. Data &amp; Security</h2>
+    <ul>
+        <li>All cryptographic operations happen locally or on your designated server. We do not have access to your plaintext data or private keys.</li>
+        <li>Agent State Records (ASR) log security events with metadata only. If blockchain anchoring is enabled, Merkle roots are submitted to the Polygon network.</li>
+        <li>Authentication is wallet-based (MetaMask). We do not store passwords.</li>
+        <li>See our <a href="/privacy">Privacy Policy</a> for detailed data handling practices.</li>
+    </ul>
+
+    <h2>6. Intellectual Property</h2>
+    <p>The Service, including its architecture, algorithms, design, and documentation, is the property of Angel Cloud. Patent pending. The ML-KEM algorithms are NIST public standards; our implementation and integration are proprietary.</p>
+    <p>You retain ownership of all data you encrypt, store, or process through the Service.</p>
+
+    <h2>7. Limitation of Liability</h2>
+    <p>THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. TO THE MAXIMUM EXTENT PERMITTED BY LAW:</p>
+    <ul>
+        <li>We are not liable for any indirect, incidental, special, consequential, or punitive damages.</li>
+        <li>Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim.</li>
+        <li>We do not guarantee uninterrupted service or that the Service will be free of errors or vulnerabilities.</li>
+        <li>Cryptographic security is provided on a best-effort basis using current NIST standards.</li>
+    </ul>
+
+    <h2>8. Indemnification</h2>
+    <p>You agree to indemnify and hold harmless Angel Cloud, its officers, and contributors from any claims, damages, or expenses arising from your use of the Service or violation of these Terms.</p>
+
+    <h2>9. Termination</h2>
+    <ul>
+        <li>You may terminate your account at any time by cancelling your subscription and ceasing use.</li>
+        <li>We may suspend or terminate your access for violation of these Terms, with or without notice.</li>
+        <li>Upon termination, your ASR data remains available for 30 days for export. After that, it may be deleted.</li>
+        <li>The heir transfer provision (RC 1.02) applies to accounts unresponsive for 90+ days.</li>
+    </ul>
+
+    <h2>10. Governing Law</h2>
+    <p>These Terms are governed by the laws of the State of Alabama, United States. Any disputes shall be resolved in the courts of Madison County, Alabama.</p>
+
+    <h2>11. Changes to Terms</h2>
+    <p>We may update these Terms at any time. Material changes will be communicated via the Service dashboard or email (if provided). Continued use after changes constitutes acceptance.</p>
+
+    <h2>12. Contact</h2>
+    <p>For questions about these Terms, contact us at <strong>support@angelcloud.io</strong>.</p>
+    <p>Angel Cloud &mdash; Hazel Green, Alabama, USA</p>
+</div>
+{% endblock %}

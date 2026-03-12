@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy{% endblock %}
+
+{% block content %}
+<style>
+    .legal-container {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 60px 30px;
+    }
+    .legal-container h1 {
+        font-family: 'Orbitron', monospace;
+        font-size: 2.2rem;
+        color: var(--quantum-cyan, #00f0ff);
+        margin-bottom: 0.5rem;
+    }
+    .legal-container .effective {
+        color: var(--text-muted, #8899aa);
+        font-size: 0.9rem;
+        margin-bottom: 2.5rem;
+        border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+        padding-bottom: 1.5rem;
+    }
+    .legal-container h2 {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1.4rem;
+        color: #ffffff;
+        margin-top: 2.5rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .legal-container p, .legal-container li {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #ccccdd;
+        margin-bottom: 0.75rem;
+    }
+    .legal-container ul {
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .legal-container li { margin-bottom: 0.4rem; }
+    .legal-container strong { color: #ffffff; }
+    .highlight-box {
+        background: rgba(0, 255, 136, 0.06);
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin: 1rem 0 1.5rem;
+    }
+    .highlight-box p { margin-bottom: 0.4rem; }
+</style>
+
+<div class="legal-container">
+    <h1>Privacy Policy</h1>
+    <p class="effective">Effective Date: March 1, 2026 &mdash; Last Updated: March 2026</p>
+
+    <p>Angel Cloud ("we", "us", "our") operates Pulsar Sentinel, a post-quantum cryptography security framework. This Privacy Policy explains what data we collect, how we use it, and your rights.</p>
+
+    <div class="highlight-box">
+        <p><strong>Privacy by Design:</strong> Pulsar Sentinel is built with a local-first architecture. Your encrypted data and private keys never leave your device or server. We cannot read your plaintext data.</p>
+    </div>
+
+    <h2>1. What We Collect</h2>
+    <ul>
+        <li><strong>Wallet Address:</strong> Your Ethereum/Polygon wallet address, used as your account identifier. This is a public blockchain address.</li>
+        <li><strong>Agent State Records (ASR):</strong> Security event metadata (timestamps, action types, threat levels, PQC status). ASRs do NOT contain your plaintext data.</li>
+        <li><strong>Usage Data:</strong> API request counts, rate limit usage, operations performed per billing period.</li>
+        <li><strong>Subscription Data:</strong> Tier selection, billing status, and payment metadata managed by Stripe.</li>
+        <li><strong>PTS Score:</strong> Calculated threat score based on your usage patterns (quantum risk, access violations, rate limit violations, signature failures).</li>
+    </ul>
+
+    <h2>2. What We Do NOT Collect</h2>
+    <ul>
+        <li><strong>Passwords:</strong> Authentication is wallet-based (MetaMask signature). No passwords are stored or transmitted.</li>
+        <li><strong>Personal Names or Email:</strong> Not required for account creation. Only collected if you voluntarily provide them.</li>
+        <li><strong>Encrypted Content:</strong> We never have access to your plaintext data. Encryption/decryption happens client-side or on your server.</li>
+        <li><strong>Private Keys:</strong> Your wallet private keys never leave your device.</li>
+        <li><strong>Browsing History or Tracking Cookies:</strong> We do not use third-party analytics or ad trackers.</li>
+    </ul>
+
+    <h2>3. How We Use Your Data</h2>
+    <ul>
+        <li><strong>Service Delivery:</strong> Authenticate requests, enforce rate limits, track operations against your subscription tier.</li>
+        <li><strong>Security Monitoring:</strong> Calculate PTS threat scores, enforce governance rules (RC codes), detect and prevent abuse.</li>
+        <li><strong>Billing:</strong> Process subscription payments through Stripe, track usage for tier enforcement.</li>
+        <li><strong>Audit Trail:</strong> Maintain Agent State Records for security compliance and your review.</li>
+    </ul>
+
+    <h2>4. Blockchain Transparency</h2>
+    <p>If blockchain anchoring is enabled (configurable per your settings):</p>
+    <ul>
+        <li>Merkle roots of ASR batches may be submitted to the Polygon blockchain (mainnet or Amoy testnet).</li>
+        <li>On-chain data contains only cryptographic hashes, not readable content.</li>
+        <li>Blockchain records are immutable and publicly verifiable by design.</li>
+        <li>You can disable blockchain anchoring at any time via your configuration.</li>
+    </ul>
+
+    <h2>5. Data Retention</h2>
+    <ul>
+        <li><strong>ASR Records:</strong> Stored locally on your deployment. Default retention is configurable.</li>
+        <li><strong>Server Logs:</strong> Retained for 90 days, then automatically purged.</li>
+        <li><strong>Billing Records:</strong> Retained by Stripe per their data retention policy.</li>
+        <li><strong>Account Data:</strong> Retained while your account is active. After 90 days of inactivity, the heir transfer provision (RC 1.02) may apply.</li>
+        <li><strong>Post-Termination:</strong> Data available for export for 30 days after account termination.</li>
+    </ul>
+
+    <h2>6. Third-Party Services</h2>
+    <p>We share limited data with the following services:</p>
+    <ul>
+        <li><strong>Stripe</strong> &mdash; Payment processing. Receives payment method details you provide. Subject to <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's Privacy Policy</a>.</li>
+        <li><strong>Polygon Network</strong> &mdash; Blockchain anchoring (if enabled). Receives cryptographic hashes only.</li>
+        <li><strong>Discord</strong> &mdash; Community features and bot interactions (optional). Subject to <a href="https://discord.com/privacy" target="_blank" rel="noopener">Discord's Privacy Policy</a>.</li>
+    </ul>
+    <p>We do not sell your data to any third party.</p>
+
+    <h2>7. Your Rights</h2>
+    <p>Depending on your jurisdiction, you may have the right to:</p>
+    <ul>
+        <li><strong>Access:</strong> Request a copy of all data we hold about your wallet address.</li>
+        <li><strong>Deletion:</strong> Request deletion of your account and associated data (subject to legal retention requirements).</li>
+        <li><strong>Portability:</strong> Export your ASR records and account data at any time.</li>
+        <li><strong>Correction:</strong> Request correction of inaccurate data.</li>
+        <li><strong>Opt-Out:</strong> Disable blockchain anchoring, optional data collection features.</li>
+    </ul>
+    <p><strong>California Residents (CCPA):</strong> You have the right to know what personal information we collect, request deletion, and opt out of sale (we do not sell data). To exercise these rights, contact us at the address below.</p>
+    <p><strong>EU/EEA Residents (GDPR):</strong> Our legal basis for processing is contract performance (providing the Service you subscribed to) and legitimate interest (security monitoring). You have the right to lodge a complaint with your local supervisory authority.</p>
+
+    <h2>8. Security</h2>
+    <p>We implement the following security measures:</p>
+    <ul>
+        <li>All API communication over TLS 1.3</li>
+        <li>ML-KEM post-quantum encryption for sensitive operations</li>
+        <li>JWT authentication with configurable expiration</li>
+        <li>Rate limiting and three-strike abuse prevention</li>
+        <li>Encrypted backups with restic</li>
+        <li>No plaintext secrets in version control</li>
+    </ul>
+
+    <h2>9. Children's Privacy</h2>
+    <p>The Service is not directed at individuals under 18. We do not knowingly collect data from minors. If you believe a minor has provided us data, contact us for removal.</p>
+
+    <h2>10. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy periodically. Material changes will be communicated via the Service dashboard. Continued use constitutes acceptance.</p>
+
+    <h2>11. Contact</h2>
+    <p>For privacy questions, data requests, or concerns:</p>
+    <p><strong>Email:</strong> privacy@angelcloud.io<br>
+    <strong>Address:</strong> Angel Cloud &mdash; Hazel Green, Alabama, USA</p>
+</div>
+{% endblock %}

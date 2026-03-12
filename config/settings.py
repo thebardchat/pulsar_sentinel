@@ -152,6 +152,28 @@ class Settings(BaseSettings):
         description="Max PTS for Tier 2 (Caution)",
     )
 
+    # Stripe Billing
+    stripe_secret_key: str = Field(
+        default="",
+        description="Stripe secret API key",
+    )
+    stripe_webhook_secret: str = Field(
+        default="",
+        description="Stripe webhook signing secret",
+    )
+    stripe_price_legacy: str = Field(
+        default="",
+        description="Stripe Price ID for Legacy Builder tier ($10.99/mo)",
+    )
+    stripe_price_sentinel: str = Field(
+        default="",
+        description="Stripe Price ID for Sentinel Core tier ($16.99/mo)",
+    )
+    stripe_price_guild: str = Field(
+        default="",
+        description="Stripe Price ID for Autonomous Guild tier ($29.99/mo)",
+    )
+
     # Discord Configuration
     discord_bot_token: str = Field(
         default="",

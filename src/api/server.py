@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from api.routes import router, init_routes
 from api.auth import MetaMaskAuth
 from api.ui_routes import ui_router
+from billing.routes import billing_router, init_billing
 from core.asr_engine import ASREngine
 from governance.access_control import AccessController
 from governance.pts_calculator import PTSCalculator
@@ -90,6 +91,9 @@ async def lifespan(app: FastAPI):
         rules_engine=rules_engine,
     )
 
+    # Initialize billing
+    init_billing(access_controller)
+
     # Store in app state for access
     app.state.auth = auth
     app.state.access_controller = access_controller
@@ -137,6 +141,9 @@ def create_app() -> FastAPI:
 
     # Include UI API routes
     app.include_router(ui_router, prefix="/api/v1")
+
+    # Include billing routes
+    app.include_router(billing_router, prefix="/api/v1")
 
     # Setup static files and templates
     project_root = Path(__file__).parent.parent.parent
@@ -195,6 +202,18 @@ def create_app() -> FastAPI:
         if templates:
             return templates.TemplateResponse("shanebrain.html", {"request": request})
         return HTMLResponse("SHANEBRAIN AI - templates not found")
+
+    @app.get("/terms", response_class=HTMLResponse)
+    async def terms_page(request: Request):
+        if templates:
+            return templates.TemplateResponse("terms.html", {"request": request})
+        return HTMLResponse("Terms of Service - templates not found")
+
+    @app.get("/privacy", response_class=HTMLResponse)
+    async def privacy_page(request: Request):
+        if templates:
+            return templates.TemplateResponse("privacy.html", {"request": request})
+        return HTMLResponse("Privacy Policy - templates not found")
 
     # Global exception handler
     @app.exception_handler(Exception)

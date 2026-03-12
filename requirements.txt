@@ -33,6 +33,9 @@ aiohttp>=3.9.0
 # Discord Bot
 discord.py>=2.3.0
 
+# Billing
+stripe>=8.0.0
+
 # Logging & Monitoring
 structlog>=24.1.0
 

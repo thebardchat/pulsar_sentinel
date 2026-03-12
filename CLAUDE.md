@@ -1,11 +1,24 @@
 # CLAUDE.md - Pulsar Sentinel
 
-> **Last Updated:** March 12, 2026
+## Infrastructure Context
+
+| Device | Role | Address |
+|--------|------|---------|
+| Raspberry Pi 5 (16GB) | Primary node | 100.67.120.6 (Tailscale) |
+| Pironman 5-MAX | NVMe RAID 1 chassis | — |
+| RAID mount | mdadm RAID 1 | /mnt/shanebrain-raid/ |
+| Pulsar0100 (Windows) | N8N bridge | 100.81.70.117 |
+
+**RAID Path:** `/mnt/shanebrain-raid/shanebrain-core/pulsar_sentinel/`
+
+**Governed by:** https://github.com/thebardchat/constitution/blob/main/CONSTITUTION.md
+
+---
+
+> **Last Updated:** March 2026
 > **Version:** 4.0
 > **Owner:** Shane Brazelton (SRM Dispatch, Alabama)
 > **Repo:** github.com/thebardchat/pulsar_sentinel
-
-This project operates under the [ShaneTheBrain Constitution](https://github.com/thebardchat/constitution/blob/main/CONSTITUTION.md).
 
 ---
 
@@ -17,75 +30,32 @@ This project operates under the [ShaneTheBrain Constitution](https://github.com/
 
 ---
 
-## Infrastructure
-
-All thebardchat repos run on a single Raspberry Pi 5 + Pironman 5-MAX with NVMe RAID 1.
-
-### Hardware
-
-| Component | Details |
-|-----------|---------|
-| **Compute** | Raspberry Pi 5, 16GB RAM |
-| **Chassis** | Pironman 5-MAX by Sunfounder |
-| **Storage** | RAID 1 — 2x WD Blue SN5000 2TB NVMe (mdadm) |
-| **Backup** | 8TB Seagate USB — restic encrypted, 3am daily |
-| **Network** | Wired ethernet, Tailscale VPN (100.67.120.6) |
-| **OS** | Raspberry Pi OS (Debian Trixie, arm64) |
-
-### Core Path
-
-```
-/mnt/shanebrain-raid/shanebrain-core/
-```
-
-All project data, services, and configuration live under this RAID-backed path.
-
-### Services (all on Pi)
-
-| Service | Port | Container/Process |
-|---------|------|-------------------|
-| Ollama | 11434 | Native (systemd) |
-| Weaviate | 8080/50051 | Docker: shanebrain-weaviate |
-| Open WebUI | 3000 | Docker: open-webui |
-| Portainer CE | 9000 | Docker: portainer |
-| Discord Bot | — | Background process |
-| Arcade Bot | — | Background process |
-| Social Bot | — | systemd: shanebrain-social |
-| Glances | 61208 | System monitor |
-
-### Tailscale Network
-
-| Device | Tailscale IP | Type |
-|--------|-------------|------|
-| shanebrain-1 | 100.67.120.6 | Pi 5 (primary server) |
-| pulsar00100 | 100.81.70.117 | Windows desktop |
-| iphone-13 | 100.86.68.38 | iPhone (mobile) |
-
----
-
 ## Quick Start
 
 ```bash
-# All services run on the Raspberry Pi 5 (shanebrain-1)
-# SSH into Pi from anywhere:
-ssh shanebrain@100.67.120.6
-
-# Clone and set up locally for development
-git clone https://github.com/thebardchat/pulsar_sentinel.git
-cd pulsar_sentinel
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Configure
 cp .env.template .env
+# Edit .env with your values
 
 # Run the server
-uvicorn src.api.server:app --host 0.0.0.0 --port 8000
+uvicorn api.server:app --host 0.0.0.0 --port 8000
 
 # Run Discord bot (standalone)
 python scripts/run_discord_bot.py
 
 # Run tests
 pytest
+
+# Windows launcher (does everything)
+PULSAR_SENTINEL.bat
 ```
 
 ---
@@ -99,6 +69,8 @@ pulsar_sentinel/
 ├── LICENSE                      # MIT License
 ├── requirements.txt             # Python dependencies
 ├── setup.py                     # Package setup
+├── Dockerfile                   # Production container
+├── docker-compose.yml           # Docker deployment
 ├── pytest.ini                   # Test configuration
 ├── .env.template                # Environment variable template
 ├── .gitignore                   # Git ignore rules
@@ -109,7 +81,11 @@ pulsar_sentinel/
 │   ├── api/
 │   │   ├── server.py            # FastAPI application + Jinja2 UI routes
 │   │   ├── auth.py              # MetaMask wallet authentication
-│   │   └── routes.py            # API endpoint definitions
+│   │   ├── routes.py            # API endpoint definitions
+│   │   └── ui_routes.py         # UI API endpoints (dashboard, wallet, mining, marketplace)
+│   ├── billing/
+│   │   ├── stripe_client.py     # Stripe subscription integration
+│   │   └── routes.py            # Billing API routes (checkout, portal, webhooks)
 │   ├── core/
 │   │   ├── pqc.py               # ML-KEM + hybrid encryption engine
 │   │   ├── legacy.py            # AES-256, ECDSA, TLS classical crypto
@@ -130,17 +106,45 @@ pulsar_sentinel/
 │
 ├── ui/
 │   ├── templates/               # Jinja2 HTML templates
+│   │   ├── base.html            # Base layout (nav, footer)
+│   │   ├── index.html           # Home/feature overview
+│   │   ├── login.html           # MetaMask wallet auth
+│   │   ├── dashboard.html       # User dashboard (stats, deployments, security)
+│   │   ├── wallet.html          # Wallet management
+│   │   ├── mining.html          # Mining dashboard
+│   │   ├── marketplace.html     # NFT/MINT marketplace
+│   │   ├── shanebrain.html      # SHANEBRAIN AI interface
+│   │   ├── terms.html           # Terms of Service
+│   │   └── privacy.html         # Privacy Policy
 │   └── static/
 │       ├── css/
-│       │   └── quantum-theme.css
+│       │   └── quantum-theme.css  # Complete design system (30KB)
 │       └── js/
+│           ├── auth.js            # MetaMask authentication flow
+│           ├── dashboard.js       # Dashboard data management
+│           ├── landing.js         # Landing page modals
+│           ├── marketplace.js     # Marketplace filtering/trading
+│           ├── mining.js          # Mining stats/charts
+│           ├── notifications.js   # Toast notification system
+│           ├── quantum-effects.js # Particle background engine
+│           ├── shanebrain.js      # AI panel management
+│           ├── wallet.js          # Wallet operations
+│           └── wallet-connect.js  # Web3 integration, JWT auth
 │
 ├── tests/                       # Pytest test suite
 ├── config/                      # Configuration files
 ├── docs/                        # Documentation
+│   ├── RAG.md                   # RAG knowledge base (659 lines)
+│   ├── API.md                   # API endpoint docs
+│   ├── ARCHITECTURE.md          # System architecture
+│   ├── DEPLOYMENT.md            # Deployment guide
+│   ├── SECURITY.md              # Security specifications
+│   └── PATENT.md                # Patent documentation
 ├── patent_docs/                 # Patent-related documents
 ├── scripts/                     # Utility scripts
-└── .github/workflows/           # CI/CD + Discord notification
+│   └── run_discord_bot.py       # Standalone bot launcher
+├── .github/workflows/           # CI/CD + Discord notification
+└── coverage_html/               # Test coverage reports
 ```
 
 ---
@@ -167,7 +171,6 @@ pulsar_sentinel/
    - Rule Codes: RC 1.01 (Signature Required), RC 1.02 (Heir Transfer), RC 2.01 (Three-Strike), RC 3.02 (Fallback)
 
 ### Authentication
-
 - MetaMask wallet-based (zero password)
 - JWT session tokens after wallet signature verification
 - Web3.js v4.0.3 browser integration
@@ -193,6 +196,10 @@ GET  /api/v1/status          - System status
 GET  /api/v1/pts/{user_id}   - Get threat score
 GET  /api/v1/asr/{user_id}   - Get audit records
 GET  /api/v1/health          - Health check
+POST /api/v1/billing/checkout    - Create Stripe checkout session
+POST /api/v1/billing/portal      - Create billing portal session
+GET  /api/v1/billing/subscription - Get subscription status
+POST /api/v1/billing/webhook     - Stripe webhook handler
 ```
 
 ---
@@ -234,6 +241,8 @@ API_PORT=8000
 JWT_SECRET_KEY=
 DISCORD_BOT_TOKEN=
 DISCORD_WEBHOOK_URL=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
 ```
 
 ---
@@ -241,8 +250,14 @@ DISCORD_WEBHOOK_URL=
 ## Testing
 
 ```bash
+# Run all tests
 pytest
+
+# With coverage
 pytest --cov=src --cov-report=html
+
+# View coverage report
+open coverage_html/index.html
 ```
 
 ---
@@ -255,6 +270,7 @@ pytest --cov=src --cov-report=html
 - `cryptography>=41.0.0` — Classical crypto (AES, ECDSA)
 - `discord.py>=2.3.0` — Discord bot
 - `pydantic>=2.5.0` — Data validation
+- `stripe>=8.0.0` — Subscription billing
 
 ---
 
@@ -262,9 +278,17 @@ pytest --cov=src --cov-report=html
 
 - NEVER commit `.env` files
 - NEVER expose private keys or wallet secrets
-- Keep repo PRIVATE until production ready
 - Security works 100% offline (no mining dependency)
 - Private keys never leave the user's device
+
+---
+
+## Development Philosophy
+
+1. **"File structure first"** - Always establish architecture before coding
+2. **Action over theory** - Build, don't just plan
+3. **Family-first** - All projects serve the family's future
+4. **Local first** - No cloud dependencies unless explicitly chosen
 
 ---
 
@@ -272,22 +296,10 @@ pytest --cov=src --cov-report=html
 
 | Project | Repo | Status |
 |---------|------|--------|
-| Constitution | thebardchat/constitution | Active |
 | ShaneBrain Core | thebardchat/shanebrain-core | Active |
 | Pulsar Sentinel | thebardchat/pulsar_sentinel | Active |
-| Loudon/DeSarro | thebardchat/loudon-desarro | Active |
-
----
-
-## Credits
-
-| Partner | Contribution |
-|---------|-------------|
-| [Claude by Anthropic](https://claude.ai) | Co-built ecosystem infrastructure |
-| [Raspberry Pi 5](https://raspberrypi.com) | Affordable local compute |
-| [Pironman 5-MAX by Sunfounder](https://pironman.com) | RAID-capable NVMe chassis |
-
-Built with Claude (Anthropic) · Runs on Raspberry Pi 5 + Pironman 5-MAX
+| Angel Cloud | thebardchat/angel-cloud | Active |
+| Loudon/DeSarro | thebardchat/loudon-desarro | Building |
 
 ---
 
@@ -297,4 +309,5 @@ Built with Claude (Anthropic) · Runs on Raspberry Pi 5 + Pironman 5-MAX
 **Company:** SRM Dispatch (Alabama)
 **Ko-fi:** ko-fi.com/shanebrain
 **Discord:** discord.gg/xbHQZkggU7
+**Project:** Angel Cloud Ecosystem
 **Mission:** 800 million users. Digital legacy for generations.
