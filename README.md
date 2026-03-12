@@ -4,6 +4,26 @@
 
 A production-grade blockchain-integrated security layer providing quantum-resistant encryption, immutable audit trails, and self-governance for the 800M Windows users facing security update deprecation.
 
+This project operates under the [ShaneTheBrain Constitution](https://github.com/thebardchat/constitution/blob/main/CONSTITUTION.md).
+
+---
+
+## Infrastructure
+
+All thebardchat repos run on a single Raspberry Pi 5 + Pironman 5-MAX with NVMe RAID 1.
+
+| Component | Details |
+|-----------|---------|
+| **Compute** | Raspberry Pi 5, 16GB RAM |
+| **Chassis** | Pironman 5-MAX by Sunfounder |
+| **Storage** | RAID 1 — 2x WD Blue SN5000 2TB NVMe (mdadm) |
+| **Core Path** | `/mnt/shanebrain-raid/shanebrain-core/` |
+| **Backup** | 8TB Seagate USB — restic encrypted, daily |
+| **Network** | Tailscale VPN across all devices |
+| **OS** | Raspberry Pi OS (Debian Trixie, arm64) |
+
+---
+
 ## Overview
 
 PULSAR SENTINEL implements a three-tier security architecture:
@@ -215,8 +235,6 @@ Key environment variables (see `.env.template`):
 | `STRIKE_THRESHOLD` | Strikes before ban | 3 |
 | `DISCORD_BOT_TOKEN` | Discord bot token | |
 | `DISCORD_WEBHOOK_URL` | Discord webhook URL | |
-| `DISCORD_GENERAL_CHANNEL_ID` | General channel ID | |
-| `DISCORD_ALERTS_CHANNEL_ID` | Alerts channel ID | |
 
 ## Requirements
 
@@ -225,14 +243,22 @@ Key environment variables (see `.env.template`):
 - Web3.py (for blockchain)
 - FastAPI (for REST API)
 
-## Security Checklist
+## Part of the Angel Cloud Ecosystem
 
-- No hardcoded secrets
-- Local-first architecture (no cloud dependencies)
-- All blockchain writes signed
-- Rate limiting on all endpoints
-- Input validation on every request
-- HMAC verification on all ciphertexts
+| Project | Repo | Status |
+|---------|------|--------|
+| Constitution | thebardchat/constitution | Active |
+| ShaneBrain Core | thebardchat/shanebrain-core | Active |
+| Pulsar Sentinel | thebardchat/pulsar_sentinel | Active |
+| Loudon/DeSarro | thebardchat/loudon-desarro | Active |
+
+## Credits
+
+| Partner | Contribution |
+|---------|-------------|
+| [Claude by Anthropic](https://claude.ai) | Co-built ecosystem infrastructure |
+| [Raspberry Pi 5](https://raspberrypi.com) | Affordable local compute |
+| [Pironman 5-MAX by Sunfounder](https://pironman.com) | RAID-capable NVMe chassis |
 
 ## License
 
@@ -240,6 +266,6 @@ MIT License - See LICENSE for details.
 
 ---
 
-**Built for the future. Secured against quantum threats. Protecting digital inheritance.**
+Built with Claude (Anthropic) · Runs on Raspberry Pi 5 + Pironman 5-MAX
 
 *"Build it once. Secure it forever."*
