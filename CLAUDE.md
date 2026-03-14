@@ -311,3 +311,8 @@ open coverage_html/index.html
 **Discord:** discord.gg/xbHQZkggU7
 **Project:** Angel Cloud Ecosystem
 **Mission:** 800 million users. Digital legacy for generations.
+
+## Claude Code Rules
+- Commit and push directly to `main`. Do NOT create branches.
+- Run build/test commands before committing.
+- Update CLAUDE.md session log before final commit.
