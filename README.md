@@ -1,20 +1,37 @@
 <div align="center"><img src=".github/assets/banner.png" alt="Pulsar Sentinel" width="100%"></div>
 
 [![Constitution](https://img.shields.io/badge/Constitution-ShaneTheBrain-blue)](https://github.com/thebardchat/constitution)
+[![Status](https://img.shields.io/badge/Status-LIVE%20on%20Pi%205-brightgreen)](https://github.com/thebardchat/pulsar_sentinel)
+[![PQC](https://img.shields.io/badge/PQC-ML--KEM--768%20%2B%20AES--256-purple)](https://github.com/thebardchat/pulsar_sentinel)
+[![Cluster](https://img.shields.io/badge/Cluster-4%20Nodes-blue)](https://github.com/thebardchat/shanebrain-core)
+[![Sponsor](https://img.shields.io/badge/Sponsor-thebardchat-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/thebardchat)
+[![Hugging Face](https://img.shields.io/badge/HuggingFace-thebardchat-yellow?logo=huggingface)](https://huggingface.co/thebardchat)
 
 # PULSAR SENTINEL
 
-**Post-Quantum Cryptography Security Framework for Angel Cloud**
+**Post-Quantum Cryptography Security Framework — LIVE on Port 8250**
 
-A production-grade blockchain-integrated security layer providing quantum-resistant encryption, immutable audit trails, and self-governance for the 800M Windows users facing security update deprecation.
+A production-grade blockchain-integrated security layer providing quantum-resistant encryption (ML-KEM-768/1024), immutable audit trails (Agent State Records with Merkle proofs), real-time threat scoring (PTS), and role-based access control. Protecting the ShaneBrain 4-node cluster and the 800M Windows users facing security update deprecation.
+
+**Currently protecting:** ShaneBrain ecosystem — 42 MCP tools, 4-node Ollama cluster, Mega Dashboard, Angel Cloud Gateway, Weaviate vector DB.
 
 This project operates under the [ShaneTheBrain Constitution](https://github.com/thebardchat/constitution/blob/main/CONSTITUTION.md).
 
 ---
 
+## Live Status
+
+| Endpoint | Status |
+|----------|--------|
+| Health | `curl http://localhost:8250/api/v1/health` |
+| Swagger Docs | `http://100.67.120.6:8250/docs` |
+| Dashboard | `http://100.67.120.6:8250/dashboard` |
+
+---
+
 ## Infrastructure
 
-All thebardchat repos run on a single Raspberry Pi 5 + Pironman 5-MAX with NVMe RAID 1.
+Runs on the ShaneBrain 4-node cluster — Pi 5 controller + 3 headless Windows worker nodes.
 
 | Component | Details |
 |-----------|---------|
