@@ -316,3 +316,21 @@ open coverage_html/index.html
 - Commit and push directly to `main`. Do NOT create branches.
 - Run build/test commands before committing.
 - Update CLAUDE.md session log before final commit.
+
+
+## Networking / Deployment
+- When working with Tailscale Funnel, remember it strips URL path prefixes. Always use hardcoded base paths rather than server-side form action prefixing for routing.
+
+## Creative Writing
+- Never overwrite or rewrite the user's creative voice, prose style, or intentional structural choices (e.g., missing notes, dialogue rhythm). Ask before making stylistic changes to creative writing files.
+
+## General Workflow Rules
+- Before setting up repos, SSH keys, or services, check what's already configured on the current machine. Run `ls ~/.ssh/`, `git remote -v`, `tailscale status`, etc. before assuming fresh setup is needed.
+- Let's focus on one thing at a time. Don't suggest other improvements until the current goal is fully verified working.
+- Before applying changes to all files, show the result on one file first so Shane can verify the approach.
+
+## Git
+- For git conflicts, always verify --theirs vs --ours semantics before applying. State which version you're keeping and why before running the command.
+
+## Raspberry Pi Environment
+- This user runs services on Raspberry Pi. Be aware: Python 3.13 removed the `cgi` module, Piper TTS needs careful noise_scale tuning to avoid clipping, and aplay conflicts with PipeWire. Prefer `pw-play` or `paplay` for audio playback.
