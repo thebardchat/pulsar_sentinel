@@ -1,5 +1,9 @@
 <div align="center"><img src=".github/assets/banner.png" alt="Pulsar Sentinel" width="100%"></div>
 
+> **Try Claude free for 2 weeks** — the AI powering this ecosystem. [Start your free trial →](https://claude.ai/referral/4fAMYN9Ing)
+
+![social card](assets/social-card.jpg)
+
 [![Constitution](https://img.shields.io/badge/Constitution-ShaneTheBrain-blue)](https://github.com/thebardchat/constitution)
 [![Status](https://img.shields.io/badge/Status-LIVE%20on%20Pi%205-brightgreen)](https://github.com/thebardchat/pulsar_sentinel)
 [![PQC](https://img.shields.io/badge/PQC-ML--KEM--768%20%2B%20AES--256-purple)](https://github.com/thebardchat/pulsar_sentinel)
