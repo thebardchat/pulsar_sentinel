@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#000000;stop-opacity:1"/>
+      <stop offset="50%" style="stop-color:#0d0018;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#050000;stop-opacity:1"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="redglow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Matrix rain columns (decorative) -->
+  <g font-family="monospace" font-size="11" opacity="0.15">
+    <text x="30" y="50" fill="#dc2626">01</text><text x="30" y="70" fill="#dc2626">10</text><text x="30" y="90" fill="#7c3aed">11</text><text x="30" y="110" fill="#dc2626">00</text><text x="30" y="130" fill="#7c3aed">01</text>
+    <text x="60" y="30" fill="#7c3aed">10</text><text x="60" y="50" fill="#dc2626">01</text><text x="60" y="70" fill="#7c3aed">11</text><text x="60" y="90" fill="#dc2626">00</text>
+    <text x="1100" y="50" fill="#dc2626">01</text><text x="1100" y="70" fill="#7c3aed">11</text><text x="1100" y="90" fill="#dc2626">00</text><text x="1100" y="110" fill="#7c3aed">10</text>
+    <text x="1130" y="30" fill="#7c3aed">10</text><text x="1130" y="50" fill="#dc2626">01</text><text x="1130" y="70" fill="#7c3aed">11</text>
+    <text x="1060" y="60" fill="#dc2626">11</text><text x="1060" y="80" fill="#7c3aed">00</text><text x="1060" y="100" fill="#dc2626">01</text>
+    <text x="1160" y="450" fill="#dc2626">10</text><text x="1160" y="470" fill="#7c3aed">01</text><text x="1160" y="490" fill="#dc2626">11</text>
+    <text x="20" y="450" fill="#7c3aed">00</text><text x="20" y="470" fill="#dc2626">11</text><text x="20" y="490" fill="#7c3aed">01</text>
+  </g>
+
+  <!-- Hexagonal shield -->
+  <g transform="translate(900, 280)" filter="url(#redglow)">
+    <polygon points="100,0 200,50 200,150 100,200 0,150 0,50" fill="none" stroke="#dc2626" stroke-width="2.5" opacity="0.8"/>
+    <polygon points="100,20 180,65 180,135 100,180 20,135 20,65" fill="none" stroke="#7c3aed" stroke-width="1.5" opacity="0.6"/>
+    <polygon points="100,50 155,80 155,120 100,150 45,120 45,80" fill="#1a0000" opacity="0.7" stroke="#dc2626" stroke-width="1"/>
+    <!-- Lock icon -->
+    <rect x="82" y="95" width="36" height="28" rx="4" fill="none" stroke="#ef4444" stroke-width="2"/>
+    <path d="M89,95 Q89,78 100,78 Q111,78 111,95" fill="none" stroke="#ef4444" stroke-width="2"/>
+    <circle cx="100" cy="107" r="4" fill="#ef4444"/>
+    <line x1="100" y1="111" x2="100" y2="117" stroke="#ef4444" stroke-width="2"/>
+  </g>
+
+  <!-- Decorative scan lines -->
+  <g stroke="#dc2626" stroke-width="1" opacity="0.06">
+    <line x1="0" y1="50" x2="1200" y2="50"/>
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="150" x2="1200" y2="150"/>
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="250" x2="1200" y2="250"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="350" x2="1200" y2="350"/>
+    <line x1="0" y1="400" x2="1200" y2="400"/>
+    <line x1="0" y1="450" x2="1200" y2="450"/>
+    <line x1="0" y1="500" x2="1200" y2="500"/>
+    <line x1="0" y1="550" x2="1200" y2="550"/>
+  </g>
+
+  <!-- Corner brackets -->
+  <g stroke="#dc2626" stroke-width="2" fill="none" opacity="0.6">
+    <polyline points="20,20 20,70 70,70"/>
+    <polyline points="1180,20 1180,70 1130,70"/>
+    <polyline points="20,610 20,560 70,560"/>
+    <polyline points="1180,610 1180,560 1130,560"/>
+  </g>
+
+  <!-- Main title -->
+  <text x="100" y="130" font-family="monospace" font-size="70" font-weight="bold" fill="#dc2626" filter="url(#redglow)">PULSAR</text>
+  <text x="100" y="210" font-family="monospace" font-size="70" font-weight="bold" fill="#7c3aed" filter="url(#glow)">SENTINEL</text>
+
+  <!-- Divider line -->
+  <line x1="100" y1="240" x2="720" y2="240" stroke="#dc2626" stroke-width="2" opacity="0.6"/>
+
+  <!-- Tagline -->
+  <text x="100" y="275" font-family="monospace" font-size="20" fill="#ef4444" filter="url(#glow)">Post-Quantum Security Framework</text>
+
+  <!-- Feature list -->
+  <g font-family="monospace" font-size="15" fill="#9ca3af">
+    <text x="105" y="320">▸ ML-KEM Lattice-Based Encryption</text>
+    <text x="105" y="348">▸ Blockchain Audit Trails on Polygon</text>
+    <text x="105" y="376">▸ MetaMask Wallet Authentication</text>
+    <text x="105" y="404">▸ Cyberpunk Security Dashboard</text>
+  </g>
+
+  <!-- Status indicators -->
+  <g font-family="monospace" font-size="12">
+    <circle cx="105" cy="440" r="5" fill="#22c55e" filter="url(#glow)"/>
+    <text x="120" y="445" fill="#22c55e">QUANTUM-RESISTANT</text>
+    <circle cx="320" cy="440" r="5" fill="#ef4444"/>
+    <text x="335" y="445" fill="#ef4444">ACTIVE DEFENSE</text>
+    <circle cx="510" cy="440" r="5" fill="#a855f7"/>
+    <text x="525" y="445" fill="#a855f7">BLOCKCHAIN SECURED</text>
+  </g>
+
+  <!-- Threat level bar -->
+  <text x="100" y="490" font-family="monospace" font-size="11" fill="#4b5563">THREAT RESISTANCE LEVEL</text>
+  <rect x="100" y="500" width="600" height="8" rx="4" fill="#1a0000" stroke="#dc2626" stroke-width="1"/>
+  <rect x="100" y="500" width="570" height="8" rx="4" fill="url(#threatgrad)"/>
+  <defs>
+    <linearGradient id="threatgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#dc2626"/>
+    </linearGradient>
+  </defs>
+  <text x="706" y="509" font-family="monospace" font-size="11" fill="#ef4444">MAX</text>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="580" width="1200" height="50" fill="#0a0000" opacity="0.9"/>
+  <line x1="0" y1="580" x2="1200" y2="580" stroke="#dc2626" stroke-width="1" opacity="0.5"/>
+  <text x="30" y="611" font-family="monospace" font-size="13" fill="#7c3aed">github.com/thebardchat/pulsar_sentinel</text>
+  <text x="1170" y="611" text-anchor="end" font-family="monospace" font-size="13" fill="#4b5563">Built by Shane + Claude Anthropic</text>
+</svg>
