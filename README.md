@@ -9,6 +9,12 @@
 
 # PULSAR SENTINEL
 
+> **Try Claude free for 2 weeks** — the AI behind this entire ecosystem. [Start your free trial →](https://claude.ai/referral/4fAMYN9Ing)
+
+---
+
+
+
 **Post-Quantum Cryptography Security Framework — LIVE on Port 8250**
 
 A production-grade blockchain-integrated security layer providing quantum-resistant encryption (ML-KEM-768/1024), immutable audit trails (Agent State Records with Merkle proofs), real-time threat scoring (PTS), and role-based access control. Protecting the ShaneBrain 4-node cluster and the 800M Windows users facing security update deprecation.
