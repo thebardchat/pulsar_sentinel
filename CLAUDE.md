@@ -13,6 +13,8 @@
 
 **Governed by:** https://github.com/thebardchat/constitution/blob/main/CONSTITUTION.md
 
+See PERSONA_REVIEW_PROTOCOL at https://github.com/thebardchat/constitution/blob/main/PERSONA_REVIEW_PROTOCOL.md
+
 ---
 
 > **Last Updated:** March 2026
