@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PULSAR SENTINEL - Quantum-proof security for 800 million abandoned computers. Digital sovereignty. Digital trust fund. Your legacy, protected forever.">
+    <meta name="theme-color" content="#00f0ff">
+    <meta property="og:title" content="PULSAR SENTINEL - Your Computer Was Abandoned. We Fixed That.">
+    <meta property="og:description" content="Quantum-proof encryption. Blockchain audit trails. Automatic digital inheritance. One install protects everything.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PULSAR SENTINEL - Digital Sovereignty for Everyone">
+    <title>PULSAR SENTINEL - Your Computer Was Abandoned. We Fixed That.</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* === RESET & VARIABLES === */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --cyan: #00f0ff;
+            --cyan-dim: #00a0aa;
+            --cyan-glow: rgba(0, 240, 255, 0.5);
+            --magenta: #ff00ff;
+            --magenta-dim: #aa00aa;
+            --magenta-glow: rgba(255, 0, 255, 0.5);
+            --gold: #ffd700;
+            --gold-glow: rgba(255, 215, 0, 0.5);
+            --green: #00ff41;
+            --orange: #ff6b35;
+            --red: #ff0040;
+            --bg: #0a0a0f;
+            --bg2: #0d0d15;
+            --bg3: #12121a;
+            --bg4: #1a1a25;
+            --bg5: #252535;
+            --text: #e0e0f0;
+            --text2: #a0a0b0;
+            --text3: #606070;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
+        }
+
+        html { font-size: 16px; scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            font-weight: 400;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            overflow-x: hidden;
+        }
+
+        ::selection { background: var(--cyan); color: var(--bg); }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg2); }
+        ::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 99px; }
+
+        /* === CANVAS === */
+        #quantum-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* === NAV === */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--bg4);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .nav-brand .logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--cyan), var(--magenta));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            animation: logo-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logo-pulse {
+            0%, 100% { box-shadow: 0 0 10px var(--cyan-glow); }
+            50% { box-shadow: 0 0 25px var(--cyan-glow), 0 0 50px var(--magenta-glow); }
+        }
+
+        .nav-brand span {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--cyan);
+            letter-spacing: 0.05em;
+        }
+
+        .nav-brand .accent { color: var(--text); }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text2);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--cyan); }
+
+        .nav-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.5rem;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--bg);
+            background: var(--cyan);
+            border: 2px solid var(--cyan);
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-cta:hover {
+            background: transparent;
+            color: var(--cyan);
+            box-shadow: 0 0 20px var(--cyan-glow);
+        }
+
+        /* === SECTIONS === */
+        section {
+            position: relative;
+            z-index: 1;
+            padding: 6rem 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* === HERO === */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 5rem;
+        }
+
+        .hero-inner {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--cyan);
+            border-radius: 99px;
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--cyan);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 .line2 {
+            display: block;
+            background: linear-gradient(135deg, var(--cyan), var(--magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-size: 1.3rem;
+            color: var(--text2);
+            margin-bottom: 2rem;
+            max-width: 540px;
+            line-height: 1.7;
+        }
+
+        .hero-sub strong {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--bg);
+            background: var(--cyan);
+            border: 2px solid var(--cyan);
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: var(--cyan);
+            box-shadow: 0 0 30px var(--cyan-glow);
+        }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--magenta);
+            background: transparent;
+            border: 2px solid var(--magenta);
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-ghost:hover {
+            background: var(--magenta);
+            color: var(--bg);
+            box-shadow: 0 0 30px var(--magenta-glow);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+        }
+
+        .hero-stat .number {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--cyan);
+        }
+
+        .hero-stat .label {
+            font-size: 0.85rem;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Quantum Orb */
+        .orb-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .quantum-orb {
+            width: 320px;
+            height: 320px;
+            position: relative;
+        }
+
+        .orb-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, var(--cyan), var(--magenta));
+            border-radius: 50%;
+            box-shadow: 0 0 60px var(--cyan-glow), 0 0 120px var(--magenta-glow);
+            animation: orb-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes orb-glow {
+            0%, 100% { box-shadow: 0 0 60px var(--cyan-glow), 0 0 120px rgba(255, 0, 255, 0.2); }
+            50% { box-shadow: 0 0 80px var(--cyan-glow), 0 0 160px var(--magenta-glow); }
+        }
+
+        .orb-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid;
+            border-radius: 50%;
+            animation: ring-rotate 8s linear infinite;
+        }
+
+        .ring-1 {
+            width: 180px;
+            height: 180px;
+            border-color: rgba(0, 240, 255, 0.4);
+            animation-duration: 8s;
+        }
+
+        .ring-2 {
+            width: 240px;
+            height: 240px;
+            border-color: rgba(255, 0, 255, 0.3);
+            animation-direction: reverse;
+            animation-duration: 12s;
+        }
+
+        .ring-3 {
+            width: 300px;
+            height: 300px;
+            border-color: rgba(255, 215, 0, 0.2);
+            animation-duration: 16s;
+        }
+
+        @keyframes ring-rotate {
+            0% { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(0deg); }
+            100% { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(360deg); }
+        }
+
+        /* === PROBLEM SECTION === */
+        .problem {
+            background: linear-gradient(180deg, transparent, rgba(255, 0, 64, 0.03), transparent);
+        }
+
+        .problem-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .problem-header h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .problem-header h2 .highlight {
+            color: var(--red);
+        }
+
+        .problem-header p {
+            font-size: 1.2rem;
+            color: var(--text2);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .problem-card {
+            background: var(--bg3);
+            border: 1px solid var(--bg4);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .problem-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--red);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .problem-card:hover {
+            border-color: rgba(255, 0, 64, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(255, 0, 64, 0.1);
+        }
+
+        .problem-card:hover::before { opacity: 1; }
+
+        .problem-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid rgba(255, 0, 64, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--red);
+            margin-bottom: 1.5rem;
+        }
+
+        .problem-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .problem-card p {
+            color: var(--text2);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .problem-stat {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--red);
+            display: block;
+            margin-top: 1rem;
+        }
+
+        /* === SOLUTION === */
+        .solution-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .solution-header h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .solution-header h2 .gradient {
+            background: linear-gradient(135deg, var(--cyan), var(--magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .solution-header p {
+            font-size: 1.2rem;
+            color: var(--text2);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .pillars {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .pillar {
+            background: var(--bg3);
+            border: 1px solid var(--bg4);
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pillar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .pillar:nth-child(1)::before { background: var(--cyan); }
+        .pillar:nth-child(2)::before { background: var(--magenta); }
+        .pillar:nth-child(3)::before { background: var(--gold); }
+
+        .pillar:hover { transform: translateY(-4px); }
+        .pillar:hover::before { opacity: 1; }
+
+        .pillar:nth-child(1):hover {
+            border-color: var(--cyan-dim);
+            box-shadow: 0 10px 40px rgba(0, 240, 255, 0.1);
+        }
+
+        .pillar:nth-child(2):hover {
+            border-color: var(--magenta-dim);
+            box-shadow: 0 10px 40px rgba(255, 0, 255, 0.1);
+        }
+
+        .pillar:nth-child(3):hover {
+            border-color: rgba(255, 215, 0, 0.4);
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.1);
+        }
+
+        .pillar-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1.5rem;
+        }
+
+        .pillar:nth-child(1) .pillar-icon {
+            background: rgba(0, 240, 255, 0.1);
+            border: 2px solid var(--cyan);
+            color: var(--cyan);
+        }
+
+        .pillar:nth-child(2) .pillar-icon {
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid var(--magenta);
+            color: var(--magenta);
+        }
+
+        .pillar:nth-child(3) .pillar-icon {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid var(--gold);
+            color: var(--gold);
+        }
+
+        .pillar h3 {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .pillar p {
+            color: var(--text2);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        /* === HOW IT WORKS === */
+        .how-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .how-header h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .steps {
+            display: flex;
+            gap: 0;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .step {
+            flex: 1;
+            max-width: 280px;
+            text-align: center;
+            padding: 0 1rem;
+        }
+
+        .step-num {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .step-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 2px solid var(--bg5);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--cyan);
+            margin: 0 auto 1rem;
+        }
+
+        .step h3 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .step p {
+            color: var(--text2);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .step-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 4rem;
+            color: var(--bg5);
+            font-size: 1.5rem;
+        }
+
+        /* === SOVEREIGNTY SECTION === */
+        .sovereignty {
+            background: linear-gradient(180deg, transparent, rgba(0, 240, 255, 0.02), transparent);
+        }
+
+        .sov-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .sov-content h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .sov-content h2 .gradient {
+            background: linear-gradient(135deg, var(--cyan), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sov-content p {
+            font-size: 1.15rem;
+            color: var(--text2);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .sov-features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .sov-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            font-size: 1.05rem;
+            color: var(--text2);
+        }
+
+        .sov-features li i {
+            color: var(--green);
+            margin-top: 0.3rem;
+            flex-shrink: 0;
+        }
+
+        .sov-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sov-card {
+            background: var(--bg3);
+            border: 1px solid var(--bg4);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .sov-card:hover {
+            border-color: var(--cyan-dim);
+            transform: translateX(8px);
+        }
+
+        .sov-card-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--cyan);
+            flex-shrink: 0;
+        }
+
+        .sov-card h4 {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .sov-card p {
+            font-size: 0.9rem;
+            color: var(--text3);
+            line-height: 1.5;
+        }
+
+        /* === TRUST FUND === */
+        .trust {
+            background: linear-gradient(180deg, transparent, rgba(255, 0, 255, 0.02), transparent);
+        }
+
+        .trust-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .trust-visual {
+            order: -1;
+        }
+
+        .trust-card {
+            background: var(--bg3);
+            border: 1px solid var(--bg4);
+            border-radius: 16px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trust-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--magenta), var(--gold));
+        }
+
+        .trust-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .trust-card-header i {
+            font-size: 2rem;
+            color: var(--magenta);
+        }
+
+        .trust-card-header h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .trust-timeline {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            border-left: 2px solid var(--bg5);
+            padding-left: 1.5rem;
+        }
+
+        .trust-timeline li {
+            position: relative;
+            font-size: 0.95rem;
+            color: var(--text2);
+        }
+
+        .trust-timeline li::before {
+            content: '';
+            position: absolute;
+            left: -1.75rem;
+            top: 0.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--magenta);
+            box-shadow: 0 0 10px var(--magenta-glow);
+        }
+
+        .trust-timeline li strong {
+            color: var(--text);
+            display: block;
+            font-weight: 600;
+        }
+
+        .trust-content h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .trust-content h2 .gradient {
+            background: linear-gradient(135deg, var(--magenta), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .trust-content p {
+            font-size: 1.15rem;
+            color: var(--text2);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        /* === PRICING === */
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .pricing-header h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-header p {
+            font-size: 1.2rem;
+            color: var(--text2);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .price-card {
+            background: var(--bg3);
+            border: 1px solid var(--bg4);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .price-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .price-card:nth-child(1)::before { background: var(--cyan); }
+        .price-card:nth-child(2)::before { background: linear-gradient(90deg, var(--cyan), var(--magenta)); opacity: 1; }
+        .price-card:nth-child(3)::before { background: var(--gold); }
+
+        .price-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .price-card:hover::before { opacity: 1; }
+
+        .price-card.featured {
+            border-color: var(--cyan-dim);
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .price-card.featured:hover {
+            transform: scale(1.05) translateY(-8px);
+        }
+
+        .featured-tag {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--cyan);
+            color: var(--bg);
+            font-family: var(--font-display);
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            border-radius: 99px;
+        }
+
+        .price-card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+        }
+
+        .price-card:nth-child(1) .price-card-icon {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--cyan);
+        }
+
+        .price-card:nth-child(2) .price-card-icon {
+            background: rgba(255, 0, 255, 0.1);
+            color: var(--magenta);
+        }
+
+        .price-card:nth-child(3) .price-card-icon {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold);
+        }
+
+        .price-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .price-card .tagline {
+            font-size: 0.9rem;
+            color: var(--text3);
+            margin-bottom: 1.5rem;
+        }
+
+        .price-amount {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 800;
+        }
+
+        .price-period {
+            font-size: 1rem;
+            color: var(--text3);
+        }
+
+        .price-features {
+            list-style: none;
+            text-align: left;
+            margin: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .price-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            color: var(--text2);
+        }
+
+        .price-features li i.fa-check { color: var(--green); }
+        .price-features li i.fa-times { color: var(--text3); }
+        .price-features li.disabled { color: var(--text3); }
+
+        .btn-tier {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-tier-ghost {
+            color: var(--cyan);
+            background: transparent;
+            border: 2px solid var(--cyan);
+        }
+
+        .btn-tier-ghost:hover {
+            background: var(--cyan);
+            color: var(--bg);
+            box-shadow: 0 0 20px var(--cyan-glow);
+        }
+
+        .btn-tier-primary {
+            color: var(--bg);
+            background: linear-gradient(135deg, var(--cyan), var(--magenta));
+            border: 2px solid transparent;
+        }
+
+        .btn-tier-primary:hover {
+            box-shadow: 0 0 30px var(--cyan-glow), 0 0 30px var(--magenta-glow);
+        }
+
+        .btn-tier-gold {
+            color: var(--bg);
+            background: var(--gold);
+            border: 2px solid var(--gold);
+        }
+
+        .btn-tier-gold:hover {
+            background: transparent;
+            color: var(--gold);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+
+        /* === STORY === */
+        .story {
+            background: linear-gradient(180deg, transparent, rgba(255, 215, 0, 0.02), transparent);
+        }
+
+        .story-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .story-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--gold);
+            border-radius: 99px;
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--gold);
+            margin-bottom: 2rem;
+        }
+
+        .story h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+
+        .story-text {
+            font-size: 1.2rem;
+            color: var(--text2);
+            line-height: 1.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .story-text strong {
+            color: var(--text);
+        }
+
+        .story-quote {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin: 2.5rem 0;
+            padding: 2rem;
+            border-left: 4px solid var(--gold);
+            text-align: left;
+            background: rgba(255, 215, 0, 0.03);
+            border-radius: 0 12px 12px 0;
+        }
+
+        /* === CTA === */
+        .cta {
+            text-align: center;
+            padding: 8rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.08), transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta h2 {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .cta p {
+            font-size: 1.3rem;
+            color: var(--text2);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+
+        .cta-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* === FOOTER === */
+        .footer {
+            border-top: 1px solid var(--bg4);
+            padding: 4rem 2rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer h4 {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .footer p, .footer a {
+            font-size: 0.9rem;
+            color: var(--text3);
+            text-decoration: none;
+            line-height: 1.8;
+        }
+
+        .footer a:hover { color: var(--cyan); }
+
+        .footer ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-brand {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-tagline {
+            font-style: italic;
+            color: var(--text3);
+            margin-top: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            background: var(--bg4);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text3);
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            background: var(--cyan);
+            color: var(--bg);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--bg4);
+            padding-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-bottom p {
+            font-size: 0.8rem;
+            color: var(--text3);
+        }
+
+        .pqc-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--cyan-dim) !important;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 1024px) {
+            .hero-inner { grid-template-columns: 1fr; text-align: center; }
+            .hero-sub { margin-left: auto; margin-right: auto; }
+            .hero-actions { justify-content: center; }
+            .hero-stats { justify-content: center; }
+            .orb-container { display: none; }
+            .sov-grid, .trust-inner { grid-template-columns: 1fr; }
+            .trust-visual { order: 0; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            section { padding: 4rem 1rem; }
+            .nav { padding: 0.75rem 1rem; }
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2.2rem; }
+            .problem-grid, .pillars, .pricing-grid { grid-template-columns: 1fr; }
+            .price-card.featured { transform: none; }
+            .price-card.featured:hover { transform: translateY(-8px); }
+            .steps { flex-direction: column; align-items: center; }
+            .step-arrow { transform: rotate(90deg); padding: 1rem 0; }
+            .story h2, .cta h2 { font-size: 2rem; }
+            .hero-actions { flex-direction: column; align-items: center; }
+            .cta-actions { flex-direction: column; align-items: center; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+            .sov-content h2, .trust-content h2, .problem-header h2, .solution-header h2, .pricing-header h2 { font-size: 2rem; }
+        }
+
+        /* === TYPEWRITER CURSOR === */
+        .typewriter::after {
+            content: '|';
+            animation: blink 0.8s infinite;
+            color: var(--cyan);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* === SCROLL ANIMATIONS === */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Particle Background -->
+<canvas id="quantum-bg"></canvas>
+
+<!-- Navigation -->
+<nav class="nav">
+    <a href="#" class="nav-brand">
+        <div class="logo"><i class="fas fa-atom" style="font-size: 1rem; color: #0a0a0f;"></i></div>
+        <span>PULSAR<span class="accent">SENTINEL</span></span>
+    </a>
+    <ul class="nav-links">
+        <li><a href="#problem">The Problem</a></li>
+        <li><a href="#solution">Solution</a></li>
+        <li><a href="#sovereignty">Sovereignty</a></li>
+        <li><a href="#trust">Digital Trust</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#story">Our Story</a></li>
+    </ul>
+    <a href="#pricing" class="nav-cta"><i class="fas fa-shield-alt"></i> Get Protected</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-inner">
+            <div class="hero-text">
+                <div class="hero-badge"><i class="fas fa-atom"></i> Post-Quantum Security</div>
+                <h1>
+                    Your Computer Was<br>
+                    <span class="line2">Abandoned. We Fixed That.</span>
+                </h1>
+                <p class="hero-sub">
+                    Microsoft is cutting off <strong>800 million</strong> Windows computers. No more updates. No more protection. Pulsar Sentinel wraps every machine in quantum-proof encryption, logs everything to a blockchain, and passes your digital life to your family when you're gone.
+                </p>
+                <div class="hero-actions">
+                    <a href="#pricing" class="btn-primary"><i class="fas fa-rocket"></i> Deploy Now</a>
+                    <a href="#solution" class="btn-ghost"><i class="fas fa-play"></i> See How It Works</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="number" data-target="800">800M</div>
+                        <div class="label">Users Unprotected</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="number">ML-KEM</div>
+                        <div class="label">Quantum-Proof</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="number">$10.99</div>
+                        <div class="label">Per Month</div>
+                    </div>
+                </div>
+            </div>
+            <div class="orb-container">
+                <div class="quantum-orb">
+                    <div class="orb-core"></div>
+                    <div class="orb-ring ring-1"></div>
+                    <div class="orb-ring ring-2"></div>
+                    <div class="orb-ring ring-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- The Problem -->
+<section class="problem" id="problem">
+    <div class="container">
+        <div class="problem-header fade-up">
+            <h2>The World Has a <span class="highlight">Security Crisis</span></h2>
+            <p>Three converging threats are about to leave billions of people exposed. Nobody is talking about it.</p>
+        </div>
+        <div class="problem-grid">
+            <div class="problem-card fade-up">
+                <div class="problem-icon"><i class="fab fa-windows"></i></div>
+                <h3>Abandoned by Microsoft</h3>
+                <p>Windows 10 end-of-support means no more security patches. Every hacker on earth knows these machines are defenseless.</p>
+                <span class="problem-stat">800M</span>
+            </div>
+            <div class="problem-card fade-up">
+                <div class="problem-icon"><i class="fas fa-atom"></i></div>
+                <h3>Quantum Computing is Coming</h3>
+                <p>When quantum computers arrive, every password, every bank account, every encrypted file on the planet becomes readable. Today's encryption dies overnight.</p>
+                <span class="problem-stat">2030</span>
+            </div>
+            <div class="problem-card fade-up">
+                <div class="problem-icon"><i class="fas fa-skull-crossbones"></i></div>
+                <h3>Your Digital Life Dies With You</h3>
+                <p>When you die, your photos, passwords, crypto, and digital assets vanish. No inheritance plan exists for your digital life. It's just... gone.</p>
+                <span class="problem-stat">100%</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Solution -->
+<section class="solution" id="solution">
+    <div class="container">
+        <div class="solution-header fade-up">
+            <h2>One Install. <span class="gradient">Total Protection.</span></h2>
+            <p>Pulsar Sentinel solves all three problems with a single security layer.</p>
+        </div>
+        <div class="pillars">
+            <div class="pillar fade-up">
+                <div class="pillar-icon"><i class="fas fa-lock"></i></div>
+                <h3>Quantum-Proof Encryption</h3>
+                <p>ML-KEM lattice-based encryption that quantum computers can't crack. Combined with AES-256 for defense-in-depth. NIST-approved. Military-grade. Runs on your old laptop.</p>
+            </div>
+            <div class="pillar fade-up">
+                <div class="pillar-icon"><i class="fas fa-link"></i></div>
+                <h3>Blockchain Audit Trail</h3>
+                <p>Every security event is cryptographically signed, batched into a Merkle tree, and permanently recorded on the Polygon blockchain. Tamper-proof. Permanent. Legally defensible.</p>
+            </div>
+            <div class="pillar fade-up">
+                <div class="pillar-icon"><i class="fas fa-scroll"></i></div>
+                <h3>Automatic Inheritance</h3>
+                <p>Designate your heir. If you're unresponsive for 90 days, your digital assets transfer automatically via smart contract. No lawyers. No probate. No lost memories.</p>
+            </div>
+        </div>
+
+        <!-- How it works steps -->
+        <div class="how-header fade-up">
+            <h2>Deploy in Three Steps</h2>
+        </div>
+        <div class="steps fade-up">
+            <div class="step">
+                <div class="step-num">01</div>
+                <div class="step-icon"><i class="fas fa-download"></i></div>
+                <h3>Install</h3>
+                <p>Download Pulsar Sentinel. Run the setup. Works on any Windows machine, even ones Microsoft abandoned.</p>
+            </div>
+            <div class="step-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="step">
+                <div class="step-num">02</div>
+                <div class="step-icon"><i class="fas fa-wallet"></i></div>
+                <h3>Connect Wallet</h3>
+                <p>Link your MetaMask wallet. That's your identity now. No passwords to steal. No accounts to hack. You own your key.</p>
+            </div>
+            <div class="step-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="step">
+                <div class="step-num">03</div>
+                <div class="step-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>You're Protected</h3>
+                <p>Every file encrypted. Every action logged. Threat monitoring active. Digital inheritance set. Your machine is now more secure than a brand new one.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Digital Sovereignty -->
+<section class="sovereignty" id="sovereignty">
+    <div class="container">
+        <div class="sov-grid">
+            <div class="sov-content fade-up">
+                <h2>This is <span class="gradient">Digital Sovereignty</span></h2>
+                <p>You don't rent security from Microsoft. You don't trust Google with your keys. You don't depend on any corporation that can decide you're not worth protecting anymore.</p>
+                <ul class="sov-features">
+                    <li><i class="fas fa-check-circle"></i> <span><strong>Your keys, your machine.</strong> Encryption happens locally. Keys never leave your device.</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span><strong>Your rules, enforced by code.</strong> Self-governance rules run autonomously. No human middleman.</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span><strong>Works offline.</strong> If the internet goes down, your machine is still protected. Local-first architecture.</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span><strong>No corporate kill switch.</strong> Nobody can revoke your security. It's math, not a subscription to someone's cloud.</span></li>
+                </ul>
+            </div>
+            <div class="sov-visual fade-up">
+                <div class="sov-card">
+                    <div class="sov-card-icon"><i class="fas fa-key"></i></div>
+                    <div>
+                        <h4>Self-Sovereign Identity</h4>
+                        <p>Your wallet is your identity. No corporation issued it. No corporation can revoke it.</p>
+                    </div>
+                </div>
+                <div class="sov-card">
+                    <div class="sov-card-icon"><i class="fas fa-gavel"></i></div>
+                    <div>
+                        <h4>Self-Governance</h4>
+                        <p>RC codes enforce rules automatically. Three strikes? Banned on-chain. No appeals department needed.</p>
+                    </div>
+                </div>
+                <div class="sov-card">
+                    <div class="sov-card-icon"><i class="fas fa-chart-line"></i></div>
+                    <div>
+                        <h4>Real-Time Threat Score</h4>
+                        <p>Every device gets a live PTS threat score. Green, yellow, red. You see everything happening on your network.</p>
+                    </div>
+                </div>
+                <div class="sov-card">
+                    <div class="sov-card-icon"><i class="fas fa-network-wired"></i></div>
+                    <div>
+                        <h4>Network-Wide Protection</h4>
+                        <p>One install protects one machine. Scale it to every device on your network from a single dashboard.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Digital Trust Fund -->
+<section class="trust" id="trust">
+    <div class="container">
+        <div class="trust-inner">
+            <div class="trust-visual fade-up">
+                <div class="trust-card">
+                    <div class="trust-card-header">
+                        <i class="fas fa-scroll"></i>
+                        <h4>Heir Transfer Protocol</h4>
+                    </div>
+                    <ul class="trust-timeline">
+                        <li>
+                            <strong>Day 1 - You activate Pulsar Sentinel</strong>
+                            Every file encrypted. Every action logged on-chain. Your digital estate begins.
+                        </li>
+                        <li>
+                            <strong>Years pass - Your legacy grows</strong>
+                            Photos, documents, crypto, passwords - all quantum-encrypted with an immutable chain of custody.
+                        </li>
+                        <li>
+                            <strong>Day 90 of inactivity - Smart contract activates</strong>
+                            RC 1.02 triggers automatically. Your designated heir receives access to your entire digital life.
+                        </li>
+                        <li>
+                            <strong>Forever - Blockchain proves ownership</strong>
+                            Every transaction hash is permanent proof. Your grandchildren can verify the chain of custody 50 years from now.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="trust-content fade-up">
+                <h2>A <span class="gradient">Digital Trust Fund</span> for Your Family</h2>
+                <p>Right now, when you die, your digital life vanishes. Your photos. Your passwords. Your crypto. Your memories. Gone.</p>
+                <p>Pulsar Sentinel changes that. Every digital asset you own is encrypted, audited on the blockchain, and automatically inheritable. The blockchain IS your estate plan.</p>
+                <p style="color: var(--gold); font-weight: 600; font-size: 1.2rem;">Your digital life doesn't die with you. It transfers to your family. Automatically. On-chain. No lawyers.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+    <div class="container">
+        <div class="pricing-header fade-up">
+            <h2>Choose Your Protection</h2>
+            <p>From a single laptop to an entire network. Security that scales with you.</p>
+        </div>
+        <div class="pricing-grid">
+            <div class="price-card fade-up">
+                <div class="price-card-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Legacy Builder</h3>
+                <p class="tagline">Essential protection</p>
+                <div class="price-amount">$10.99</div>
+                <div class="price-period">/month</div>
+                <ul class="price-features">
+                    <li><i class="fas fa-check"></i> AES-256 Encryption</li>
+                    <li><i class="fas fa-check"></i> Weekly Audit Logs</li>
+                    <li><i class="fas fa-check"></i> Threat Monitoring</li>
+                    <li><i class="fas fa-check"></i> MetaMask Login</li>
+                    <li><i class="fas fa-check"></i> 5M Operations/Month</li>
+                    <li class="disabled"><i class="fas fa-times"></i> Quantum-Proof Encryption</li>
+                    <li class="disabled"><i class="fas fa-times"></i> Smart Contracts</li>
+                </ul>
+                <a href="#" class="btn-tier btn-tier-ghost">Get Started</a>
+            </div>
+            <div class="price-card featured fade-up">
+                <div class="featured-tag">Most Popular</div>
+                <div class="price-card-icon"><i class="fas fa-bolt"></i></div>
+                <h3>Sentinel Core</h3>
+                <p class="tagline">Quantum-proof security</p>
+                <div class="price-amount">$16.99</div>
+                <div class="price-period">/month</div>
+                <ul class="price-features">
+                    <li><i class="fas fa-check"></i> Everything in Legacy Builder</li>
+                    <li><i class="fas fa-check"></i> ML-KEM Quantum Encryption</li>
+                    <li><i class="fas fa-check"></i> Daily Blockchain Audits</li>
+                    <li><i class="fas fa-check"></i> Hybrid AES + PQC Mode</li>
+                    <li><i class="fas fa-check"></i> 10M Operations/Month</li>
+                    <li><i class="fas fa-check"></i> Merkle Proof Verification</li>
+                    <li class="disabled"><i class="fas fa-times"></i> Smart Contracts</li>
+                </ul>
+                <a href="#" class="btn-tier btn-tier-primary">Start Protection</a>
+            </div>
+            <div class="price-card fade-up">
+                <div class="price-card-icon"><i class="fas fa-crown"></i></div>
+                <h3>Autonomous Guild</h3>
+                <p class="tagline">Full digital sovereignty</p>
+                <div class="price-amount">$29.99</div>
+                <div class="price-period">/month</div>
+                <ul class="price-features">
+                    <li><i class="fas fa-check"></i> Everything in Sentinel Core</li>
+                    <li><i class="fas fa-check"></i> ML-KEM-1024 (NIST Level 5)</li>
+                    <li><i class="fas fa-check"></i> Real-Time Blockchain Audits</li>
+                    <li><i class="fas fa-check"></i> Heir Transfer Protocol</li>
+                    <li><i class="fas fa-check"></i> Custom Governance Rules</li>
+                    <li><i class="fas fa-check"></i> Unlimited Operations</li>
+                    <li><i class="fas fa-check"></i> Smart Contract Deployment</li>
+                </ul>
+                <a href="#" class="btn-tier btn-tier-gold">Join the Guild</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Story -->
+<section class="story" id="story">
+    <div class="container">
+        <div class="story-inner fade-up">
+            <div class="story-badge"><i class="fas fa-heart"></i> Built With Purpose</div>
+            <h2>Why This Exists</h2>
+            <p class="story-text">
+                This was built by <strong>Shane</strong>, a trucking dispatcher in Alabama who taught himself to code because he saw something nobody else was fixing.
+            </p>
+            <p class="story-text">
+                <strong>800 million computers</strong> are about to lose their security updates. That's grandma's laptop with her photos. That's the small business down the street running payroll. That's someone's entire digital life sitting on an unpatched machine, waiting to be compromised.
+            </p>
+            <div class="story-quote">
+                "I named Angel Cloud after my daughter-in-law. Every project in this ecosystem serves the family. This isn't a startup play. It's a legacy. Build it once. Secure it forever."
+            </div>
+            <p class="story-text">
+                Pulsar Sentinel isn't corporate security software sold by a company that'll get acquired and shut down in three years. It's <strong>infrastructure for families</strong>. Quantum-proof encryption that protects your digital life today and passes it to your children tomorrow.
+            </p>
+            <p class="story-text" style="color: var(--gold); font-weight: 600;">
+                800 million users. Digital legacy for generations. That's the mission.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<section class="cta">
+    <div class="container">
+        <h2 class="fade-up">Your Computer Was Abandoned.<br><span style="background: linear-gradient(135deg, var(--cyan), var(--magenta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">You Don't Have to Be.</span></h2>
+        <p class="fade-up">Quantum-proof encryption. Blockchain audit trails. Automatic digital inheritance. One install protects everything.</p>
+        <div class="cta-actions fade-up">
+            <a href="#pricing" class="btn-primary"><i class="fas fa-rocket"></i> Deploy Pulsar Sentinel</a>
+            <a href="https://github.com/thebardchat/pulsar_sentinel" class="btn-ghost" target="_blank"><i class="fab fa-github"></i> View on GitHub</a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand">PULSAR SENTINEL</div>
+                <p>Post-Quantum Security Framework for the Angel Cloud Ecosystem.</p>
+                <p class="footer-tagline">"Build it once. Secure it forever."</p>
+                <div class="social-links" style="margin-top: 1.5rem;">
+                    <a href="https://github.com/thebardchat/pulsar_sentinel" target="_blank"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="#solution">How It Works</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#sovereignty">Digital Sovereignty</a></li>
+                    <li><a href="#trust">Digital Trust Fund</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="https://github.com/thebardchat/pulsar_sentinel" target="_blank">Documentation</a></li>
+                    <li><a href="https://github.com/thebardchat/pulsar_sentinel" target="_blank">API Reference</a></li>
+                    <li><a href="#">Whitepaper</a></li>
+                    <li><a href="#">Security Audit</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#story">Our Story</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Angel Cloud Technologies. Patent Pending. All Rights Reserved.</p>
+            <p class="pqc-badge"><i class="fas fa-shield-alt"></i> Protected by ML-KEM-768 Post-Quantum Cryptography</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+// === Quantum Particle Background ===
+(function() {
+    const canvas = document.getElementById('quantum-bg');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mouse = { x: null, y: null };
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    function createParticles() {
+        const count = Math.floor((canvas.width * canvas.height) / 18000);
+        particles = [];
+        const colors = ['#00f0ff', '#ff00ff', '#ffd700'];
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                r: Math.random() * 2 + 0.5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                pulse: Math.random() * Math.PI * 2,
+                ps: Math.random() * 0.02 + 0.01
+            });
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Connections
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 130) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = 'rgba(0, 240, 255, ' + ((1 - dist / 130) * 0.2) + ')';
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Particles
+        for (const p of particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.pulse += p.ps;
+
+            if (mouse.x !== null) {
+                const dx = mouse.x - p.x;
+                const dy = mouse.y - p.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120) {
+                    p.vx -= (dx / dist) * 0.015;
+                    p.vy -= (dy / dist) * 0.015;
+                }
+            }
+
+            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            p.vx *= 0.999;
+            p.vy *= 0.999;
+            if (Math.abs(p.vx) < 0.08) p.vx = (Math.random() - 0.5) * 0.4;
+            if (Math.abs(p.vy) < 0.08) p.vy = (Math.random() - 0.5) * 0.4;
+
+            const scale = 1 + Math.sin(p.pulse) * 0.3;
+            const r = p.r * scale;
+
+            const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3);
+            grad.addColorStop(0, p.color);
+            grad.addColorStop(0.5, p.color + '40');
+            grad.addColorStop(1, 'transparent');
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, r * 3, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+        }
+
+        requestAnimationFrame(draw);
+    }
+
+    resize();
+    createParticles();
+    draw();
+
+    window.addEventListener('resize', () => { resize(); createParticles(); });
+    window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
+})();
+
+// === Scroll Animations ===
+(function() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+})();
+
+// === Smooth Scroll ===
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+
+// === Nav Background on Scroll ===
+(function() {
+    const nav = document.querySelector('.nav');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            nav.style.background = 'rgba(10, 10, 15, 0.95)';
+            nav.style.borderBottomColor = '#1a1a25';
+        } else {
+            nav.style.background = 'rgba(10, 10, 15, 0.85)';
+            nav.style.borderBottomColor = '#1a1a25';
+        }
+    });
+})();
+</script>
+
+</body>
+</html>
