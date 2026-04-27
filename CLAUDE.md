@@ -13,7 +13,7 @@
 
 **Governed by:** https://github.com/thebardchat/constitution/blob/main/CONSTITUTION.md
 
-See PERSONA_REVIEW_PROTOCOL at https://github.com/thebardchat/constitution/blob/main/PERSONA_REVIEW_PROTOCOL.md
+Before producing any review, critique, or analysis written in the voice of a named real person, fetch and follow PERSONA_REVIEW_PROTOCOL at https://github.com/thebardchat/constitution/blob/main/PERSONA_REVIEW_PROTOCOL.md
 
 ---
 
