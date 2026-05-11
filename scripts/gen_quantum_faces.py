@@ -1,189 +1,248 @@
 #!/usr/bin/env python3
 """
-Quantum Face Renderer — Human faces built entirely from numbers/symbols.
-The SHAPE comes from character density mapped to brightness.
-The MOTION comes from characters cycling within each brightness band.
+Quantum Face Renderer v3 — Ghost in the Machine
+Characters cycle as before, BUT each cell's pool now includes
+a real face image tile sliced to character size.
+Most frames: numbers/symbols. Occasionally: a face appears.
 """
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
 import numpy as np
-import math, os
+import math, os, random
 
-# --- Output config ---
 GIF_W, GIF_H = 860, 320
 COLS, ROWS = 72, 28
-CW = GIF_W / COLS
-CH = GIF_H / ROWS
-FRAMES = 20
-FRAME_MS = 70
+CW = int(GIF_W / COLS)   # px per char cell
+CH = int(GIF_H / ROWS)
 
-# --- Brightness → character bands (dark to bright) ---
-# Each band has a pool; each frame picks the next char in pool
+FRAMES = 24
+FRAME_MS = 65
+
 BANDS = [
-    (0.00, 0.12, ['█','█','▓','W','M','#','@','B']),           # deep shadow
-    (0.12, 0.28, ['0','8','9','Q','G','&','B','%']),            # shadow
-    (0.28, 0.44, ['4','6','5','3','E','F','Z','ψ']),            # mid-dark
-    (0.44, 0.58, ['0','7','2','J','T','I','1','Ω']),            # mid
-    (0.58, 0.72, ['1','!','/','\\','|','(',')','-']),           # mid-light
-    (0.72, 0.85, ['.','·',',','\'','^','`','~',':']),           # light
-    (0.85, 1.00, [' ',' ','·','\'',' ',' ','·',' ']),          # highlight / void
+    (0.00, 0.12, ['█','▓','#','@','M','W','B','0']),
+    (0.12, 0.28, ['0','8','9','Q','G','B','%','&']),
+    (0.28, 0.44, ['4','6','5','3','E','F','Z','ψ']),
+    (0.44, 0.58, ['7','2','J','T','I','1','Ω','0']),
+    (0.58, 0.72, ['!','/','-','|','(',')','-','1']),
+    (0.72, 0.85, ['.','·',',','\'','^','`','~',':']),
+    (0.85, 1.00, [' ',' ','·','\'',' ',' ','·',' ']),
 ]
 
 BG_COLOR = (8, 8, 14)
+FACE_TILE_EVERY = 8   # 1 face tile per N char slots in the pool
 
-def get_band(brightness):
-    for i, (lo, hi, chars) in enumerate(BANDS):
-        if lo <= brightness < hi:
-            return i, chars
-    return len(BANDS)-1, BANDS[-1][2]
 
-def band_color(band_idx, is_face):
-    """Color per brightness band"""
-    colors = [
-        (30,  0,  50),   # deep shadow - dark purple
-        (0,  40,  80),   # shadow - dark cyan
-        (0, 100, 160),   # mid-dark - cyan
-        (0, 180, 220),   # mid - bright cyan
-        (40, 220, 255),  # mid-light - ice cyan
-        (180, 240, 255), # light
-        (230, 248, 255), # highlight
-    ]
-    if not is_face:
-        return tuple(max(0, c - 30) for c in colors[band_idx])
-    return colors[band_idx]
-
-def make_face_image(cx_norm, face_w, face_h):
-    """Render a face into a float32 numpy array (0=dark, 1=bright).
-       cx_norm: 0..1 across the full canvas.
-       Returns brightness array shape (ROWS, COLS).
-    """
-    img = Image.new('L', (GIF_W, GIF_H), 0)
+def render_face_image(cx_frac, fw, fh, color_scheme='cyan'):
+    """Render a face at full GIF resolution, return PIL Image (RGB)."""
+    img = Image.new('RGB', (GIF_W, GIF_H), BG_COLOR)
     d = ImageDraw.Draw(img)
-
-    cx = int(cx_norm * GIF_W)
+    cx = int(cx_frac * GIF_W)
     cy = GIF_H // 2
+    hw, hh = fw // 2, fh // 2
 
-    # --- Head ---
-    hw, hh = face_w // 2, face_h // 2
-    d.ellipse([cx-hw, cy-hh, cx+hw, cy+hh], fill=160)
+    if color_scheme == 'cyan':
+        skin_hi  = (0, 220, 200)
+        skin_mid = (0, 140, 160)
+        skin_lo  = (0, 80, 100)
+        eye_col  = (200, 0, 255)
+        lip_col  = (255, 80, 200)
+        hair_col = (0, 40, 80)
+    else:
+        skin_hi  = (255, 200, 160)
+        skin_mid = (200, 140, 100)
+        skin_lo  = (140, 80,  50)
+        eye_col  = (30,  30,  60)
+        lip_col  = (180, 60,  60)
+        hair_col = (40,  25,  10)
 
-    # --- Forehead brighter ---
-    d.ellipse([cx-hw+10, cy-hh, cx+hw-10, cy], fill=200)
-
-    # --- Cheeks / jaw shadow ---
-    d.ellipse([cx-hw, cy, cx+hw, cy+hh+10], fill=120)
-
-    # --- Brow ridge ---
+    # Head
+    d.ellipse([cx-hw, cy-hh, cx+hw, cy+hh], fill=skin_mid)
+    # Highlight top
+    d.ellipse([cx-hw+12, cy-hh, cx+hw-12, cy-hh//3], fill=skin_hi)
+    # Shadow jaw
+    d.ellipse([cx-hw+6, cy+hh//3, cx+hw-6, cy+hh+6], fill=skin_lo)
+    # Brow ridge highlight
     brow_y = cy - int(hh * 0.25)
-    d.ellipse([cx - hw + 15, brow_y - 12, cx + hw - 15, brow_y + 6], fill=220)
+    d.ellipse([cx-hw+18, brow_y-10, cx+hw-18, brow_y+5], fill=skin_hi)
 
-    # --- Eyes (dark with highlight) ---
-    eye_rx, eye_ry = int(face_w * 0.085), int(face_h * 0.065)
-    eye_y = cy - int(hh * 0.18)
+    # Hair
+    d.ellipse([cx-hw, cy-hh-8, cx+hw, cy-int(hh*0.35)], fill=hair_col)
+    # Temples
     for sign in [-1, 1]:
-        ex = cx + sign * int(face_w * 0.22)
-        # eye socket shadow
-        d.ellipse([ex - eye_rx - 4, eye_y - eye_ry - 4,
-                   ex + eye_rx + 4, eye_y + eye_ry + 4], fill=20)
+        tx0 = min(cx+sign*(hw-15), cx+sign*hw+sign*5)
+        tx1 = max(cx+sign*(hw-15), cx+sign*hw+sign*5)
+        d.ellipse([tx0, cy-hh, tx1, cy-hh//3], fill=hair_col)
+
+    # Eyes
+    eye_rx = int(fw * 0.09)
+    eye_ry = int(fh * 0.07)
+    eye_y  = cy - int(hh * 0.17)
+    for sign in [-1, 1]:
+        ex = cx + sign * int(fw * 0.22)
+        # socket shadow
+        d.ellipse([ex-eye_rx-5, eye_y-eye_ry-4, ex+eye_rx+5, eye_y+eye_ry+5], fill=skin_lo)
+        # white
+        d.ellipse([ex-eye_rx, eye_y-eye_ry, ex+eye_rx, eye_y+eye_ry], fill=(220, 220, 240))
         # iris
-        d.ellipse([ex - eye_rx, eye_y - eye_ry,
-                   ex + eye_rx, eye_y + eye_ry], fill=45)
+        ir = max(eye_rx-3, 4)
+        d.ellipse([ex-ir, eye_y-ir+2, ex+ir, eye_y+ir+2], fill=eye_col)
         # pupil
-        pr = min(eye_rx, eye_ry) // 2
-        d.ellipse([ex - pr, eye_y - pr, ex + pr, eye_y + pr], fill=5)
+        pr = max(ir-4, 2)
+        d.ellipse([ex-pr, eye_y-pr+2, ex+pr, eye_y+pr+2], fill=(5, 5, 10))
         # catch light
-        cl = max(2, pr // 2)
-        d.ellipse([ex - eye_rx // 2, eye_y - eye_ry // 2,
-                   ex - eye_rx // 2 + cl, eye_y - eye_ry // 2 + cl], fill=240)
+        cl = max(pr-2, 1)
+        d.ellipse([ex-ir//2, eye_y-ir//2, ex-ir//2+cl*2, eye_y-ir//2+cl*2], fill=(240, 240, 255))
+        # lashes hint
+        for lx in range(ex-eye_rx, ex+eye_rx, 4):
+            d.line([(lx, eye_y-eye_ry), (lx+1, eye_y-eye_ry-4)], fill=hair_col, width=1)
 
-    # --- Nose ---
-    nose_y = cy + int(hh * 0.1)
-    nose_w = int(face_w * 0.12)
+    # Eyebrows
+    for sign in [-1, 1]:
+        bx = cx + sign * int(fw * 0.22)
+        d.line([(bx-eye_rx, eye_y-eye_ry-7), (bx+eye_rx, eye_y-eye_ry-10)],
+               fill=hair_col, width=3)
+
+    # Nose
+    nose_y = cy + int(hh * 0.12)
+    nw = int(fw * 0.07)
     d.polygon([
-        (cx, cy - int(hh * 0.05)),
-        (cx - nose_w, nose_y + 8),
-        (cx - nose_w + 5, nose_y + 14),
-        (cx, nose_y + 8),
-        (cx + nose_w - 5, nose_y + 14),
-        (cx + nose_w, nose_y + 8),
-    ], fill=100)
+        (cx, cy - int(hh * 0.04)),
+        (cx - nw*2, nose_y + 4),
+        (cx - nw, nose_y + 12),
+        (cx + nw, nose_y + 12),
+        (cx + nw*2, nose_y + 4),
+    ], fill=skin_lo)
+    # Nostrils
+    for sign in [-1, 1]:
+        nx = cx + sign * nw
+        d.ellipse([nx-4, nose_y+6, nx+4, nose_y+14], fill=tuple(max(0,v-30) for v in skin_lo))
 
-    # --- Philtrum shadow ---
-    d.ellipse([cx - 8, nose_y + 8, cx + 8, nose_y + 22], fill=90)
-
-    # --- Lips ---
+    # Lips
     lip_y = cy + int(hh * 0.32)
-    lip_w = int(face_w * 0.28)
-    # upper lip
-    d.ellipse([cx - lip_w, lip_y - 12, cx + lip_w, lip_y + 4], fill=80)
-    # lower lip (fuller)
-    d.ellipse([cx - lip_w + 6, lip_y, cx + lip_w - 6, lip_y + 18], fill=100)
+    lw = int(fw * 0.27)
+    # upper
+    d.polygon([
+        (cx - lw, lip_y),
+        (cx - lw//2, lip_y - 9),
+        (cx, lip_y - 5),
+        (cx + lw//2, lip_y - 9),
+        (cx + lw, lip_y),
+    ], fill=lip_col)
+    # lower
+    d.ellipse([cx-lw+4, lip_y, cx+lw-4, lip_y+16], fill=tuple(min(255,v+30) for v in lip_col))
     # lip line
-    d.line([(cx - lip_w + 8, lip_y), (cx + lip_w - 8, lip_y)], fill=30, width=2)
+    d.line([(cx-lw, lip_y), (cx+lw, lip_y)], fill=tuple(max(0,v-40) for v in lip_col), width=2)
+    # Philtrum
+    d.line([(cx, nose_y+12), (cx, lip_y-3)], fill=skin_lo, width=2)
 
-    # --- Hair ---
-    d.ellipse([cx - hw, cy - hh - 10, cx + hw, cy - int(hh * 0.4)], fill=40)
-
-    # --- Ears ---
+    # Ears
+    ear_h = int(hh * 0.30)
+    ear_w = int(fw * 0.07)
     ear_y = cy - int(hh * 0.05)
-    ear_h = int(hh * 0.35)
-    ear_w = int(face_w * 0.07)
     for sign in [-1, 1]:
         ex = cx + sign * (hw - 2)
-        d.ellipse([ex - ear_w, ear_y - ear_h,
-                   ex + ear_w, ear_y + ear_h], fill=130)
+        d.ellipse([ex-ear_w, ear_y-ear_h, ex+ear_w, ear_y+ear_h], fill=skin_mid)
+        d.ellipse([ex-ear_w+3, ear_y-ear_h+5, ex+ear_w-2, ear_y+ear_h-5], fill=skin_lo)
 
-    # --- Neck ---
-    neck_w = int(face_w * 0.22)
-    d.rectangle([cx - neck_w, cy + hh - 10, cx + neck_w, GIF_H], fill=110)
+    # Neck
+    nk = int(fw * 0.20)
+    d.rectangle([cx-nk, cy+hh-8, cx+nk, GIF_H], fill=skin_mid)
+    d.line([(cx-nk, cy+hh-8), (cx-nk, GIF_H)], fill=skin_lo, width=2)
+    d.line([(cx+nk, cy+hh-8), (cx+nk, GIF_H)], fill=skin_lo, width=2)
 
-    # Slight blur for smooth gradients
-    img = img.filter(ImageFilter.GaussianBlur(radius=3))
+    img = img.filter(ImageFilter.GaussianBlur(radius=1.8))
+    return img
 
-    # Resize to character grid
-    small = img.resize((COLS, ROWS), Image.LANCZOS)
-    arr = np.array(small, dtype=np.float32) / 255.0
-    return arr
 
-# --- Build 3 face brightness maps ---
-face_configs = [
-    (0.17, 180, 240),  # left face
-    (0.50, 180, 240),  # center face
-    (0.83, 180, 240),  # right face
+def make_brightness(face_img_gray):
+    small = face_img_gray.resize((COLS, ROWS), Image.LANCZOS)
+    return np.array(small, dtype=np.float32) / 255.0
+
+
+# --- Render face images (full res) ---
+print("Rendering face images...")
+FACE_CONFIGS = [
+    (0.17, 185, 245, 'cyan'),
+    (0.50, 185, 245, 'cyan'),
+    (0.83, 185, 245, 'cyan'),
 ]
 
-brightness_maps = []
-for (cx_norm, fw, fh) in face_configs:
-    brightness_maps.append(make_face_image(cx_norm, fw, fh))
+face_images = []
+for (cx, fw, fh, scheme) in FACE_CONFIGS:
+    fi = render_face_image(cx, fw, fh, scheme)
+    face_images.append(fi)
 
-# Composite brightness — max across all 3 faces
+# Combined brightness for char-band selection
+gray_maps = [fi.convert('L') for fi in face_images]
+brightness_maps = [make_brightness(g) for g in gray_maps]
 combined = np.max(np.stack(brightness_maps), axis=0)
 
-# For each cell, determine band and face membership
-cell_data = np.zeros((ROWS, COLS), dtype=int)  # band index
-cell_is_face = np.zeros((ROWS, COLS), dtype=bool)
-FACE_THRESHOLD = 0.04
+# --- Slice each face image into character-sized tiles ---
+# face_tiles[face_idx][row][col] = PIL Image (CW x CH)
+face_tiles = []
+for fi in face_images:
+    tile_grid = []
+    for r in range(ROWS):
+        row_tiles = []
+        for c in range(COLS):
+            x0, y0 = c * CW, r * CH
+            tile = fi.crop((x0, y0, x0 + CW, y0 + CH))
+            row_tiles.append(tile)
+        tile_grid.append(row_tiles)
+    face_tiles.append(tile_grid)
+
+# --- Build per-cell rotation pools ---
+# Pool items: either a str (character) or an int (face_index to use)
+print("Building rotation pools...")
+rng = random.Random(42)
+
+cell_pools = []        # list of lists: pool items per cell
+cell_phases = []       # starting index in pool
+cell_speeds = []       # frames per step
+
+FACE_THRESHOLD = 0.05
 
 for r in range(ROWS):
+    row_pools, row_phases, row_speeds = [], [], []
     for c in range(COLS):
         b = float(combined[r, c])
-        band_idx, _ = get_band(b)
-        cell_data[r, c] = band_idx
-        # Is this cell "inside" any face shape?
-        cell_is_face[r, c] = b > FACE_THRESHOLD
+        band_idx = 0
+        for i, (lo, hi, chars) in enumerate(BANDS):
+            if lo <= b < hi:
+                band_idx = i
+                break
+        _, __, char_pool = BANDS[band_idx]
 
-# Per-cell phase offsets for animation variety
-rng = np.random.default_rng(42)
-phases = rng.integers(0, 8, size=(ROWS, COLS))
-# Face cells cycle slower than background
-speeds = np.where(cell_is_face, 1, rng.integers(2, 5, size=(ROWS, COLS)))
+        # Build base char pool (8 entries)
+        pool = list(char_pool)
 
-# --- Load font ---
-FONT_SIZE = int(CH * 0.92)
+        # Insert 1 face tile reference every FACE_TILE_EVERY slots
+        # Pick which face to use for this cell (the closest face)
+        best_face = 0
+        best_val = 0.0
+        for fi_idx, bmap in enumerate(brightness_maps):
+            if bmap[r, c] > best_val:
+                best_val = bmap[r, c]
+                best_face = fi_idx
+
+        # Insert face tile at a random position in the pool
+        insert_pos = rng.randint(0, len(pool))
+        pool.insert(insert_pos, ('face', best_face))  # tuple = image tile
+
+        row_pools.append(pool)
+        row_phases.append(rng.randint(0, len(pool) - 1))
+        is_face = b > FACE_THRESHOLD
+        row_speeds.append(1 if is_face else rng.randint(1, 3))
+
+    cell_pools.append(row_pools)
+    cell_phases.append(row_phases)
+    cell_speeds.append(row_speeds)
+
+# --- Font ---
+FONT_SIZE = int(CH * 0.90)
 font = None
 for path in [
     '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf',
     '/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf',
-    '/usr/share/fonts/truetype/ubuntu/UbuntuMono-B.ttf',
 ]:
     try:
         font = ImageFont.truetype(path, FONT_SIZE)
@@ -191,12 +250,23 @@ for path in [
         break
     except:
         pass
-if font is None:
+if not font:
     font = ImageFont.load_default()
-    print("Font: default fallback")
+
+
+def band_color(b, f):
+    # Cyan-dominant, magenta flash on faces every ~12 frames
+    if b < 0.15:   return (20,  0,  40)
+    if b < 0.30:   return (0,   60, 100)
+    if b < 0.45:   return (0,  120, 160)
+    if b < 0.60:   return (0,  190, 230)
+    if b < 0.75:   return (80, 220, 255)
+    if b < 0.88:   return (160,235, 255)
+    return (220, 245, 255)
+
 
 # --- Render frames ---
-print(f"Rendering {FRAMES} frames ({COLS}x{ROWS} grid)...")
+print(f"Rendering {FRAMES} frames...")
 frames = []
 
 for f in range(FRAMES):
@@ -205,50 +275,44 @@ for f in range(FRAMES):
 
     for r in range(ROWS):
         for c in range(COLS):
-            band_idx = int(cell_data[r, c])
-            _, __, chars = BANDS[band_idx]
-            is_face = bool(cell_is_face[r, c])
+            pool  = cell_pools[r][c]
+            phase = cell_phases[r][c]
+            speed = cell_speeds[r][c]
+            idx   = (phase + f * speed) % len(pool)
+            item  = pool[idx]
+            b     = float(combined[r, c])
+            x, y  = c * CW, r * CH
 
-            # Which character this frame
-            char_idx = (int(phases[r, c]) + f * int(speeds[r, c])) % len(chars)
-            ch = chars[char_idx]
+            if isinstance(item, tuple) and item[0] == 'face':
+                # Paste the face tile from the corresponding face image
+                fi_idx = item[1]
+                tile   = face_tiles[fi_idx][r][c]
+                img.paste(tile, (x, y))
+            else:
+                # Draw text character
+                color = band_color(b, f)
+                # Pulse: brief brightness boost
+                if b > FACE_THRESHOLD and f % 8 < 2:
+                    color = tuple(min(255, int(v * 1.4)) for v in color)
+                draw.text((x + 1, y), item, font=font, fill=color)
 
-            x = c * CW
-            y = r * CH
-
-            color = band_color(band_idx, is_face)
-
-            # Pulse: brighter on beat frames
-            if is_face and f % 8 < 2:
-                color = tuple(min(255, int(v * 1.35)) for v in color)
-            # Occasional magenta flash on eyes/mouth region
-            elif is_face and band_idx <= 2 and f % 12 == 0:
-                color = (min(255, color[0]+120), color[1]//2, min(255, color[2]+80))
-
-            draw.text((x + 1, y), ch, font=font, fill=color)
-
-    # Scanline overlay
-    scan_layer = Image.new('RGBA', (GIF_W, GIF_H), (0, 0, 0, 0))
-    sd = ImageDraw.Draw(scan_layer)
+    # Scanline
+    sl = Image.new('RGBA', (GIF_W, GIF_H), (0, 0, 0, 0))
+    sld = ImageDraw.Draw(sl)
     for sy in range(0, GIF_H, 3):
-        sd.line([(0, sy), (GIF_W, sy)], fill=(0, 0, 0, 35))
-    img = Image.alpha_composite(img.convert('RGBA'), scan_layer).convert('RGB')
-
+        sld.line([(0, sy), (GIF_W, sy)], fill=(0, 0, 0, 28))
+    img = Image.alpha_composite(img.convert('RGBA'), sl).convert('RGB')
     frames.append(img)
-    if f % 8 == 0:
+
+    if f % 6 == 0:
         print(f"  frame {f+1}/{FRAMES}")
 
-# --- Save GIF ---
+# --- Save ---
 out = '/mnt/shanebrain-raid/pulsar-sentinel/quantum-banner.gif'
 frames[0].save(
-    out,
-    save_all=True,
-    append_images=frames[1:],
-    loop=0,
-    duration=FRAME_MS,
-    optimize=True,
-    colors=128,
+    out, save_all=True, append_images=frames[1:],
+    loop=0, duration=FRAME_MS, optimize=True, colors=128,
 )
-size_kb = os.path.getsize(out) // 1024
-print(f"\n✓ Saved → {out}  ({size_kb} KB, {FRAMES} frames @ {FRAME_MS}ms)")
-print(f"  Grid: {COLS}×{ROWS}, GIF: {GIF_W}×{GIF_H}")
+kb = os.path.getsize(out) // 1024
+print(f"\n✓ {out}  ({kb} KB, {FRAMES} frames @ {FRAME_MS}ms)")
+print(f"  Each cell pool: {len(cell_pools[0][0])} items (7 chars + 1 face tile)")
