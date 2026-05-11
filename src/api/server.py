@@ -160,9 +160,19 @@ def create_app() -> FastAPI:
     if templates_dir.exists():
         templates = Jinja2Templates(directory=str(templates_dir))
 
-    # UI Page Routes
+    # Marketing landing page at root
+    landing_path = project_root / "landing.html"
+
     @app.get("/", response_class=HTMLResponse)
     async def home(request: Request):
+        if landing_path.exists():
+            return HTMLResponse(landing_path.read_text())
+        if templates:
+            return templates.TemplateResponse("index.html", {"request": request})
+        return HTMLResponse("<h1>PULSAR SENTINEL</h1><p>API available at /docs</p>")
+
+    @app.get("/app", response_class=HTMLResponse)
+    async def app_home(request: Request):
         if templates:
             return templates.TemplateResponse("index.html", {"request": request})
         return HTMLResponse("<h1>PULSAR SENTINEL</h1><p>UI templates not found. API available at /docs</p>")
