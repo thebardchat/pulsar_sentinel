@@ -7,7 +7,7 @@
 | Raspberry Pi 5 (16GB) | Primary node | 100.67.120.6 (Tailscale) |
 | Pironman 5-MAX | NVMe RAID 1 chassis | — |
 | RAID mount | mdadm RAID 1 | /mnt/shanebrain-raid/ |
-| Pulsar0100 (Windows) | N8N bridge | 100.81.70.117 |
+| Pulsar0100 (Windows) | Cluster node (fastest) | 100.81.70.117 |
 
 **RAID Path:** `/mnt/shanebrain-raid/shanebrain-core/pulsar_sentinel/`
 

@@ -10,6 +10,7 @@ Authentication Flow:
 4. Client uses JWT for subsequent requests
 """
 
+import os
 import secrets
 import time
 from dataclasses import dataclass, field
@@ -494,10 +495,16 @@ def get_auth_instance() -> MetaMaskAuth:
     return _auth_instance
 
 
+INTERNAL_SERVICE_KEY = os.environ.get("PULSAR_SERVICE_KEY", "shanebrain-internal-2026")
+
+
 async def get_current_user(
     authorization: str | None = None,
 ) -> WalletSession:
     """FastAPI dependency to get current authenticated user.
+
+    Supports MetaMask wallet auth OR internal service key for
+    Pi-to-Pi communication (MCP tools, cluster nodes).
 
     Args:
         authorization: Authorization header value
@@ -513,6 +520,16 @@ async def get_current_user(
     token = extract_token_from_header(authorization)
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
+
+    # Internal service key bypass for ShaneBrain ecosystem
+    if token == INTERNAL_SERVICE_KEY:
+        return WalletSession(
+            wallet_address="0xSHANEBRAIN_INTERNAL",
+            token=token,
+            role=3,  # Admin
+            created_at=datetime.now(timezone.utc),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=365),
+        )
 
     auth = get_auth_instance()
     session = auth.get_session(token)

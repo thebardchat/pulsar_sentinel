@@ -69,6 +69,11 @@ def init_routes(
     _pts_calculator = pts_calculator
     _rules_engine = rules_engine
 
+    # Register internal ShaneBrain service user with full permissions
+    internal_address = "0xSHANEBRAIN_INTERNAL"
+    if not _access_controller.get_user(internal_address):
+        _access_controller.register_user(internal_address, UserRole.ADMIN)
+
 
 # Request/Response Models
 
@@ -191,6 +196,19 @@ async def get_current_session(
         raise HTTPException(
             status_code=401,
             detail="Missing or invalid Authorization header",
+        )
+
+    # Internal service key for ShaneBrain ecosystem (Pi, MCP, cluster)
+    import os
+    service_key = os.environ.get("PULSAR_SERVICE_KEY", "shanebrain-internal-2026")
+    if token == service_key:
+        from datetime import datetime, timezone, timedelta
+        return WalletSession(
+            wallet_address="0xSHANEBRAIN_INTERNAL",
+            token=token,
+            created_at=datetime.now(timezone.utc),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=365),
+            metadata={"role": "admin", "source": "internal_service_key"},
         )
 
     session = _auth.get_session(token)
