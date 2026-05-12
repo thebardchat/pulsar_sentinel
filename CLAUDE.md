@@ -1,338 +1,186 @@
-# CLAUDE.md - Pulsar Sentinel
-
-## Infrastructure Context
-
-| Device | Role | Address |
-|--------|------|---------|
-| Raspberry Pi 5 (16GB) | Primary node | 100.67.120.6 (Tailscale) |
-| Pironman 5-MAX | NVMe RAID 1 chassis | — |
-| RAID mount | mdadm RAID 1 | /mnt/shanebrain-raid/ |
-| Pulsar0100 (Windows) | Cluster node (fastest) | 100.81.70.117 |
-
-**RAID Path:** `/mnt/shanebrain-raid/shanebrain-core/pulsar_sentinel/`
-
-**Governed by:** https://github.com/thebardchat/constitution/blob/main/CONSTITUTION.md
-
-See PERSONA_REVIEW_PROTOCOL at https://github.com/thebardchat/constitution/blob/main/PERSONA_REVIEW_PROTOCOL.md
+# CLAUDE.md — Pulsar Sentinel
+> **Last Updated:** 2026-05-12 | **Status:** LIVE + PAYING | **Owner:** Shane Brazelton
 
 ---
 
-> **Last Updated:** March 2026
-> **Version:** 4.0
-> **Owner:** Shane Brazelton (SRM Dispatch, Alabama)
-> **Repo:** github.com/thebardchat/pulsar_sentinel
+## Current State (Read This First)
+
+Pulsar Sentinel is **live** at https://sentinel.shanebrain.cloud. Stripe live mode is wired. Discord bot is running. All 43 public repos have the ad banner. Do not treat this as a dev project — it is a running product.
 
 ---
 
-## Project Overview
+## Where Things Live
 
-**Pulsar Sentinel** is a production-grade Post-Quantum Cryptography (PQC) security framework for the Angel Cloud ecosystem. It provides quantum-resistant encryption (ML-KEM-768/1024), immutable blockchain audit trails (Polygon), AI-driven threat scoring (PTS), and self-governance rule codes.
+| Thing | Path |
+|---|---|
+| Project root | `/mnt/shanebrain-raid/pulsar-sentinel/` |
+| Source (FastAPI) | `src/api/server.py`, `src/api/routes.py`, `src/api/auth.py` |
+| Config | `config/settings.py` |
+| Landing page | `landing.html` → served at `/` |
+| GitHub Pages copy | `index.html` (repo root) |
+| Discord bot | `scripts/run_discord_bot.py` |
+| Quantum banner | `quantum-banner.gif` (v5, animated, in repo root) |
+| Environment | `.env` (never commit) |
+| venv | `venv/` |
 
-**Mission:** Protect 800 million Windows users losing security updates with affordable, local-first security infrastructure.
+**The project is at `/mnt/shanebrain-raid/pulsar-sentinel/` — NOT inside shanebrain-core.**
 
 ---
 
-## Quick Start
+## Running Services
+
+| Service | Port | Command |
+|---|---|---|
+| `pulsar-sentinel` | 8250 | `sudo systemctl restart pulsar-sentinel` |
+| `pulsar-sentinel-bot` | — | `sudo systemctl restart pulsar-sentinel-bot` |
+| `cloudflared-mcp` | — | Cloudflare Zero Trust tunnel |
 
 ```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure
-cp .env.template .env
-# Edit .env with your values
-
-# Run the server
-uvicorn api.server:app --host 0.0.0.0 --port 8000
-
-# Run Discord bot (standalone)
-python scripts/run_discord_bot.py
-
-# Run tests
-pytest
-
-# Windows launcher (does everything)
-PULSAR_SENTINEL.bat
+sudo systemctl status pulsar-sentinel
+sudo journalctl -u pulsar-sentinel -f   # live logs
 ```
+
+**Sentinel runs on the Pi only.** Pulsar Windows (100.81.70.117) does NOT run Sentinel — port 8250 times out there.
 
 ---
 
-## File Structure
+## PYTHONPATH — Critical, Do Not Change
 
 ```
-pulsar_sentinel/
-├── CLAUDE.md                    # This file
-├── README.md                    # Project documentation
-├── LICENSE                      # MIT License
-├── requirements.txt             # Python dependencies
-├── setup.py                     # Package setup
-├── Dockerfile                   # Production container
-├── docker-compose.yml           # Docker deployment
-├── pytest.ini                   # Test configuration
-├── .env.template                # Environment variable template
-├── .gitignore                   # Git ignore rules
-├── PULSAR_SENTINEL.bat          # Windows launcher
-├── landing.html                 # Marketing landing page (standalone)
-│
-├── src/
-│   ├── api/
-│   │   ├── server.py            # FastAPI application + Jinja2 UI routes
-│   │   ├── auth.py              # MetaMask wallet authentication
-│   │   ├── routes.py            # API endpoint definitions
-│   │   └── ui_routes.py         # UI API endpoints (dashboard, wallet, mining, marketplace)
-│   ├── billing/
-│   │   ├── stripe_client.py     # Stripe subscription integration
-│   │   └── routes.py            # Billing API routes (checkout, portal, webhooks)
-│   ├── core/
-│   │   ├── pqc.py               # ML-KEM + hybrid encryption engine
-│   │   ├── legacy.py            # AES-256, ECDSA, TLS classical crypto
-│   │   └── asr_engine.py        # Agent State Records (audit trail)
-│   ├── blockchain/
-│   │   ├── polygon_client.py    # Polygon network integration
-│   │   ├── smart_contract.py    # Governance smart contract interface
-│   │   └── event_logger.py      # Blockchain event logging
-│   ├── governance/
-│   │   ├── rules_engine.py      # RC codes enforcement
-│   │   ├── pts_calculator.py    # Points Toward Threat scoring
-│   │   └── access_control.py    # RBAC + rate limiting
-│   └── discord_bot/
-│       ├── bot.py               # Discord bot initialization
-│       ├── commands.py          # Bot commands (!help, !status, !pricing, !pts, !docs, !invite)
-│       ├── embeds.py            # Message formatting
-│       └── alerts.py            # Threat alert system
-│
-├── ui/
-│   ├── templates/               # Jinja2 HTML templates
-│   │   ├── base.html            # Base layout (nav, footer)
-│   │   ├── index.html           # Home/feature overview
-│   │   ├── login.html           # MetaMask wallet auth
-│   │   ├── dashboard.html       # User dashboard (stats, deployments, security)
-│   │   ├── wallet.html          # Wallet management
-│   │   ├── mining.html          # Mining dashboard
-│   │   ├── marketplace.html     # NFT/MINT marketplace
-│   │   ├── shanebrain.html      # SHANEBRAIN AI interface
-│   │   ├── terms.html           # Terms of Service
-│   │   └── privacy.html         # Privacy Policy
-│   └── static/
-│       ├── css/
-│       │   └── quantum-theme.css  # Complete design system (30KB)
-│       └── js/
-│           ├── auth.js            # MetaMask authentication flow
-│           ├── dashboard.js       # Dashboard data management
-│           ├── landing.js         # Landing page modals
-│           ├── marketplace.js     # Marketplace filtering/trading
-│           ├── mining.js          # Mining stats/charts
-│           ├── notifications.js   # Toast notification system
-│           ├── quantum-effects.js # Particle background engine
-│           ├── shanebrain.js      # AI panel management
-│           ├── wallet.js          # Wallet operations
-│           └── wallet-connect.js  # Web3 integration, JWT auth
-│
-├── tests/                       # Pytest test suite
-├── config/                      # Configuration files
-├── docs/                        # Documentation
-│   ├── RAG.md                   # RAG knowledge base (659 lines)
-│   ├── API.md                   # API endpoint docs
-│   ├── ARCHITECTURE.md          # System architecture
-│   ├── DEPLOYMENT.md            # Deployment guide
-│   ├── SECURITY.md              # Security specifications
-│   └── PATENT.md                # Patent documentation
-├── patent_docs/                 # Patent-related documents
-├── scripts/                     # Utility scripts
-│   └── run_discord_bot.py       # Standalone bot launcher
-├── .github/workflows/           # CI/CD + Discord notification
-└── coverage_html/               # Test coverage reports
+PYTHONPATH=/mnt/shanebrain-raid/pulsar-sentinel/src:/mnt/shanebrain-raid/pulsar-sentinel
 ```
+
+Both `src/` AND the project root must be in PYTHONPATH. `config/` lives at project root, not inside `src/`. The systemd service sets this correctly — do not move files or change paths without updating the service file.
+
+**`src/__init__.py` has NO eager imports.** Do not add any. Eager imports there break cold start.
 
 ---
 
-## Architecture
+## Public URLs
 
-### Security Stack (3 Layers)
-
-1. **Layer 1: Post-Quantum Cryptography** (local, no internet required)
-   - ML-KEM-768/1024 lattice-based key encapsulation
-   - AES-256-GCM symmetric encryption
-   - ECDSA secp256k1 digital signatures
-   - Hybrid mode: ML-KEM + AES defense-in-depth
-
-2. **Layer 2: Agent State Records** (local + optional blockchain)
-   - Cryptographic signing of all security events
-   - Merkle tree batching for efficiency
-   - Local SQLite storage (offline capable)
-   - Optional Polygon blockchain anchoring
-
-3. **Layer 3: Governance & Threat Scoring** (local)
-   - PTS algorithm: `(quantum_risk * 0.4) + (access_violations * 0.3) + (rate_limits * 0.2) + (signature_failures * 0.1)`
-   - Tiers: Safe (<50), Caution (50-149), Critical (>=150)
-   - Rule Codes: RC 1.01 (Signature Required), RC 1.02 (Heir Transfer), RC 2.01 (Three-Strike), RC 3.02 (Fallback)
-
-### Authentication
-- MetaMask wallet-based (zero password)
-- JWT session tokens after wallet signature verification
-- Web3.js v4.0.3 browser integration
-
-### Subscription Tiers
-
-| Tier | Price | PQC Level | Ops/Month |
-|------|-------|-----------|-----------|
-| Legacy Builder | $10.99 | AES-256 | 5M |
-| Sentinel Core | $16.99 | ML-KEM-768 | 10M |
-| Autonomous Guild | $29.99 | ML-KEM-1024 | Unlimited |
+| URL | What |
+|---|---|
+| https://sentinel.shanebrain.cloud | Live product — Cloudflare tunnel → Pi:8250 |
+| https://thebardchat.github.io/pulsar_sentinel/ | GitHub Pages mirror (index.html at repo root) |
 
 ---
 
 ## API Endpoints
 
-```
-POST /api/v1/auth/nonce      - Request authentication nonce
-POST /api/v1/auth/verify     - Verify wallet signature
-POST /api/v1/encrypt         - Encrypt data with PQC
-POST /api/v1/decrypt         - Decrypt data
-GET  /api/v1/status          - System status
-GET  /api/v1/pts/{user_id}   - Get threat score
-GET  /api/v1/asr/{user_id}   - Get audit records
-GET  /api/v1/health          - Health check
-POST /api/v1/billing/checkout    - Create Stripe checkout session
-POST /api/v1/billing/portal      - Create billing portal session
-GET  /api/v1/billing/subscription - Get subscription status
-POST /api/v1/billing/webhook     - Stripe webhook handler
-```
+| Endpoint | Auth | Notes |
+|---|---|---|
+| `GET /` | none | Serves `landing.html` |
+| `GET /app` | none | Jinja2 app template |
+| `GET /api/v1/health` | **none** | `{"status":"healthy","pqc_available":true}` — point uptime monitors here |
+| `GET /api/v1/status` | JWT or service key | User posture: role, tier, PTS, pqc_available |
+| `POST /api/v1/auth/nonce` | none | MetaMask auth step 1 |
+| `POST /api/v1/auth/verify` | none | MetaMask auth step 2 → JWT |
+| `POST /api/v1/keys/generate` | JWT/key | ML-KEM keypair |
+| `POST /api/v1/encrypt` | JWT/key | ML-KEM or AES encrypt |
+| `POST /api/v1/decrypt` | JWT/key | Decrypt |
+| `GET /api/v1/asr/{user_id}` | JWT/key | Agent State Records |
+| `GET /api/v1/pts/{user_id}` | JWT/key | Pulsar Trust Score |
+| `POST /api/v1/billing/checkout` | JWT/key | Stripe checkout |
+| `POST /api/v1/billing/webhook` | Stripe sig | Webhook — do not add auth middleware here |
 
 ---
 
-## UI Design System
+## Auth — Two Paths
 
-- **Colors:** Quantum Cyan (#00f0ff), Pulsar Magenta (#ff00ff), Matrix Green, Gold
-- **Fonts:** Orbitron (display), Rajdhani (body), Share Tech Mono (code)
-- **Effects:** Canvas particle background, glow animations, scroll reveals
-- **Responsive:** Mobile breakpoints at 1024px, 768px
+### 1. MetaMask JWT (user-facing)
+- User signs a nonce with MetaMask → gets JWT
+- **JWT expires in 24 hours** — cannot be vaulted, cannot be reused
+- `Authorization: Bearer <jwt>`
 
----
-
-## Discord Bot
-
-Lightweight standalone process (~30-50MB RAM).
-
-| Command | Action |
-|---------|--------|
-| `!help` | Show all commands |
-| `!status` | API health + PQC status |
-| `!pricing` | Subscription tiers |
-| `!pts` | Explain threat scoring |
-| `!docs` | Documentation links |
-| `!invite` | Server invite |
-
-**Automated:** Welcome embeds, threat alerts (5s poll), GitHub push notifications via Actions webhook.
+### 2. Internal Service Key (automation, MCP, Pi tools)
+- `Authorization: Bearer shanebrain-internal-2026`
+- Set via `PULSAR_SERVICE_KEY` env var (default is `shanebrain-internal-2026`)
+- Permanent, Admin role, no MetaMask needed
+- **Use this for all MCP tools, scripts, and internal calls**
 
 ---
 
-## Environment Variables
+## MCP Tools — Correct Implementation
 
-See `.env.template` for full list. Key variables:
+```python
+# Health — no auth, use for uptime monitors
+@mcp.tool()
+async def shanebrain_sentinel_health() -> dict:
+    async with httpx.AsyncClient() as client:
+        r = await client.get("http://localhost:8250/api/v1/health", timeout=5)
+        return r.json()
 
-```env
-POLYGON_NETWORK=testnet
-PQC_SECURITY_LEVEL=768
-API_PORT=8000
-JWT_SECRET_KEY=
-DISCORD_BOT_TOKEN=
-DISCORD_WEBHOOK_URL=
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
+# Status — internal service key, NOT a vaulted JWT
+@mcp.tool()
+async def shanebrain_sentinel_status() -> dict:
+    headers = {"Authorization": "Bearer shanebrain-internal-2026"}
+    async with httpx.AsyncClient() as client:
+        r = await client.get("http://localhost:8250/api/v1/status", headers=headers, timeout=5)
+        return r.json()
 ```
 
----
-
-## Testing
-
-```bash
-# Run all tests
-pytest
-
-# With coverage
-pytest --cov=src --cov-report=html
-
-# View coverage report
-open coverage_html/index.html
-```
+Use `localhost:8250` from the Pi. From other mesh nodes, use `http://100.67.120.6:8250`. **Never `100.81.70.117:8250`** — that's Pulsar Windows, Sentinel is not there.
 
 ---
 
-## Key Dependencies
+## Stripe (Live Mode)
 
-- `liboqs-python` — Post-quantum cryptography (ML-KEM)
-- `web3>=6.11.0` — Polygon blockchain integration
-- `fastapi>=0.109.0` — REST API + UI serving
-- `cryptography>=41.0.0` — Classical crypto (AES, ECDSA)
-- `discord.py>=2.3.0` — Discord bot
-- `pydantic>=2.5.0` — Data validation
-- `stripe>=8.0.0` — Subscription billing
-
----
-
-## Security Rules
-
-- NEVER commit `.env` files
-- NEVER expose private keys or wallet secrets
-- Security works 100% offline (no mining dependency)
-- Private keys never leave the user's device
+| Key | Where |
+|---|---|
+| `STRIPE_SECRET_KEY` | `.env` (sk_live_...) |
+| `STRIPE_WEBHOOK_SECRET` | `.env` (whsec_...) |
+| `STRIPE_PRICE_LEGACY` | `.env` — $10.99/mo |
+| `STRIPE_PRICE_SENTINEL` | `.env` — $24.99/mo |
+| `STRIPE_PRICE_GUILD` | `.env` — $49.99/mo |
 
 ---
 
-## Development Philosophy
+## Banner / Ad
 
-1. **"File structure first"** - Always establish architecture before coding
-2. **Action over theory** - Build, don't just plan
-3. **Family-first** - All projects serve the family's future
-4. **Local first** - No cloud dependencies unless explicitly chosen
-
----
-
-## Part of the Angel Cloud Ecosystem
-
-| Project | Repo | Status |
-|---------|------|--------|
-| ShaneBrain Core | thebardchat/shanebrain-core | Active |
-| Pulsar Sentinel | thebardchat/pulsar_sentinel | Active |
-| Angel Cloud | thebardchat/angel-cloud | Active |
-| Loudon/DeSarro | thebardchat/loudon-desarro | Building |
+- `quantum-banner.gif` v5 — 24 frames @ 65ms, 1.8MB
+- 3 ASCII faces formed by cycling numbers/symbols
+- 6 eyes, each flashes on its own frame (frames 2,6,11,15,19,22) — anatomically correct, partially closed, never all at once
+- Hosted at `raw.githubusercontent.com/thebardchat/pulsar_sentinel/main/quantum-banner.gif`
+- **All 43 public repos already have the ad** in their README pointing to this URL
+- Updating the GIF updates all 43 repos' banners simultaneously
+- Script: `scripts/gen_quantum_faces.py`
 
 ---
 
-## Contact
+## GitHub
 
-**Owner:** Shane Brazelton
-**Company:** SRM Dispatch (Alabama)
-**Ko-fi:** ko-fi.com/shanebrain
-**Discord:** discord.gg/xbHQZkggU7
-**Project:** Angel Cloud Ecosystem
-**Mission:** 800 million users. Digital legacy for generations.
+- Repo: `thebardchat/pulsar_sentinel`, branch `main`
+- Commit direct to main — no branches
+- Latest: `5b24a83` — live Stripe, landing page rewrite, internal service key auth
 
-## Claude Code Rules
-- Commit and push directly to `main`. Do NOT create branches.
-- Run build/test commands before committing.
-- Update CLAUDE.md session log before final commit.
+---
 
+## Security Stack
 
-## Networking / Deployment
-- When working with Tailscale Funnel, remember it strips URL path prefixes. Always use hardcoded base paths rather than server-side form action prefixing for routing.
+1. **ML-KEM-768** (CRYSTALS-Kyber) — NIST-approved lattice-based KEM, liboqs-python v0.15.0
+2. **AES-256-GCM** — symmetric encryption
+3. **HKDF** — key derivation from KEM shared secret
+4. **HybridEncryptor** — ML-KEM encapsulation → HKDF → AES-256-GCM
+5. `pqc_available: true` in health response = liboqs loaded and real ML-KEM active
 
-## Creative Writing
-- Never overwrite or rewrite the user's creative voice, prose style, or intentional structural choices (e.g., missing notes, dialogue rhythm). Ask before making stylistic changes to creative writing files.
+---
 
-## General Workflow Rules
-- Before setting up repos, SSH keys, or services, check what's already configured on the current machine. Run `ls ~/.ssh/`, `git remote -v`, `tailscale status`, etc. before assuming fresh setup is needed.
-- Let's focus on one thing at a time. Don't suggest other improvements until the current goal is fully verified working.
-- Before applying changes to all files, show the result on one file first so Shane can verify the approach.
+## PTS Algorithm
 
-## Git
-- For git conflicts, always verify --theirs vs --ours semantics before applying. State which version you're keeping and why before running the command.
+`(quantum_risk × 0.4) + (access_violations × 0.3) + (rate_limits × 0.2) + (signature_failures × 0.1)`
 
-## Raspberry Pi Environment
-- This user runs services on Raspberry Pi. Be aware: Python 3.13 removed the `cgi` module, Piper TTS needs careful noise_scale tuning to avoid clipping, and aplay conflicts with PipeWire. Prefer `pw-play` or `paplay` for audio playback.
+Tiers: Safe < 50, Caution 50–149, Critical ≥ 150
+
+---
+
+## Rules
+
+- Do not change port from 8250
+- Do not add imports to `src/__init__.py`
+- Do not commit `.env`
+- Do not create branches — commit directly to main
+- Do not touch `ui/templates/index.html` (Jinja2 extends base.html) — it is NOT the landing page
+- `landing.html` at project root is the marketing page served at `/`
+- `index.html` at project root is the GitHub Pages copy
+- Show result on one file before applying changes to all files
+- Sentinel runs on the Pi — verify with `curl localhost:8250/api/v1/health` before touching services
