@@ -171,6 +171,33 @@ def create_app() -> FastAPI:
             return templates.TemplateResponse("index.html", {"request": request})
         return HTMLResponse("<h1>PULSAR SENTINEL</h1><p>API available at /docs</p>")
 
+    # Feature deep-dive pages — flat HTML at project root.
+    # Served at BOTH /feature-{slug}.html (the literal filename, also works on
+    # python -m http.server and GitHub Pages) and /features/{slug} (clean URL).
+    feature_files = {
+        "encryption":  project_root / "feature-encryption.html",
+        "audit":       project_root / "feature-audit.html",
+        "inheritance": project_root / "feature-inheritance.html",
+    }
+
+    def _serve_feature(slug: str) -> HTMLResponse:
+        page = feature_files.get(slug)
+        if page and page.exists():
+            return HTMLResponse(page.read_text())
+        return HTMLResponse(
+            "<h1>Not found</h1><p>That feature page hasn't been built yet.</p>"
+            '<p><a href="/">← Back</a></p>',
+            status_code=404,
+        )
+
+    @app.get("/features/{slug}", response_class=HTMLResponse)
+    async def feature_page_clean(slug: str):
+        return _serve_feature(slug)
+
+    @app.get("/feature-{slug}.html", response_class=HTMLResponse)
+    async def feature_page_filename(slug: str):
+        return _serve_feature(slug)
+
     @app.get("/app", response_class=HTMLResponse)
     async def app_home(request: Request):
         if templates:
@@ -224,6 +251,12 @@ def create_app() -> FastAPI:
         if templates:
             return templates.TemplateResponse("privacy.html", {"request": request})
         return HTMLResponse("Privacy Policy - templates not found")
+
+    @app.get("/security", response_class=HTMLResponse)
+    async def security_page(request: Request):
+        if templates:
+            return templates.TemplateResponse("security.html", {"request": request})
+        return HTMLResponse("Security - templates not found")
 
     # Global exception handler
     @app.exception_handler(Exception)

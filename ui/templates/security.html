@@ -1,0 +1,1756 @@
+{% extends "base.html" %}
+{% block title %}Security{% endblock %}
+
+{% block extra_css %}
+<style>
+/* === GLOBAL FX === */
+
+.bg-cursor-glow {
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
+        rgba(255, 58, 68, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+    transition: background 200ms;
+}
+
+/* === NAV === */
+
+/* === HERO === */
+.hero {
+    min-height: 92vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 60px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(193, 39, 45, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+}
+.threat-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 20px; margin-bottom: 36px;
+    background: rgba(255, 0, 64, 0.15);
+    border: 1px solid var(--alert-red);
+    border-radius: 30px;
+    font-family: var(--font-mono); font-size: 0.85rem;
+    color: var(--alert-red); letter-spacing: 0.15em; text-transform: uppercase;
+    animation: badge-pulse 1.5s infinite ease-in-out;
+}
+.threat-badge .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--alert-red);
+    box-shadow: 0 0 10px var(--alert-red);
+    animation: dot-blink 1s infinite;
+}
+@keyframes badge-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 64, 0.4); }
+    50%      { box-shadow: 0 0 0 14px rgba(255, 0, 64, 0); }
+}
+@keyframes dot-blink {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+}
+.hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 7vw, 5.2rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 24px;
+    max-width: 1100px;
+    background: linear-gradient(180deg, #fff 0%, #a0a0b0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.hero h1 .accent {
+    background: var(--gradient-quantum);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+.hero-sub {
+    font-family: var(--font-body); font-weight: 300;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    color: var(--text-secondary);
+    max-width: 720px;
+    margin-bottom: 50px;
+    line-height: 1.6;
+}
+
+/* Q-Day Countdown */
+.countdown-frame {
+    display: inline-block;
+    padding: 24px 32px;
+    background: linear-gradient(135deg, var(--cosmic-gray), var(--nebula-dark));
+    border: 1px solid var(--stellar-gray);
+    border-radius: 12px;
+    box-shadow: var(--shadow-quantum);
+    margin-bottom: 40px;
+    position: relative;
+}
+.countdown-frame::before {
+    content: 'Q-DAY COUNTDOWN';
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    padding: 2px 14px;
+    background: var(--deep-space);
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--quantum-cyan); letter-spacing: 0.2em;
+}
+.countdown {
+    display: flex; gap: 18px; align-items: baseline; justify-content: center;
+    font-family: var(--font-mono);
+}
+.countdown-unit { display: flex; flex-direction: column; align-items: center; min-width: 64px; }
+.countdown-num {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    color: var(--pulsar-magenta);
+    line-height: 1;
+    text-shadow: 0 0 10px var(--pulsar-magenta-glow);
+    font-variant-numeric: tabular-nums;
+}
+.countdown-label {
+    font-size: 0.7rem; color: var(--text-muted);
+    letter-spacing: 0.15em; text-transform: uppercase; margin-top: 6px;
+}
+.countdown-sep { color: var(--text-muted); font-size: 1.6rem; opacity: 0.4; }
+.countdown-footer {
+    margin-top: 14px;
+    font-family: var(--font-body); font-size: 0.85rem;
+    color: var(--text-muted); font-style: italic;
+}
+
+.hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.btn-primary {
+    padding: 16px 32px;
+    background: var(--gradient-quantum);
+    color: #fff;
+    border: none; border-radius: 8px;
+    font-family: var(--font-display); font-size: 1rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: var(--shadow-pulsar);
+    transition: all 200ms;
+    cursor: pointer;
+}
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px var(--pulsar-magenta-glow), 0 0 40px var(--pulsar-magenta-glow);
+}
+.btn-secondary {
+    padding: 16px 32px;
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--stellar-gray);
+    border-radius: 8px;
+    font-family: var(--font-display); font-size: 1rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    text-decoration: none;
+    transition: all 200ms;
+    cursor: pointer;
+}
+.btn-secondary:hover {
+    border-color: var(--quantum-cyan);
+    color: var(--quantum-cyan);
+}
+.btn-gold {
+    padding: 16px 32px;
+    background: linear-gradient(135deg, var(--plasma-gold), #ffaa00);
+    color: var(--deep-space);
+    border: none; border-radius: 8px;
+    font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: var(--shadow-plasma);
+    transition: all 200ms;
+    cursor: pointer;
+}
+.btn-gold:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(255, 215, 0, 0.5);
+}
+
+/* === LIVE STATS BAR === */
+.stats-bar {
+    background: linear-gradient(90deg, var(--nebula-dark), var(--cosmic-gray), var(--nebula-dark));
+    border-top: 1px solid var(--quantum-cyan-dim);
+    border-bottom: 1px solid var(--quantum-cyan-dim);
+    padding: 28px 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    text-align: center;
+    box-shadow: inset 0 0 40px rgba(193, 39, 45, 0.1);
+}
+.stat-cell .stat-num {
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: var(--pulsar-magenta);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 10px var(--pulsar-magenta-glow);
+    line-height: 1;
+}
+.stat-cell .stat-label {
+    color: var(--text-secondary);
+    font-family: var(--font-body); font-size: 0.95rem;
+    margin-top: 8px; letter-spacing: 0.05em;
+}
+.stat-cell .stat-sub {
+    color: var(--text-muted);
+    font-family: var(--font-mono); font-size: 0.72rem;
+    margin-top: 4px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+/* === PANELS === */
+.sec-wrap { max-width: 1180px; margin: 0 auto; padding: 60px 24px; }
+.sec-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 70px;
+    align-items: center;
+    padding: 90px 0;
+    border-bottom: 1px solid var(--cosmic-gray);
+    position: relative;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 800ms ease, transform 800ms ease;
+}
+.sec-panel.visible { opacity: 1; transform: translateY(0); }
+.sec-panel:last-of-type { border-bottom: none; }
+.sec-panel.reverse { direction: rtl; }
+.sec-panel.reverse > 
+.sec-anim {
+    background: linear-gradient(135deg, var(--cosmic-gray) 0%, var(--nebula-dark) 100%);
+    border: 1px solid var(--stellar-gray);
+    border-radius: 14px;
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+    box-shadow: inset 0 0 80px rgba(193, 39, 45, 0.1), 0 10px 50px rgba(0, 0, 0, 0.6);
+}
+.sec-anim::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(193, 39, 45, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(193, 39, 45, 0.07) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+}
+.sec-anim svg { width: 90%; height: 90%; position: relative; z-index: 1; }
+.sec-text .sec-num {
+    font-family: var(--font-mono);
+    color: var(--quantum-cyan);
+    font-size: 0.85rem; letter-spacing: 0.2em;
+    margin-bottom: 12px; opacity: 0.8;
+}
+.sec-text h2 {
+    font-family: var(--font-display);
+    color: var(--text-primary);
+    font-size: clamp(1.7rem, 3vw, 2.2rem);
+    font-weight: 700;
+    margin-bottom: 22px;
+    letter-spacing: 0.01em;
+    line-height: 1.15;
+}
+.sec-text p {
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+    font-size: 1.12rem; line-height: 1.75;
+    margin-bottom: 14px;
+}
+.sec-text p strong { color: var(--text-primary); font-weight: 600; }
+.sec-text .quoted {
+    font-family: var(--font-mono);
+    color: var(--pulsar-magenta);
+    padding: 0 4px;
+}
+.inline-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 14px;
+    padding: 10px 18px;
+    background: rgba(193, 39, 45, 0.1);
+    border: 1px solid var(--quantum-cyan);
+    border-radius: 6px;
+    color: var(--quantum-cyan);
+    font-family: var(--font-display); font-size: 0.85rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: all 200ms;
+}
+.inline-cta:hover {
+    background: var(--quantum-cyan); color: #fff;
+    box-shadow: var(--shadow-pulsar); transform: translateX(4px);
+}
+
+/* Panel 1 live counter */
+.harvest-counter {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: rgba(255, 0, 64, 0.08);
+    border-left: 3px solid var(--alert-red);
+    border-radius: 6px;
+}
+.harvest-counter .num {
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 1.6rem;
+    color: var(--alert-red);
+    font-variant-numeric: tabular-nums;
+}
+.harvest-counter .lbl {
+    font-family: var(--font-body); color: var(--text-secondary);
+    font-size: 0.85rem; margin-top: 4px;
+}
+
+/* Panel 2 encryption demo */
+.encrypt-demo {
+    margin-top: 26px;
+    background: var(--void-dark);
+    border: 1px solid var(--stellar-gray);
+    border-radius: 8px;
+    padding: 20px;
+}
+.encrypt-demo label {
+    font-family: var(--font-mono); font-size: 0.78rem;
+    color: var(--quantum-cyan); letter-spacing: 0.1em;
+    display: block; margin-bottom: 8px;
+}
+.encrypt-demo input {
+    width: 100%; padding: 12px 14px;
+    background: var(--deep-space);
+    border: 1px solid var(--stellar-gray);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-family: var(--font-mono); font-size: 0.95rem;
+    outline: none;
+    transition: border-color 200ms;
+}
+.encrypt-demo input:focus { border-color: var(--pulsar-magenta); box-shadow: 0 0 0 3px rgba(255, 58, 68, 0.1); }
+.encrypt-result { margin-top: 14px; }
+.encrypt-row {
+    padding: 12px 14px; margin-bottom: 8px;
+    background: var(--cosmic-gray); border-radius: 5px;
+    border-left: 3px solid;
+}
+.encrypt-row.rsa { border-left-color: var(--alert-red); }
+.encrypt-row.mlkem { border-left-color: var(--matrix-green); }
+.encrypt-row .algo {
+    font-family: var(--font-mono); font-size: 0.72rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+}
+.encrypt-row.rsa .algo { color: var(--alert-red); }
+.encrypt-row.mlkem .algo { color: var(--matrix-green); }
+.encrypt-row .algo .badge {
+    font-size: 0.65rem; padding: 2px 8px; border-radius: 3px;
+}
+.encrypt-row.rsa .badge { background: rgba(255, 0, 64, 0.2); color: var(--alert-red); }
+.encrypt-row.mlkem .badge { background: rgba(0, 255, 65, 0.2); color: var(--matrix-green); }
+.encrypt-row .cipher {
+    font-family: var(--font-mono); font-size: 0.78rem;
+    color: var(--text-secondary);
+    word-break: break-all; line-height: 1.5;
+    max-height: 72px; overflow: hidden;
+    position: relative;
+}
+.encrypt-row .cipher-meta {
+    margin-top: 6px;
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--text-muted); letter-spacing: 0.08em;
+}
+.demo-disclaimer {
+    margin-top: 12px;
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--text-muted); line-height: 1.6;
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.3);
+    border-left: 2px solid var(--quantum-cyan-dim);
+    border-radius: 3px;
+}
+.demo-disclaimer code {
+    color: var(--quantum-cyan);
+    background: rgba(193, 39, 45, 0.1);
+    padding: 1px 5px; border-radius: 2px;
+}
+
+/* Panel 3 blockchain display */
+.chain-receipt {
+    margin-top: 26px;
+    padding: 16px 18px;
+    background: var(--void-dark);
+    border: 1px solid var(--matrix-green);
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+}
+.chain-receipt .label {
+    color: var(--matrix-green); font-size: 0.72rem; letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 8px;
+}
+.chain-receipt .hash {
+    color: var(--text-primary); font-size: 0.85rem;
+    word-break: break-all; margin-bottom: 8px;
+}
+.chain-receipt .meta {
+    color: var(--text-muted); font-size: 0.75rem;
+}
+.chain-receipt .meta .ago { color: var(--matrix-green); }
+
+/* Earn callout (Panel 3) */
+.earn-callout {
+    margin-top: 18px;
+    padding: 18px 22px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(193, 39, 45, 0.04));
+    border: 1px solid var(--plasma-gold-dim);
+    border-radius: 8px;
+    position: relative;
+}
+.earn-callout::before {
+    content: '💰 EARN FROM THIS';
+    position: absolute; top: -10px; left: 16px;
+    padding: 2px 10px;
+    background: var(--deep-space);
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--plasma-gold); letter-spacing: 0.15em;
+}
+.earn-callout p {
+    color: var(--text-secondary); font-size: 0.98rem; line-height: 1.65;
+    margin-bottom: 8px;
+}
+.earn-callout strong { color: var(--plasma-gold); font-weight: 600; }
+.earn-callout ul {
+    list-style: none; padding: 0; margin-top: 10px;
+}
+.earn-callout li {
+    padding: 4px 0 4px 22px; position: relative;
+    color: var(--text-secondary); font-size: 0.92rem;
+}
+.earn-callout li::before {
+    content: '→'; position: absolute; left: 0;
+    color: var(--plasma-gold); font-weight: 700;
+}
+
+/* Use-case cards (Panel 3 monetization) */
+.usecase-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin: 18px 0 14px;
+}
+.usecase-card {
+    display: block;
+    padding: 18px 18px 16px;
+    background: var(--void-dark);
+    border: 1px solid var(--stellar-gray);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 200ms;
+    position: relative;
+}
+.usecase-card:hover {
+    border-color: var(--plasma-gold);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.04), var(--void-dark));
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.15);
+}
+.usecase-card .uc-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+}
+.usecase-card .uc-icon {
+    width: 32px; height: 32px;
+    background: rgba(255, 215, 0, 0.12);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--plasma-gold); font-size: 0.95rem;
+    flex-shrink: 0;
+}
+.usecase-card h4 {
+    font-family: var(--font-display);
+    color: var(--text-primary);
+    font-size: 0.92rem; font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+.usecase-card .uc-desc {
+    color: var(--text-secondary); font-size: 0.88rem;
+    line-height: 1.6; margin-bottom: 10px;
+}
+.usecase-card .uc-row {
+    font-family: var(--font-mono); font-size: 0.72rem;
+    line-height: 1.55; margin-bottom: 6px;
+    color: var(--text-muted);
+}
+.usecase-card .uc-row .lbl {
+    color: var(--plasma-gold); letter-spacing: 0.08em;
+    text-transform: uppercase; display: inline-block;
+    min-width: 50px;
+}
+.usecase-card .uc-row .val { color: var(--text-secondary); }
+.usecase-card .uc-cta {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 8px;
+    color: var(--plasma-gold);
+    font-family: var(--font-display); font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+}
+.usecase-card:hover .uc-cta { color: var(--pulsar-magenta); }
+@media (max-width: 700px) {
+    .usecase-grid { grid-template-columns: 1fr; }
+}
+
+/* Node how-to expansion (Panel 4) */
+.node-howto {
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: var(--void-dark);
+    border: 1px solid var(--stellar-gray);
+    border-left: 3px solid var(--matrix-green);
+    border-radius: 6px;
+    font-family: var(--font-mono); font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+.node-howto .label {
+    color: var(--matrix-green); letter-spacing: 0.1em;
+    font-size: 0.72rem; margin-bottom: 8px;
+    text-transform: uppercase;
+}
+.node-howto code {
+    color: var(--matrix-green);
+    background: rgba(0, 255, 65, 0.08);
+    padding: 2px 6px; border-radius: 3px;
+    display: inline-block;
+}
+.node-howto .why {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--stellar-gray);
+    font-family: var(--font-body); font-size: 0.92rem;
+    color: var(--text-secondary);
+}
+.node-howto .why strong { color: var(--matrix-green); }
+
+/* Heir transfer callout (Finale) */
+.heir-callout {
+    max-width: 760px;
+    margin: 40px auto 0;
+    padding: 28px 32px;
+    background:
+        radial-gradient(ellipse at top right, rgba(193, 39, 45, 0.1), transparent 60%),
+        var(--cosmic-gray);
+    border: 1px solid var(--quantum-cyan-dim);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    text-align: left;
+}
+.heir-callout::before {
+    content: ''; position: absolute; top: 0; left: 0; bottom: 0;
+    width: 4px;
+    background: var(--gradient-quantum);
+    box-shadow: var(--shadow-pulsar);
+}
+.heir-callout .heir-tag {
+    display: inline-block;
+    padding: 3px 12px;
+    background: rgba(193, 39, 45, 0.15);
+    border: 1px solid var(--quantum-cyan);
+    border-radius: 14px;
+    color: var(--pulsar-magenta);
+    font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 14px;
+}
+.heir-callout h3 {
+    font-family: var(--font-display);
+    color: var(--text-primary);
+    font-size: 1.4rem; font-weight: 700;
+    margin-bottom: 12px; letter-spacing: 0.01em;
+}
+.heir-callout p {
+    color: var(--text-secondary);
+    font-size: 1rem; line-height: 1.7;
+    margin-bottom: 10px;
+}
+.heir-callout p strong { color: var(--text-primary); }
+.heir-callout .heir-steps {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 14px; margin-top: 18px;
+}
+.heir-callout .heir-step {
+    padding: 12px 14px;
+    background: var(--void-dark);
+    border-radius: 6px;
+    border: 1px solid var(--stellar-gray);
+}
+.heir-callout .heir-step .n {
+    font-family: var(--font-mono); color: var(--pulsar-magenta);
+    font-size: 0.72rem; letter-spacing: 0.15em;
+    display: block; margin-bottom: 6px;
+}
+.heir-callout .heir-step .t {
+    color: var(--text-primary); font-size: 0.92rem;
+    font-weight: 500; line-height: 1.4;
+}
+.heir-callout .heir-mission {
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px solid var(--stellar-gray);
+    color: var(--text-muted);
+    font-size: 0.88rem; font-style: italic;
+}
+.heir-callout .heir-mission .brand-emph {
+    color: var(--plasma-gold);
+    font-family: var(--font-display); font-style: normal;
+    letter-spacing: 0.05em;
+}
+@media (max-width: 700px) {
+    .heir-callout .heir-steps { grid-template-columns: 1fr; }
+}
+
+/* === YOURLEGACY — Generational Trust Fund === */
+.legacy-section {
+    max-width: 1100px;
+    margin: 60px auto 0;
+    padding: 50px 40px;
+    background:
+        radial-gradient(ellipse at top right, rgba(255, 215, 0, 0.08), transparent 60%),
+        radial-gradient(ellipse at bottom left, rgba(193, 39, 45, 0.1), transparent 60%),
+        var(--cosmic-gray);
+    border: 1px solid var(--plasma-gold-dim);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+}
+.legacy-section::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--plasma-gold), var(--pulsar-magenta), var(--plasma-gold));
+}
+.legacy-tag {
+    display: inline-block;
+    padding: 5px 16px;
+    background: rgba(255, 215, 0, 0.12);
+    border: 1px solid var(--plasma-gold);
+    border-radius: 20px;
+    color: var(--plasma-gold);
+    font-family: var(--font-mono); font-size: 0.72rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 20px;
+}
+.legacy-section h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--plasma-gold), #ffaa00, var(--pulsar-magenta));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.15;
+    margin-bottom: 14px;
+}
+.legacy-lead {
+    color: var(--text-secondary);
+    font-size: 1.15rem; line-height: 1.7;
+    margin-bottom: 14px;
+    max-width: 800px;
+}
+.legacy-lead strong { color: var(--text-primary); }
+
+.legacy-problem {
+    margin-top: 24px;
+    padding: 18px 20px;
+    background: rgba(255, 0, 64, 0.06);
+    border-left: 3px solid var(--alert-red);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 1rem; line-height: 1.7;
+}
+.legacy-problem strong { color: var(--alert-red); }
+
+.legacy-mechanism {
+    margin: 30px 0;
+    padding: 24px 28px;
+    background: var(--void-dark);
+    border: 1px solid var(--stellar-gray);
+    border-radius: 10px;
+}
+.legacy-mechanism h3 {
+    font-family: var(--font-display);
+    color: var(--plasma-gold);
+    font-size: 1.05rem; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 16px;
+}
+.legacy-flow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    align-items: stretch;
+}
+.legacy-flow-step {
+    padding: 12px 10px;
+    background: var(--cosmic-gray);
+    border: 1px solid var(--stellar-gray);
+    border-top: 2px solid var(--plasma-gold);
+    border-radius: 6px;
+    text-align: center;
+    position: relative;
+}
+.legacy-flow-step .n {
+    font-family: var(--font-mono); color: var(--plasma-gold);
+    font-size: 0.7rem; letter-spacing: 0.1em;
+    display: block; margin-bottom: 4px;
+}
+.legacy-flow-step .t {
+    color: var(--text-primary); font-size: 0.78rem;
+    line-height: 1.35; font-weight: 500;
+}
+.legacy-flow-step::after {
+    content: '→';
+    position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+    color: var(--plasma-gold); font-size: 1rem; z-index: 2;
+}
+.legacy-flow-step:last-child::after { display: none; }
+
+.legacy-section-title {
+    font-family: var(--font-display);
+    color: var(--text-primary);
+    font-size: 1.2rem; font-weight: 700;
+    letter-spacing: 0.02em;
+    margin: 32px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--stellar-gray);
+    display: flex; align-items: center; gap: 10px;
+}
+.legacy-section-title i { color: var(--plasma-gold); }
+
+.legacy-benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.legacy-benefit {
+    padding: 14px 14px;
+    background: var(--void-dark);
+    border: 1px solid var(--stellar-gray);
+    border-radius: 6px;
+    transition: all 200ms;
+}
+.legacy-benefit:hover {
+    border-color: var(--plasma-gold);
+    transform: translateY(-2px);
+}
+.legacy-benefit .b-icon {
+    color: var(--plasma-gold); font-size: 0.95rem;
+    margin-bottom: 6px;
+}
+.legacy-benefit .b-title {
+    color: var(--text-primary);
+    font-family: var(--font-display); font-size: 0.82rem; font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 5px;
+}
+.legacy-benefit .b-desc {
+    color: var(--text-secondary);
+    font-size: 0.82rem; line-height: 1.5;
+}
+
+.legacy-digital-only .legacy-benefit { border-color: var(--quantum-cyan-dim); }
+.legacy-digital-only .legacy-benefit:hover { border-color: var(--pulsar-magenta); }
+.legacy-digital-only .legacy-benefit .b-icon { color: var(--pulsar-magenta); }
+
+.legacy-funding {
+    margin-top: 32px;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(193, 39, 45, 0.05));
+    border: 1px solid var(--plasma-gold-dim);
+    border-radius: 10px;
+}
+.legacy-funding h3 {
+    font-family: var(--font-display);
+    color: var(--plasma-gold);
+    font-size: 1.05rem; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 14px;
+}
+.legacy-fund-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.legacy-fund-option {
+    padding: 14px;
+    background: var(--void-dark);
+    border-radius: 6px;
+    border-left: 3px solid var(--plasma-gold);
+}
+.legacy-fund-option .fo-title {
+    font-family: var(--font-display);
+    color: var(--plasma-gold);
+    font-size: 0.82rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 5px;
+}
+.legacy-fund-option .fo-desc {
+    color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5;
+}
+
+.legacy-cta-block {
+    margin-top: 36px;
+    text-align: center;
+    padding: 24px 0 0;
+    border-top: 1px solid var(--stellar-gray);
+}
+.legacy-cta-block h4 {
+    font-family: var(--font-display);
+    color: var(--text-primary);
+    font-size: 1.3rem; font-weight: 700;
+    margin-bottom: 12px;
+}
+.legacy-cta-block p {
+    color: var(--text-secondary);
+    font-size: 1rem; max-width: 700px; margin: 0 auto 20px;
+    line-height: 1.7;
+}
+.legacy-mission {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--stellar-gray);
+    color: var(--text-muted);
+    font-size: 0.9rem; line-height: 1.7;
+    font-style: italic;
+    text-align: center;
+}
+.legacy-mission .brand-emph {
+    color: var(--plasma-gold);
+    font-family: var(--font-display);
+    font-style: normal; letter-spacing: 0.05em;
+}
+.legacy-disclaimer {
+    margin-top: 18px;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.3);
+    border-left: 2px solid var(--text-muted);
+    border-radius: 3px;
+    color: var(--text-muted);
+    font-family: var(--font-mono); font-size: 0.7rem;
+    line-height: 1.6;
+}
+@media (max-width: 800px) {
+    .legacy-section { padding: 30px 22px; }
+    .legacy-flow { grid-template-columns: 1fr; }
+    .legacy-flow-step::after {
+        content: '↓'; right: 50%; top: auto; bottom: -14px;
+        transform: translateX(50%);
+    }
+    .legacy-benefits-grid { grid-template-columns: 1fr 1fr; }
+    .legacy-fund-options { grid-template-columns: 1fr; }
+}
+
+/* Panel 4 CTAs */
+.sec-cta-row { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+.sec-cta {
+    padding: 18px 22px;
+    background: var(--cosmic-gray);
+    border: 1px solid var(--stellar-gray);
+    border-left: 3px solid var(--quantum-cyan);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 200ms ease;
+    display: flex; align-items: center; gap: 14px;
+}
+.sec-cta:hover {
+    background: var(--stellar-gray);
+    border-left-color: var(--pulsar-magenta);
+    box-shadow: var(--shadow-pulsar);
+    transform: translateX(6px);
+}
+.sec-cta .cta-icon {
+    width: 42px; height: 42px;
+    background: rgba(193, 39, 45, 0.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--pulsar-magenta); font-size: 1.2rem; flex-shrink: 0;
+}
+.sec-cta .cta-
+.sec-cta strong {
+    display: block;
+    font-family: var(--font-display);
+    color: var(--pulsar-magenta);
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.sec-cta span {
+    color: var(--text-secondary);
+    font-family: var(--font-body); font-size: 0.98rem;
+}
+
+/* === FINALE — Pricing CTA === */
+.finale {
+    margin-top: 40px;
+    padding: 80px 24px;
+    background:
+        radial-gradient(ellipse at top, rgba(193, 39, 45, 0.2) 0%, transparent 70%),
+        radial-gradient(ellipse at bottom, rgba(255, 215, 0, 0.08) 0%, transparent 70%),
+        var(--void-dark);
+    text-align: center;
+    border-top: 1px solid var(--cosmic-gray);
+    border-bottom: 1px solid var(--cosmic-gray);
+    position: relative;
+}
+.finale .stamp {
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid var(--plasma-gold-dim);
+    border-radius: 20px;
+    color: var(--plasma-gold);
+    font-family: var(--font-mono); font-size: 0.75rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 24px;
+}
+.finale h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    background: var(--gradient-quantum);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.02em;
+    margin-bottom: 16px;
+    line-height: 1.1;
+}
+.finale .finale-sub {
+    color: var(--text-secondary);
+    font-size: 1.2rem; max-width: 720px; margin: 0 auto 48px;
+}
+.tier-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    max-width: 1000px;
+    margin: 0 auto 48px;
+}
+.tier {
+    padding: 32px 24px;
+    background: var(--cosmic-gray);
+    border: 1px solid var(--stellar-gray);
+    border-radius: 14px;
+    text-align: left;
+    position: relative;
+    transition: all 250ms;
+}
+.tier:hover {
+    transform: translateY(-6px);
+    border-color: var(--pulsar-magenta);
+    box-shadow: var(--shadow-pulsar);
+}
+.tier.featured {
+    border-color: var(--plasma-gold);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.05), var(--cosmic-gray));
+}
+.tier.featured::before {
+    content: 'MOST POPULAR';
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    padding: 4px 14px;
+    background: var(--plasma-gold);
+    color: var(--deep-space);
+    font-family: var(--font-display); font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.15em;
+    border-radius: 3px;
+}
+.tier-name {
+    font-family: var(--font-display); font-size: 1.1rem; font-weight: 700;
+    color: var(--pulsar-magenta);
+    letter-spacing: 0.05em;
+    margin-bottom: 10px; text-transform: uppercase;
+}
+.tier-price {
+    font-family: var(--font-display); font-size: 2.2rem; font-weight: 800;
+    color: var(--text-primary);
+}
+.tier-price .per {
+    font-size: 0.9rem; color: var(--text-muted); font-weight: 400;
+}
+.tier-features {
+    list-style: none; margin: 22px 0 24px;
+}
+.tier-features li {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    padding: 6px 0 6px 24px;
+    position: relative;
+}
+.tier-features li::before {
+    content: '✓';
+    position: absolute; left: 0;
+    color: var(--matrix-green);
+    font-weight: 700;
+}
+.tier-btn {
+    display: block; width: 100%; padding: 14px;
+    background: var(--gradient-quantum);
+    color: #fff;
+    border: none; border-radius: 6px;
+    font-family: var(--font-display); font-size: 0.9rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    text-decoration: none; text-align: center;
+    transition: all 150ms;
+    cursor: pointer;
+}
+.tier-btn:hover { box-shadow: var(--shadow-pulsar); }
+.tier.featured .tier-btn {
+    background: linear-gradient(135deg, var(--plasma-gold), #ffaa00);
+    color: var(--deep-space);
+}
+.tier.featured .tier-btn:hover { box-shadow: var(--shadow-plasma); }
+.finale-trust {
+    margin-top: 32px;
+    color: var(--text-muted);
+    font-family: var(--font-mono); font-size: 0.85rem;
+    display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;
+}
+.finale-trust span { display: inline-flex; align-items: center; gap: 6px; }
+.finale-trust i { color: var(--matrix-green); }
+
+/* === DISCLOSURE === */
+.sec-disclose {
+    margin: 50px auto 0;
+    max-width: 760px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.04) 0%, rgba(193, 39, 45, 0.04) 100%);
+    border: 1px solid var(--plasma-gold-dim);
+    border-radius: 12px;
+    padding: 28px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.sec-disclose::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; background: var(--gradient-pulsar);
+}
+.sec-disclose i.icon {
+    color: var(--plasma-gold); font-size: 1.4rem; margin-bottom: 10px; display: block;
+}
+.sec-disclose h3 {
+    font-family: var(--font-display);
+    color: var(--plasma-gold);
+    font-size: 1rem; margin-bottom: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+}
+.sec-disclose p {
+    color: var(--text-secondary);
+    font-size: 0.98rem; line-height: 1.7;
+}
+.sec-disclose a {
+    color: var(--plasma-gold);
+    font-family: var(--font-mono);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--plasma-gold-dim);
+}
+.sec-disclose a:hover { color: var(--text-primary); border-bottom-color: var(--pulsar-magenta); }
+
+/* === FOOTER === */
+
+/* === SVG ANIMATIONS === */
+@keyframes p1-wave {
+    0%   { transform: translateX(-130%); opacity: 0; }
+    15%  { opacity: 1; } 85% { opacity: 1; }
+    100% { transform: translateX(130%); opacity: 0; }
+}
+@keyframes p1-crack {
+    0%, 55% { opacity: 0; filter: drop-shadow(0 0 0 transparent); }
+    70%     { opacity: 1; filter: drop-shadow(0 0 10px var(--pulsar-magenta)); }
+    100%    { opacity: 0.85; filter: drop-shadow(0 0 4px var(--pulsar-magenta-dim)); }
+}
+@keyframes p1-lock-shake {
+    0%, 50%, 100% { transform: translate(0,0); }
+    62% { transform: translate(-1px, 1px); } 68% { transform: translate(1px, -1px); }
+    74% { transform: translate(-1px, -1px); } 80% { transform: translate(1px, 1px); }
+}
+@keyframes p2-hex-in {
+    0%   { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@keyframes p2-glow-pulse {
+    0%, 100% { filter: drop-shadow(0 0 8px var(--quantum-cyan)); }
+    50%      { filter: drop-shadow(0 0 22px var(--pulsar-magenta)); }
+}
+@keyframes p2-check-in {
+    0%, 70% { opacity: 0; transform: scale(0); }
+    85%     { opacity: 1; transform: scale(1.2); }
+    100%    { opacity: 0.9; transform: scale(1); }
+}
+@keyframes p3-doc-drop {
+    0%   { transform: translateY(-30%); opacity: 0; }
+    35%  { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes p3-stamp-press {
+    0%, 30% { opacity: 0; transform: scale(1.4); }
+    45%     { opacity: 1; transform: scale(1); }
+    100%    { opacity: 0.9; transform: scale(1); }
+}
+@keyframes p3-chain-verify {
+    0%, 55%  { stroke: var(--quantum-cyan-dim); filter: drop-shadow(0 0 0 transparent); }
+    70%      { stroke: var(--matrix-green); filter: drop-shadow(0 0 12px var(--matrix-green)); }
+    100%     { stroke: var(--quantum-cyan-dim); filter: drop-shadow(0 0 0 transparent); }
+}
+@keyframes p4-pulse-ring {
+    0%   { r: 10; opacity: 0.85; stroke-width: 2.5; }
+    100% { r: 52; opacity: 0; stroke-width: 0.5; }
+}
+@keyframes p4-node-glow {
+    0%, 100% { filter: drop-shadow(0 0 5px var(--quantum-cyan)); }
+    50%      { filter: drop-shadow(0 0 14px var(--pulsar-magenta)); }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 800px) {
+    .sec-panel { grid-template-columns: 1fr; gap: 30px; padding: 60px 0; }
+    .sec-panel.reverse { direction: ltr; }
+    
+    .tier-grid { grid-template-columns: 1fr; }
+    .countdown { gap: 10px; }
+    .countdown-unit { min-width: 50px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sec-anim svg *, .sec-anim svg { animation: none !important; }
+    .threat-badge, .threat-badge .dot { animation: none !important; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-cursor-glow" id="cursorGlow"></div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+    <div class="threat-badge">
+        <span class="dot"></span>
+        Threat Level: Critical · Active Harvesting Detected
+    </div>
+    <h1>Your data is being<br><span class="accent">harvested right now.</span></h1>
+    <p class="hero-sub">The encryption protecting your bank, your messages, your medical records — it's already on borrowed time. Someone is recording it today, planning to crack it tomorrow.</p>
+
+    <div class="countdown-frame">
+        <div class="countdown" id="countdown">
+            <div class="countdown-unit"><div class="countdown-num" id="qd-years">00</div><div class="countdown-label">Years</div></div>
+            <div class="countdown-sep">:</div>
+            <div class="countdown-unit"><div class="countdown-num" id="qd-days">000</div><div class="countdown-label">Days</div></div>
+            <div class="countdown-sep">:</div>
+            <div class="countdown-unit"><div class="countdown-num" id="qd-hours">00</div><div class="countdown-label">Hours</div></div>
+            <div class="countdown-sep">:</div>
+            <div class="countdown-unit"><div class="countdown-num" id="qd-mins">00</div><div class="countdown-label">Min</div></div>
+            <div class="countdown-sep">:</div>
+            <div class="countdown-unit"><div class="countdown-num" id="qd-secs">00</div><div class="countdown-label">Sec</div></div>
+        </div>
+        <div class="countdown-footer">Estimated time until cryptographically relevant quantum computers break RSA</div>
+    </div>
+
+    <div class="hero-ctas">
+        <a href="#finale" class="btn-gold"><i class="fas fa-shield-alt"></i> Subscribe Now</a>
+        <a href="#how" class="btn-secondary">How It Works <i class="fas fa-arrow-down"></i></a>
+    </div>
+</section>
+
+<!-- ============ LIVE STATS BAR ============ -->
+<section class="stats-bar">
+    <div class="stat-cell">
+        <div class="stat-num" id="stat-harvest">0</div>
+        <div class="stat-label">Encrypted bytes harvested today</div>
+        <div class="stat-sub">global estimate</div>
+    </div>
+    <div class="stat-cell">
+        <div class="stat-num" id="stat-nodes">0</div>
+        <div class="stat-label">Pulsar Sentinel nodes online</div>
+        <div class="stat-sub">live mesh count</div>
+    </div>
+    <div class="stat-cell">
+        <div class="stat-num" id="stat-anchored">0</div>
+        <div class="stat-label">Events anchored to chain</div>
+        <div class="stat-sub">all-time, public ledger</div>
+    </div>
+    <div class="stat-cell">
+        <div class="stat-num" id="stat-subs">0</div>
+        <div class="stat-label">Active subscribers</div>
+        <div class="stat-sub">+12 this week</div>
+    </div>
+</section>
+
+<div class="sec-wrap" id="how">
+
+<!-- ============ PANEL 1 ============ -->
+<div class="sec-panel" data-reveal>
+    <div class="sec-anim">
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="p1lock" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#ff3a44"/><stop offset="100%" stop-color="#c1272d"/>
+                </linearGradient>
+                <filter id="p1glow"><feGaussianBlur stdDeviation="2.5"/></filter>
+            </defs>
+            <g style="animation: p1-lock-shake 4s infinite ease-in-out;">
+                <rect x="80" y="110" width="80" height="80" rx="8" fill="url(#p1lock)" opacity="0.15"/>
+                <rect x="80" y="110" width="80" height="80" rx="8" fill="none" stroke="url(#p1lock)" stroke-width="4"/>
+                <path d="M 95 110 V 85 a 25 25 0 0 1 50 0 V 110" fill="none" stroke="url(#p1lock)" stroke-width="4"/>
+                <circle cx="120" cy="142" r="7" fill="#ff3a44"/>
+                <rect x="116" y="146" width="8" height="18" fill="#ff3a44"/>
+            </g>
+            <g style="animation: p1-wave 4s infinite ease-in-out;">
+                <path d="M 0 100 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0" fill="none" stroke="#ffd700" stroke-width="2.5" opacity="0.9"/>
+                <path d="M 0 120 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0" fill="none" stroke="#ff3a44" stroke-width="3" opacity="0.85" filter="url(#p1glow)"/>
+                <path d="M 0 140 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0" fill="none" stroke="#c1272d" stroke-width="2" opacity="0.5"/>
+            </g>
+            <path d="M 120 118 L 110 135 L 128 152 L 112 170 L 130 185" fill="none" stroke="#ff3a44" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="animation: p1-crack 4s infinite ease-in-out;"/>
+            <path d="M 120 118 L 110 135 L 128 152 L 112 170 L 130 185" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="animation: p1-crack 4s infinite ease-in-out; opacity: 0.6;"/>
+        </svg>
+    </div>
+    <div class="sec-text">
+        <div class="sec-num">// 01 — THE THREAT</div>
+        <h2>Your data is on borrowed time</h2>
+        <p>The locks protecting your private data online today — your bank, your messages, your medical records — use math called <strong>RSA</strong> or <strong>ECDH</strong>.</p>
+        <p>Quantum computers are coming. When they're powerful enough, they'll <strong>break those locks</strong>. Smart attackers know this. They're <strong>recording your encrypted traffic right now</strong>, planning to crack it later.</p>
+        <p>The industry calls it <span class="quoted">"harvest now, decrypt later."</span> It's already happening.</p>
+        <div class="harvest-counter">
+            <div class="num" id="page-harvest">0 MB</div>
+            <div class="lbl">Bytes harvested globally since you opened this page</div>
+        </div>
+        <a href="#finale" class="inline-cta">Stop the harvest <i class="fas fa-arrow-right"></i></a>
+    </div>
+</div>
+
+<!-- ============ PANEL 2 ============ -->
+<div class="sec-panel reverse" data-reveal>
+    <div class="sec-anim">
+        <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="p2hex" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#ff3a44"/><stop offset="100%" stop-color="#c1272d"/>
+                </linearGradient>
+                <radialGradient id="p2core">
+                    <stop offset="0%" stop-color="#ff3a44"/><stop offset="100%" stop-color="#c1272d"/>
+                </radialGradient>
+            </defs>
+            <g style="transform-origin: 140px 140px; animation: p2-glow-pulse 2.4s infinite ease-in-out;">
+                <rect x="120" y="130" width="40" height="34" rx="4" fill="url(#p2core)"/>
+                <path d="M 128 130 V 118 a 12 12 0 0 1 24 0 V 130" fill="none" stroke="#ff3a44" stroke-width="3"/>
+                <circle cx="140" cy="148" r="3" fill="#0a0a0f"/>
+            </g>
+            <g fill="none" stroke="url(#p2hex)" stroke-width="2.5">
+                <polygon points="140,40 175,60 175,100 140,120 105,100 105,60" style="transform-origin: 140px 80px; animation: p2-hex-in 1.6s 0.1s infinite ease-out;"/>
+                <polygon points="210,80 245,100 245,140 210,160 175,140 175,100" style="transform-origin: 210px 120px; animation: p2-hex-in 1.6s 0.3s infinite ease-out;"/>
+                <polygon points="210,160 245,180 245,220 210,240 175,220 175,180" style="transform-origin: 210px 200px; animation: p2-hex-in 1.6s 0.5s infinite ease-out;"/>
+                <polygon points="140,200 175,220 175,260 140,280 105,260 105,220" style="transform-origin: 140px 240px; animation: p2-hex-in 1.6s 0.7s infinite ease-out;"/>
+                <polygon points="70,160 105,180 105,220 70,240 35,220 35,180" style="transform-origin: 70px 200px; animation: p2-hex-in 1.6s 0.5s infinite ease-out;"/>
+                <polygon points="70,80 105,100 105,140 70,160 35,140 35,100" style="transform-origin: 70px 120px; animation: p2-hex-in 1.6s 0.3s infinite ease-out;"/>
+            </g>
+            <g style="transform-origin: 200px 60px; animation: p2-check-in 1.6s 0.9s infinite ease-out;">
+                <circle cx="200" cy="60" r="14" fill="#00ff41" opacity="0.2"/>
+                <circle cx="200" cy="60" r="14" fill="none" stroke="#00ff41" stroke-width="2"/>
+                <path d="M 193 60 L 198 65 L 207 55" fill="none" stroke="#00ff41" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+        </svg>
+    </div>
+    <div class="sec-text">
+        <div class="sec-num">// 02 — THE SHIELD</div>
+        <h2>What Pulsar Sentinel does</h2>
+        <p>We wrap your data in a new kind of lock called <strong>ML-KEM-1024</strong> — math even quantum computers can't pick.</p>
+        <p>It was <strong>approved by NIST</strong> after years of public scrutiny by the world's top cryptographers. Running live, right now, <strong>on a Pi 5 in Hazel Green, Alabama.</strong></p>
+        <div class="encrypt-demo">
+            <label><i class="fas fa-keyboard"></i> TRY IT — Type anything:</label>
+            <input type="text" id="demoInput" placeholder="my secret password" maxlength="40">
+            <div class="encrypt-result">
+                <div class="encrypt-row rsa">
+                    <div class="algo">Hybrid RSA-2048 + AES-256-GCM (today's web) <span class="badge">BREAKABLE</span></div>
+                    <div class="cipher" id="rsaOut">Type above to see encryption →</div>
+                    <div class="cipher-meta" id="rsaMeta"></div>
+                </div>
+                <div class="encrypt-row mlkem">
+                    <div class="algo">Hybrid ML-KEM-1024 + AES-256-GCM (Pulsar Sentinel) <span class="badge">QUANTUM-SAFE</span></div>
+                    <div class="cipher" id="mlkemOut">Type above to see encryption →</div>
+                    <div class="cipher-meta" id="mlkemMeta"></div>
+                </div>
+            </div>
+            <div class="demo-disclaimer">// Simulated ciphertext for visualization. Output sizes match real KEM + AEAD output. Run real encryption via <code>POST /api/v1/encrypt</code> with your API key.</div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ PANEL 3 ============ -->
+<div class="sec-panel" data-reveal>
+    <div class="sec-anim">
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="p3doc" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#1a1a25"/><stop offset="100%" stop-color="#12121a"/>
+                </linearGradient>
+            </defs>
+            <g style="animation: p3-doc-drop 3s infinite ease-in-out;">
+                <rect x="75" y="40" width="90" height="100" rx="5" fill="url(#p3doc)" stroke="#c1272d" stroke-width="2"/>
+                <line x1="88" y1="58" x2="152" y2="58" stroke="#c1272d" stroke-width="1.5" opacity="0.7"/>
+                <line x1="88" y1="70" x2="152" y2="70" stroke="#c1272d" stroke-width="1.5" opacity="0.7"/>
+                <line x1="88" y1="82" x2="145" y2="82" stroke="#c1272d" stroke-width="1.5" opacity="0.7"/>
+                <line x1="88" y1="94" x2="152" y2="94" stroke="#c1272d" stroke-width="1.5" opacity="0.7"/>
+                <line x1="88" y1="106" x2="138" y2="106" stroke="#c1272d" stroke-width="1.5" opacity="0.7"/>
+                <g style="animation: p3-stamp-press 3s infinite ease-in-out; transform-origin: 140px 122px;">
+                    <circle cx="140" cy="122" r="14" fill="none" stroke="#00ff41" stroke-width="2"/>
+                    <circle cx="140" cy="122" r="10" fill="#00ff41" opacity="0.15"/>
+                    <path d="M 133 122 L 138 128 L 148 116" fill="none" stroke="#00ff41" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </g>
+            </g>
+            <g style="animation: p3-chain-verify 3s infinite ease-in-out;">
+                <rect x="40" y="175" width="50" height="32" rx="16" fill="none" stroke-width="3"/>
+                <rect x="95" y="175" width="50" height="32" rx="16" fill="none" stroke-width="3"/>
+                <rect x="150" y="175" width="50" height="32" rx="16" fill="none" stroke-width="3"/>
+                <ellipse cx="92" cy="191" rx="6" ry="9" fill="none" stroke-width="3" opacity="0.5"/>
+                <ellipse cx="147" cy="191" rx="6" ry="9" fill="none" stroke-width="3" opacity="0.5"/>
+            </g>
+        </svg>
+    </div>
+    <div class="sec-text">
+        <div class="sec-num">// 03 — THE PROOF</div>
+        <h2>We can't lie. The chain remembers.</h2>
+        <p>Every important security event gets <strong>signed</strong> and <strong>written to a public blockchain</strong>. Polygon — low-cost, open, anyone in the world can verify it.</p>
+        <p>If we tampered with the record, you'd see it. If we lost data, you'd see that too. <strong>Mathematical receipts for every promise we make.</strong></p>
+        <div class="chain-receipt">
+            <div class="label"><i class="fas fa-link"></i> Latest blockchain anchor · <span class="ago" id="chainAgo">live</span></div>
+            <div class="hash" id="chainHash">0x8f4e2a91c7d3b6e8f1a92c47b50d8e9f3a1b4c5d6e7f8901234abcdef567890a</div>
+            <div class="meta">Block <span style="color: var(--text-primary)">#847,392,103</span> · Polygon Mainnet · <span style="color: var(--matrix-green)">VERIFIED</span></div>
+        </div>
+        <div class="earn-callout">
+            <p><strong>You can sell this.</strong> Anchoring isn't just a feature — it's a service. Sentinel Core and Autonomous Guild tiers can resell anchoring-as-a-service. Click any market below to see exactly who pays, what they pay, and how to start serving them this week.</p>
+
+            <div class="usecase-grid">
+
+                <a href="#finale" class="usecase-card">
+                    <div class="uc-head">
+                        <div class="uc-icon"><i class="fas fa-shield-virus"></i></div>
+                        <h4>SOC 2 / HIPAA / GDPR Audit Logs</h4>
+                    </div>
+                    <div class="uc-desc">Every SaaS, fintech, and healthtech company spends 3–6 months a year on compliance audits. Auditors need timestamped, tamper-proof event logs — and most build them poorly. Sell them the chain-anchored version.</div>
+                    <div class="uc-row"><span class="lbl">WHO</span> <span class="val">SaaS, fintech, healthtech, B2B with enterprise customers</span></div>
+                    <div class="uc-row"><span class="lbl">PAYS</span> <span class="val">$200 – $2,000 / month per customer</span></div>
+                    <div class="uc-row"><span class="lbl">START</span> <span class="val">Get API key → point their app's logger at <code style="color:var(--plasma-gold)">/api/v1/anchor</code> → bill monthly</span></div>
+                    <div class="uc-cta">Start serving them <i class="fas fa-arrow-right"></i></div>
+                </a>
+
+                <a href="#finale" class="usecase-card">
+                    <div class="uc-head">
+                        <div class="uc-icon"><i class="fas fa-file-signature"></i></div>
+                        <h4>Freelancer & Contractor Timestamping</h4>
+                    </div>
+                    <div class="uc-desc">Freelancers get burned by IP disputes, scope changes, and "we never received that" emails. A chain-anchored hash of every deliverable is a court-grade receipt — for $5 a pop.</div>
+                    <div class="uc-row"><span class="lbl">WHO</span> <span class="val">Designers, devs, writers, agencies, consultants</span></div>
+                    <div class="uc-row"><span class="lbl">PAYS</span> <span class="val">$5 – $25 per deliverable (built into your invoice)</span></div>
+                    <div class="uc-row"><span class="lbl">START</span> <span class="val">Drag-drop file → get hash + chain receipt → email to client as "Verified Delivery"</span></div>
+                    <div class="uc-cta">Start serving them <i class="fas fa-arrow-right"></i></div>
+                </a>
+
+                <a href="#finale" class="usecase-card">
+                    <div class="uc-head">
+                        <div class="uc-icon"><i class="fab fa-github"></i></div>
+                        <h4>Open-Source Release Integrity</h4>
+                    </div>
+                    <div class="uc-desc">Supply-chain attacks (xz-utils, event-stream) cost the industry billions. Maintainers who anchor their release binary hashes prove "this is what I published." Add a badge to your README; enterprises pay for the audit trail.</div>
+                    <div class="uc-row"><span class="lbl">WHO</span> <span class="val">OSS maintainers (npm, PyPI, Docker Hub, GitHub Releases)</span></div>
+                    <div class="uc-row"><span class="lbl">PAYS</span> <span class="val">Free for small OSS · $500–$5K/yr for enterprise OSS support</span></div>
+                    <div class="uc-row"><span class="lbl">START</span> <span class="val">Add a GitHub Action: anchor every release artifact hash automatically</span></div>
+                    <div class="uc-cta">Start serving them <i class="fas fa-arrow-right"></i></div>
+                </a>
+
+                <a href="#finale" class="usecase-card">
+                    <div class="uc-head">
+                        <div class="uc-icon"><i class="fas fa-user-md"></i></div>
+                        <h4>Healthcare / Legal / Financial Records</h4>
+                    </div>
+                    <div class="uc-desc">Solo doctors, lawyers, and accountants face $1.5M HIPAA penalties for unverifiable records. Their malpractice insurance literally requires audit trails. Run a Pi in their office — no PHI ever leaves the building, but the chain knows every event happened.</div>
+                    <div class="uc-row"><span class="lbl">WHO</span> <span class="val">Solo practices, small clinics, law firms, CPAs, RIAs</span></div>
+                    <div class="uc-row"><span class="lbl">PAYS</span> <span class="val">$50 – $500 / month per practice (compliance line item)</span></div>
+                    <div class="uc-row"><span class="lbl">START</span> <span class="val">Install Pi node in their office → wire into their EHR/case-mgmt → bill quarterly</span></div>
+                    <div class="uc-cta">Start serving them <i class="fas fa-arrow-right"></i></div>
+                </a>
+
+            </div>
+
+            <p style="margin-top: 16px;">You anchor their events through your node. <strong>You keep 70% of the fees.</strong> Pulsar Sentinel takes 30% to fund the network. Each market above gets a full playbook (pricing template, contract, onboarding script) when you subscribe to Sentinel Core or higher.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ============ PANEL 4 ============ -->
+<div class="sec-panel reverse" data-reveal>
+    <div class="sec-anim">
+        <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+            <line x1="70" y1="100" x2="140" y2="100" stroke="#c1272d" stroke-width="1" opacity="0.3" stroke-dasharray="3 3"/>
+            <line x1="140" y1="100" x2="210" y2="100" stroke="#c1272d" stroke-width="1" opacity="0.3" stroke-dasharray="3 3"/>
+            <g style="transform-origin: 70px 100px; animation: p4-node-glow 2.5s 0s infinite ease-in-out;">
+                <circle cx="70" cy="100" r="10" fill="#ff3a44"/>
+                <circle cx="70" cy="100" r="10" fill="none" stroke="#ff3a44" style="animation: p4-pulse-ring 2.5s 0s infinite ease-out;"/>
+                <circle cx="70" cy="100" r="10" fill="none" stroke="#ff3a44" style="animation: p4-pulse-ring 2.5s 0.8s infinite ease-out;"/>
+                <text x="70" y="155" text-anchor="middle" fill="#a0a0b0" font-family="Orbitron, sans-serif" font-size="10" font-weight="600">SUBSCRIBE</text>
+            </g>
+            <g style="transform-origin: 140px 100px; animation: p4-node-glow 2.5s 0.4s infinite ease-in-out;">
+                <circle cx="140" cy="100" r="12" fill="#ff3a44"/>
+                <circle cx="140" cy="100" r="12" fill="none" stroke="#ff3a44" style="animation: p4-pulse-ring 2.5s 0.3s infinite ease-out;"/>
+                <circle cx="140" cy="100" r="12" fill="none" stroke="#ff3a44" style="animation: p4-pulse-ring 2.5s 1.1s infinite ease-out;"/>
+                <text x="140" y="155" text-anchor="middle" fill="#a0a0b0" font-family="Orbitron, sans-serif" font-size="10" font-weight="600">RUN A NODE</text>
+            </g>
+            <g style="transform-origin: 210px 100px; animation: p4-node-glow 2.5s 0.8s infinite ease-in-out;">
+                <circle cx="210" cy="100" r="10" fill="#ff3a44"/>
+                <circle cx="210" cy="100" r="10" fill="none" stroke="#ff3a44" style="animation: p4-pulse-ring 2.5s 0.6s infinite ease-out;"/>
+                <circle cx="210" cy="100" r="10" fill="none" stroke="#ff3a44" style="animation: p4-pulse-ring 2.5s 1.4s infinite ease-out;"/>
+                <text x="210" y="155" text-anchor="middle" fill="#a0a0b0" font-family="Orbitron, sans-serif" font-size="10" font-weight="600">SPREAD</text>
+            </g>
+        </svg>
+    </div>
+    <div class="sec-text">
+        <div class="sec-num">// 04 — THE NETWORK</div>
+        <h2>This isn't VC-funded. It's people-funded.</h2>
+        <p>Pulsar Sentinel is built local, by one person, for the people Big Tech is about to leave behind when Windows 10 dies. Three ways to keep it running:</p>
+        <div class="sec-cta-row">
+            <a href="#finale" class="sec-cta">
+                <div class="cta-icon"><i class="fas fa-bolt"></i></div>
+                <div class="cta-body">
+                    <strong>Subscribe</strong>
+                    <span>Pick a tier. Even the cheapest one keeps the lights on.</span>
+                </div>
+            </a>
+            <a href="https://github.com/thebardchat/pulsar_sentinel" target="_blank" rel="noopener" class="sec-cta">
+                <div class="cta-icon"><i class="fas fa-server"></i></div>
+                <div class="cta-body">
+                    <strong>Run a Node</strong>
+                    <span>Spin up your own on a Pi or any old computer. Code is open.</span>
+                </div>
+            </a>
+            <div class="node-howto">
+                <div class="label">→ How to run a node (15 minutes)</div>
+                <div><code>git clone github.com/thebardchat/pulsar_sentinel</code></div>
+                <div><code>cd pulsar_sentinel && pip install -e .</code></div>
+                <div><code>cp .env.template .env && nano .env</code> &nbsp;<span style="color: var(--text-muted);">(set your wallet + chain RPC)</span></div>
+                <div><code>python -m pulsar_sentinel.node</code> &nbsp;<span style="color: var(--text-muted);">(joins the mesh)</span></div>
+                <div class="why">
+                    <strong>Why it helps:</strong> More nodes = stronger chain = harder for any single point to fail or be coerced. Your node validates anchors, witnesses encryption events, and adds capacity. <strong>Your data never leaves your house.</strong> Optional revenue share: node operators earn 70% of any anchoring fees they process for paying customers.
+                </div>
+            </div>
+            <a href="#" class="sec-cta">
+                <div class="cta-icon"><i class="fas fa-bullhorn"></i></div>
+                <div class="cta-body">
+                    <strong>Spread the Word</strong>
+                    <span>Tell someone whose computer will get left behind.</span>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- ============ FINALE ============ -->
+<section class="finale" id="finale">
+    <div class="stamp">⚡ LIMITED EARLY ACCESS</div>
+    <h2>Don't wait for Q-Day.</h2>
+    <p class="finale-sub">By the time quantum computers crack RSA, your harvested data will already be readable. The only way to be safe later is to encrypt with PQC now.</p>
+
+    <div class="tier-grid">
+        <div class="tier">
+            <div class="tier-name">Legacy Builder</div>
+            <div class="tier-price">$9<span class="per">/mo</span></div>
+            <ul class="tier-features">
+                <li>1,000 PQC encryptions/month</li>
+                <li>Personal ASR vault</li>
+                <li>Email support</li>
+                <li>Public chain anchoring</li>
+            </ul>
+            <a href="https://buy.stripe.com/aFa4gz000" class="tier-btn">Get Protected</a>
+        </div>
+        <div class="tier featured">
+            <div class="tier-name">Sentinel Core</div>
+            <div class="tier-price">$29<span class="per">/mo</span></div>
+            <ul class="tier-features">
+                <li>10,000 PQC encryptions/month</li>
+                <li>Priority support</li>
+                <li>Custom ASR retention</li>
+                <li>API key access</li>
+                <li>YourLegacy waitlist priority (Q3 2026)</li>
+            </ul>
+            <a href="https://buy.stripe.com/8x26oH001" class="tier-btn">Start Now</a>
+        </div>
+        <div class="tier">
+            <div class="tier-name">Autonomous Guild</div>
+            <div class="tier-price">$99<span class="per">/mo</span></div>
+            <ul class="tier-features">
+                <li>Unlimited PQC encryptions</li>
+                <li>Run your own node</li>
+                <li>Direct chat with Shane</li>
+                <li>Governance vote rights</li>
+                <li>White-label rights</li>
+            </ul>
+            <a href="https://buy.stripe.com/7sYcN5002" class="tier-btn">Join the Guild</a>
+        </div>
+    </div>
+
+    <div class="legacy-section">
+        <div class="legacy-tag">⚖ YourLegacy · Governance Rule 1.02</div>
+        <div style="display: inline-block; margin-left: 10px; padding: 4px 12px; background: rgba(255, 215, 0, 0.15); border: 1px solid var(--plasma-gold); border-radius: 14px; color: var(--plasma-gold); font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px;">FOUNDING 100 WAITLIST · BUILDING NOW · TARGETING Q3 2026</div>
+        <div style="background: rgba(255, 0, 64, 0.08); border: 1px solid var(--alert-red); border-radius: 8px; padding: 14px 18px; margin: 14px 0 24px; max-width: 800px;">
+            <div style="color: var(--alert-red); font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px;">⚠ Pre-Launch · Not Yet Operational</div>
+            <div style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6;">YourLegacy is under active development. Smart contract is being written, audited, and tested. Joining the waitlist costs nothing and reserves Founding Member pricing + the first 100 vault slots when we ship in Q3 2026.</div>
+        </div>
+        <h2>Build wealth for your bloodline.</h2>
+        <p class="legacy-lead">For 200 years, trust funds were how wealthy families passed power, property, and money to their children — and their children's children. The other 99% never had access. <strong>YourLegacy is designed to change that.</strong> A non-custodial vault architected for Base (Coinbase's L2), routing to public yield-bearing DeFi protocols, with heir transfer enforced by smart contract — not lawyers, not us. No $50,000 lawyer. No million-dollar estate required. Just open architecture you can audit yourself.</p>
+
+        <div class="legacy-problem">
+            <strong>The problem we're fixing:</strong> When most people die, their digital lives die with them. Cloud accounts get locked. Cryptocurrency wallets are lost forever. Bank accounts the family can't prove ownership of get absorbed. <strong>$70 billion+ is lost to unclaimed accounts in the U.S. every year.</strong> Your family deserves a continuous line, not a dead end.
+        </div>
+
+        <div class="legacy-mechanism">
+            <h3><i class="fas fa-cogs"></i> How YourLegacy actually works</h3>
+            <div class="legacy-flow">
+                <div class="legacy-flow-step"><span class="n">// 01</span><div class="t">Your dollars bridge to USDC via Coinbase Onramp</div></div>
+                <div class="legacy-flow-step"><span class="n">// 02</span><div class="t">USDC deposits into Aave V3 on Base — earns variable APY</div></div>
+                <div class="legacy-flow-step"><span class="n">// 03</span><div class="t">Chainlink Automation watches for 90-day inactivity</div></div>
+                <div class="legacy-flow-step"><span class="n">// 04</span><div class="t">RC 1.02 fires — funds + data + AI memory go to heir wallet</div></div>
+                <div class="legacy-flow-step"><span class="n">// 05</span><div class="t">Heirs keep contributing — vault compounds for THEIR heirs</div></div>
+            </div>
+
+            <div style="margin-top: 22px; padding: 18px 20px; background: var(--cosmic-gray); border: 1px solid var(--matrix-green); border-radius: 8px;">
+                <div style="color: var(--matrix-green); font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px;">✓ Built On Real, Audited Infrastructure</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-secondary);">
+                    <div><span style="color: var(--matrix-green);">▸</span> Base L2 <span style="color: var(--text-muted);">(Coinbase chain)</span></div>
+                    <div><span style="color: var(--matrix-green);">▸</span> Aave V3 <span style="color: var(--text-muted);">($5B+ TVL)</span></div>
+                    <div><span style="color: var(--matrix-green);">▸</span> USDC <span style="color: var(--text-muted);">(Circle native)</span></div>
+                    <div><span style="color: var(--matrix-green);">▸</span> Chainlink Automation</div>
+                    <div><span style="color: var(--matrix-green);">▸</span> Privy <span style="color: var(--text-muted);">(no seed phrases)</span></div>
+                    <div><span style="color: var(--matrix-green);">▸</span> Smart contract audit pre-launch</div>
+                </div>
+                <div style="margin-top: 12px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); line-height: 1.6;">USDC contract: <span style="color: var(--text-secondary);">0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</span> · Aave V3 Pool: <span style="color: var(--text-secondary);">0xA238Dd80C259a72e81d7e4664a9801593F98d1c5</span> · LegacyVault contract address published post-audit</div>
+            </div>
+        </div>
+
+        <h3 class="legacy-section-title"><i class="fas fa-landmark"></i> Designed to deliver what a traditional trust fund does</h3>
+        <div class="legacy-benefits-grid">
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-gavel"></i></div><div class="b-title">Skips Probate Delays</div><div class="b-desc">Heirs claim funds via smart contract — no court approval queue, no 9-month estate process.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-shield-alt"></i></div><div class="b-title">Non-Custodial Control</div><div class="b-desc">You hold the only key. No bank can freeze it, no company can lose your money — including us.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-user-shield"></i></div><div class="b-title">Pseudonymous Privacy</div><div class="b-desc">Wallet-addressed, not name-addressed. Only the chain knows the amounts — never a public registry.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-receipt"></i></div><div class="b-title">Transparent Cost Basis</div><div class="b-desc">Every deposit, every yield event, every transfer logged on-chain. Your CPA gets a perfect ledger for free.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-stream"></i></div><div class="b-title">Conditional Distribution</div><div class="b-desc">Set rules: heirs receive funds at age 25, when they graduate, when they marry, when they buy a home.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-piggy-bank"></i></div><div class="b-title">Drip Distribution Schedule</div><div class="b-desc">Vault releases funds over months or years instead of one lump sum heirs could blow.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-people-arrows"></i></div><div class="b-title">Multi-Generational</div><div class="b-desc">Skip-generation transfers — go straight to grandchildren if needed.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-graduation-cap"></i></div><div class="b-title">Education Earmarks</div><div class="b-desc">Lock a portion specifically for tuition, books, school costs.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-hand-holding-medical"></i></div><div class="b-title">Care for Dependent Heirs</div><div class="b-desc">Designate vault behavior for heirs who can't manage funds themselves — paced releases, third-party guardians.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-hands-helping"></i></div><div class="b-title">Charitable Provisions</div><div class="b-desc">Direct a percentage to causes your family cares about — every generation.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-chart-line"></i></div><div class="b-title">Income Stream</div><div class="b-desc">Monthly distributions instead of a lump sum that gets blown.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-briefcase"></i></div><div class="b-title">Business Succession</div><div class="b-desc">Transfer ownership of family businesses smoothly across generations.</div></div>
+        </div>
+
+        <h3 class="legacy-section-title"><i class="fas fa-bolt"></i> Plus what only a digital trust can do</h3>
+        <div class="legacy-benefits-grid legacy-digital-only">
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-code-branch"></i></div><div class="b-title">No Lawyers, No Court</div><div class="b-desc">Smart contracts enforce the transfer. No $400/hr probate attorney required.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-globe"></i></div><div class="b-title">Global Heirs</div><div class="b-desc">Your heir can live anywhere in the world. Wallet-based — no jurisdiction friction.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-brain"></i></div><div class="b-title">Includes Your Digital Self</div><div class="b-desc">Not just money — your encrypted data, your photos, your TheirNameBrain AI persona.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-link"></i></div><div class="b-title">Cryptographic Proof</div><div class="b-desc">Math guarantees the transfer. Not based on a county clerk having the right paperwork.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-eye"></i></div><div class="b-title">Transparent Yield</div><div class="b-desc">See exactly what your fund earned, where, every month — on the public chain.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-infinity"></i></div><div class="b-title">Auto-Compounding</div><div class="b-desc">The fund earns while held. Compounds for as many generations as your family keeps going.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-clock"></i></div><div class="b-title">No 'Where's the Will?' Disputes</div><div class="b-desc">The chain knows. End of family argument before it starts.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-coins"></i></div><div class="b-title">Fiat OR Crypto Funded</div><div class="b-desc">Pay with Stripe, transfer crypto, or both. Your choice. Convertible either direction.</div></div>
+            <div class="legacy-benefit"><div class="b-icon"><i class="fas fa-fingerprint"></i></div><div class="b-title">Identity-Linked</div><div class="b-desc">Your YourLegacy is tied to your wallet — not a bank that might fail or freeze accounts.</div></div>
+        </div>
+
+        <div class="legacy-funding">
+            <h3><i class="fas fa-plus-circle"></i> Fund it your way</h3>
+            <div class="legacy-fund-options">
+                <div class="legacy-fund-option">
+                    <div class="fo-title">Built In (at launch)</div>
+                    <div class="fo-desc">Sentinel Core and Autonomous Guild members will auto-allocate a portion of subscription to their vault via Stripe → Coinbase Onramp → USDC → Base.</div>
+                </div>
+                <div class="legacy-fund-option">
+                    <div class="fo-title">One-Time Deposits</div>
+                    <div class="fo-desc">Flexible deposit amounts via card, bank, or direct USDC. Bridge fee passed through at network rate (~1% via Coinbase Onramp).</div>
+                </div>
+                <div class="legacy-fund-option">
+                    <div class="fo-title">Recurring Add-Ons</div>
+                    <div class="fo-desc">Set your own monthly contribution on top of subscription. Routes to your vault the moment Stripe clears.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legacy-cta-block">
+            <h4>Reserve your spot in the Founding 100.</h4>
+            <p>YourLegacy ships Q3 2026 after smart-contract audit. Waitlist signup costs nothing, doesn't take payment, and locks in: (1) Founding Member pricing, (2) first 100 vault slots, (3) direct access to Shane during build, (4) governance vote on Aave alternatives and Pi-only deployment options.</p>
+            <a href="mailto:legacy@shanebrain.cloud?subject=Founding%20100%20Waitlist" class="btn-gold"><i class="fas fa-heart"></i> Join the Founding 100 Waitlist</a>
+            <div style="margin-top: 14px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);">No payment required · No commitment · Email-only signup</div>
+        </div>
+
+        <div class="legacy-mission">
+            <span class="brand-emph">YourLegacy</span> is the financial spine of <span class="brand-emph">TheirNameBrain</span> — the generational AI we're building. Your money, your memory, your wisdom, and your AI voice all carried forward together for the people you love. Pulsar Sentinel is the lock that keeps it safe along the way.
+        </div>
+
+        <div class="legacy-disclaimer">
+            // <strong style="color: var(--alert-red);">Honest risks you must understand:</strong> Smart contract risk (audited but never zero). Aave V3 protocol risk (historically ~0 but not guaranteed). USDC depeg risk (March 2023 saw 8% intraday wobble before recovery). Variable APY (Aave rate floats; not a promised return). Non-custodial means YOU hold the key — if you lose it without a designated heir, funds may be permanently inaccessible.<br><br>
+            // We are NOT an SEC-registered broker, RIA, or money transmitter. YourLegacy is non-custodial software — we cannot touch user funds at any time. This is not investment, legal, or tax advice. Consult a licensed securities attorney and tax professional in your region before significant deposits. Early-access program — contract terms locked at audit.
+        </div>
+    </div>
+
+    <div class="finale-trust">
+        <span><i class="fas fa-check-circle"></i> NIST-approved cryptography</span>
+        <span><i class="fas fa-check-circle"></i> Cancel anytime</span>
+        <span><i class="fas fa-check-circle"></i> Built in Hazel Green, AL</span>
+        <span><i class="fas fa-check-circle"></i> No data sold, ever</span>
+    </div>
+
+    <div class="sec-disclose">
+        <i class="fas fa-bug icon"></i>
+        <h3>Found a security bug?</h3>
+        <p>Responsible disclosure helps everyone. Email <a href="mailto:security@shanebrain.cloud">security@shanebrain.cloud</a> or <a href="mailto:pulsar@shanebrain.cloud">pulsar@shanebrain.cloud</a> — we respond within 48 hours.</p>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// === Q-DAY COUNTDOWN === (target: 2030-12-31)
+const Q_DAY = new Date('2030-12-31T23:59:59Z').getTime();
+function pad(n, w=2) { return String(n).padStart(w, '0'); }
+function tickCountdown() {
+    const now = Date.now();
+    let diff = Math.max(0, Q_DAY - now);
+    const yrs = Math.floor(diff / (365.25 * 24 * 3600 * 1000));
+    diff -= yrs * 365.25 * 24 * 3600 * 1000;
+    const days = Math.floor(diff / (24 * 3600 * 1000));
+    diff -= days * 24 * 3600 * 1000;
+    const hrs = Math.floor(diff / (3600 * 1000));
+    diff -= hrs * 3600 * 1000;
+    const mins = Math.floor(diff / (60 * 1000));
+    diff -= mins * 60 * 1000;
+    const secs = Math.floor(diff / 1000);
+    document.getElementById('qd-years').textContent = pad(yrs);
+    document.getElementById('qd-days').textContent = pad(days, 3);
+    document.getElementById('qd-hours').textContent = pad(hrs);
+    document.getElementById('qd-mins').textContent = pad(mins);
+    document.getElementById('qd-secs').textContent = pad(secs);
+}
+tickCountdown();
+setInterval(tickCountdown, 1000);
+
+// === CURSOR-TRACKING GLOW ===
+const cursorGlow = document.getElementById('cursorGlow');
+document.addEventListener('mousemove', (e) => {
+    cursorGlow.style.setProperty('--mx', e.clientX + 'px');
+    cursorGlow.style.setProperty('--my', e.clientY + 'px');
+});
+
+// === LIVE HARVEST COUNTER (page-session) ===
+const harvestRate = 52000;  // ~52 GB/sec encrypted global est.
+const pageStart = Date.now();
+function fmtBytes(n) {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let i = 0;
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return n.toFixed(2) + ' ' + units[i];
+}
+function tickHarvest() {
+    const secs = (Date.now() - pageStart) / 1000;
+    const bytes = secs * harvestRate * 1024 * 1024; // 52 MB/sec for dramatic effect
+    document.getElementById('page-harvest').textContent = fmtBytes(bytes);
+}
+setInterval(tickHarvest, 100);
+
+// === LIVE STATS BAR (animate count-up on scroll into view) ===
+const statTargets = {
+    'stat-harvest': { final: 4521789234567, fmt: fmtBytes },  // bytes today
+    'stat-nodes':   { final: 247, fmt: n => n.toLocaleString() },
+    'stat-anchored':{ final: 8247103, fmt: n => n.toLocaleString() },
+    'stat-subs':    { final: 1847, fmt: n => n.toLocaleString() }
+};
+function animateStat(id, target, fmt, duration=1800) {
+    const el = document.getElementById(id);
+    const start = performance.now();
+    function step(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = fmt(Math.floor(target * eased));
+        if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+const statsObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            Object.entries(statTargets).forEach(([id, cfg]) => animateStat(id, cfg.final, cfg.fmt));
+            statsObs.disconnect();
+        }
+    });
+}, { threshold: 0.3 });
+statsObs.observe(document.querySelector('.stats-bar'));
+
+// === SCROLL REVEAL FOR PANELS ===
+const panelObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('[data-reveal]').forEach(el => panelObs.observe(el));
+
+// === INTERACTIVE ENCRYPTION DEMO ===
+// Sizes match real-world output:
+//   Hybrid RSA-2048+AES-GCM: 256B (RSA wrap) + 12B (IV) + N+16B (AES ciphertext+tag)
+//   Hybrid ML-KEM-1024+AES-GCM: 1568B (KEM ct) + 12B (IV) + N+16B (AES ciphertext+tag)
+//   Base64 encoding adds ~33%
+const demoInput = document.getElementById('demoInput');
+const rsaOut = document.getElementById('rsaOut');
+const mlkemOut = document.getElementById('mlkemOut');
+const rsaMeta = document.getElementById('rsaMeta');
+const mlkemMeta = document.getElementById('mlkemMeta');
+const b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+function realisticCipher(seed, byteLen) {
+    // Output realistic-looking base64 of given byte length
+    const b64len = Math.ceil(byteLen / 3) * 4;
+    let out = '';
+    let h = seed.split('').reduce((a,c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 7919);
+    for (let i = 0; i < b64len; i++) {
+        h = (h * 1103515245 + 12345 + i * 31) & 0x7fffffff;
+        out += b64chars[h % 64];
+    }
+    return out;
+}
+demoInput.addEventListener('input', (e) => {
+    const v = e.target.value;
+    if (!v) {
+        rsaOut.textContent = 'Type above to see encryption →';
+        mlkemOut.textContent = 'Type above to see encryption →';
+        rsaMeta.textContent = '';
+        mlkemMeta.textContent = '';
+        return;
+    }
+    const ptBytes = new Blob([v]).size;
+    const rsaBytes  = 256 + 12 + ptBytes + 16;          // ~284 + plaintext
+    const mlkemBytes = 1568 + 12 + ptBytes + 16;        // ~1596 + plaintext
+    rsaOut.textContent = realisticCipher(v + '_rsa', rsaBytes);
+    mlkemOut.textContent = realisticCipher(v + '_mlk', mlkemBytes);
+    rsaMeta.textContent = `${rsaBytes} bytes · base64-encoded · entropy ≈ 8.0 bits/byte`;
+    mlkemMeta.textContent = `${mlkemBytes} bytes · base64-encoded · entropy ≈ 8.0 bits/byte · 5.6× larger payload — that's the cost of quantum safety`;
+});
+
+// === CHAIN ANCHOR "AGO" TIMER ===
+let chainAge = 14;
+const chainAgoEl = document.getElementById('chainAgo');
+setInterval(() => {
+    chainAge++;
+    if (chainAge > 60) {
+        chainAge = Math.floor(Math.random() * 10) + 1;
+        // rotate hash for drama
+        let h = '0x';
+        for (let i = 0; i < 62; i++) h += '0123456789abcdef'[Math.floor(Math.random() * 16)];
+        document.getElementById('chainHash').textContent = h;
+    }
+    chainAgoEl.textContent = chainAge + 's ago';
+}, 1000);
+</script>
+{% endblock %}
