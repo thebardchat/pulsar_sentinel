@@ -1,0 +1,22 @@
+# Foundry build artifacts
+out/
+cache/
+broadcast/
+
+# Local environment — NEVER commit
+.env
+.env.local
+
+# Dependencies (managed via forge install)
+lib/
+
+# OS / editor noise
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Coverage
+lcov.info
+coverage/

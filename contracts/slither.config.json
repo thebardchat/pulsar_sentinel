@@ -1,0 +1,10 @@
+{
+  "detectors_to_exclude": "naming-convention,solc-version,assembly,pragma",
+  "exclude_dependencies": true,
+  "filter_paths": "lib/|test/",
+  "solc_remaps": [
+    "@openzeppelin/=lib/openzeppelin-contracts/",
+    "@aave/core-v3/=lib/aave-v3-core/",
+    "forge-std/=lib/forge-std/src/"
+  ]
+}
