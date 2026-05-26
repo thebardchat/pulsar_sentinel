@@ -1,14 +1,20 @@
-# YourLegacy Mindmap — Single-File Integration
+# ShaneBrain Universal Mindmap — Tailscale-Live Integration
 
-> **Last Updated:** 2026-05-25 | **Owner:** Shane Brazelton | **Canonical path:** `/mnt/shanebrain-raid/shanebrain-core/yourlegacy-mindmap.html` on the Pi
+> **Last Updated:** 2026-05-25 | **Owner:** Shane Brazelton
+> **Live URL:** `http://100.67.120.6:8600` (Tailscale, every node)
+> **Source state:** `/mnt/shanebrain-raid/shanebrain-core/mindmap-state.json` on Pi
 
 ---
 
 ## The rule (read this first)
 
-**One file. Always overwritten. Never duplicated.** No more `yourlegacy-mindmap.html`, `yourlegacy-mindmap-v2.html`, `yourlegacy-mindmap-final.html`, etc. The Pi is the source of truth; every other machine pulls a copy via the existing claudemd-sync rails.
+**One service. Every project. One URL. Every device.**
 
-When something changes, **the old state is shown with a red strikethrough above the new state.** Auditor-grade visual diff: nothing gets lost.
+Open `http://100.67.120.6:8600` on pulsar00100, gulfshores, neworleans, your iPhone (over Tailscale), or any laptop on the mesh — same live state, every time. No file copying. No "is this the latest?" friction. No proliferation of HTML files. Bookmark it on Safari and you're one tap from the whole brain.
+
+Projects are **tabs inside the same UI**: YourLegacy, Pulsar Sentinel, SRM Dispatch, Book 2, Claim Cruncher, AI-Trainer-MAX, HaloFinance, MEGA Crew, Wrestling Facility — all live behind the same URL. Add new projects on the fly via the `/api/delta` endpoint (the updater script handles this).
+
+When something changes, **the old state shows with a red strikethrough above the new state.** Auditor-grade visual diff: nothing gets lost.
 
 ---
 
@@ -16,14 +22,15 @@ When something changes, **the old state is shown with a red strikethrough above 
 
 | Surface | Path | Authority |
 |---|---|---|
-| Source of truth | `/mnt/shanebrain-raid/shanebrain-core/yourlegacy-mindmap.html` on Pi (`shanebrain` node) | ✅ Canonical |
-| State cache | `/mnt/shanebrain-raid/shanebrain-core/yourlegacy-mindmap.state.json` on Pi | Tracks applied deltas |
-| Updater script | `scripts/update_mindmap.py` | Reads Weaviate, applies deltas, rewrites HTML |
-| Systemd service | `scripts/update-mindmap.service` | Runs the script |
-| Systemd timer | `scripts/update-mindmap.timer` | Schedules hourly + boot runs |
-| Hubby Desktop copy | `~/Desktop/yourlegacy-mindmap.html` | Read-only mirror (via claudemd-sync rails) |
-| iPhone | Taildrop drop folder | Read-only mirror |
-| Google Drive | `shanebrain@shanebrain.cloud` → Drive | Read-only mirror |
+| Live URL | `http://100.67.120.6:8600` (Tailscale) | ✅ Where you actually look |
+| Server | `scripts/mindmap_server.py` on Pi:8600 | FastAPI app, serves UI + API |
+| Server systemd | `scripts/mindmap-server.service` | Auto-start on boot, restart on failure |
+| State file | `/mnt/shanebrain-raid/shanebrain-core/mindmap-state.json` | Canonical multi-project state |
+| Updater script | `scripts/update_mindmap.py` | Reads Weaviate, posts deltas to server |
+| Updater systemd | `scripts/update-mindmap.{service,timer}` | Hourly delta sync |
+| API endpoints | `GET /api/state` · `POST /api/delta` · `GET /api/projects` | Programmatic access |
+| Health check | `GET /api/health` | Liveness probe for uptime monitor |
+| iPhone bookmark | `http://100.67.120.6:8600` saved to Safari Home Screen | One-tap access over Tailscale |
 
 ---
 
@@ -36,16 +43,16 @@ When something changes, **the old state is shown with a red strikethrough above 
         ↓
 [update_mindmap.py queries Weaviate for new deltas]
         ↓
-[Applies deltas to state.json — adds / modifies / removes nodes]
+[POST each delta to http://localhost:8600/api/delta]
         ↓
-[Re-renders yourlegacy-mindmap.html — overwrites in place]
+[mindmap_server.py applies to state JSON in place]
         ↓
-[inotifywait detects the file mtime change]
-        ↓
-[claudemd-sync distributes to Desktop / iPhone / Drive / Discord / email]
+[Next page load (or 30-second poll) shows the change live]
         ↓
 [shanebrain_daily_briefing includes "Mindmap deltas (last 24h)" section]
 ```
+
+**Every device on Tailscale sees the same live state in real time.** The UI auto-polls every 30 seconds. No reload needed.
 
 ---
 
@@ -102,25 +109,45 @@ ssh shanebrain@100.67.120.6
 cd /mnt/shanebrain-raid/pulsar-sentinel
 git pull origin main
 
-# Copy the script + units to shanebrain-core (keeps mindmap with the Pi tools, not the Sentinel app)
+# Install Python deps (one-time)
+pip3 install --user fastapi 'uvicorn[standard]'
+
+# Copy server + updater + units to shanebrain-core
+sudo mkdir -p /mnt/shanebrain-raid/shanebrain-core/scripts
+sudo cp scripts/mindmap_server.py /mnt/shanebrain-raid/shanebrain-core/scripts/
 sudo cp scripts/update_mindmap.py /mnt/shanebrain-raid/shanebrain-core/scripts/
+sudo chmod +x /mnt/shanebrain-raid/shanebrain-core/scripts/mindmap_server.py
 sudo chmod +x /mnt/shanebrain-raid/shanebrain-core/scripts/update_mindmap.py
 
-# Install the systemd units
+# Install all three systemd units
+sudo cp scripts/mindmap-server.service /etc/systemd/system/
 sudo cp scripts/update-mindmap.service /etc/systemd/system/
 sudo cp scripts/update-mindmap.timer /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now update-mindmap.timer
 
-# Verify the timer is scheduled
+# Start the server first (it serves the UI + API)
+sudo systemctl enable --now mindmap-server.service
+sudo systemctl status mindmap-server.service
+
+# Then start the updater timer (hourly delta pulls from Weaviate)
+sudo systemctl enable --now update-mindmap.timer
 systemctl list-timers update-mindmap.timer
 
-# Manual first run to seed the state file
-sudo systemctl start update-mindmap.service
-sudo journalctl -u update-mindmap.service -n 50
+# Verify the server is live
+curl http://localhost:8600/api/health
+# Expected: {"status":"ok","service":"shanebrain-mindmap","port":8600}
 
-# Confirm the canonical HTML now exists
-ls -lah /mnt/shanebrain-raid/shanebrain-core/yourlegacy-mindmap.html
+# Open from any Tailscale device:
+#   http://100.67.120.6:8600
+# On iPhone Safari: Share → Add to Home Screen for one-tap access
+```
+
+## Optional — public URL via Cloudflare tunnel
+
+```bash
+# Add a mapping in your cloudflared config (where mcp.shanebrain.cloud already routes):
+# mindmap.shanebrain.cloud → http://localhost:8600
+# Then any device anywhere on the internet (with the right auth) sees it.
 ```
 
 ---

@@ -1,0 +1,227 @@
+{
+  "projects": {
+    "yourlegacy": {
+      "title": "YourLegacy",
+      "subtitle": "Non-custodial Digital Trust · Q3 2026",
+      "phase-1": [
+        {
+          "title": "USDC → Aave V3 on Base",
+          "status": "built",
+          "date": "2026-05-25",
+          "date_label": "ADDED",
+          "what": "Vault pulls USDC, supplies to Aave V3 Pool, aTokens accrue. Subscription router can deposit too.",
+          "shane_note": "Is this set up or is it a separate step? — Both, depending on layer.",
+          "tech": "<strong>Contract:</strong> deposit() built + tested<br><strong>Tests:</strong> 6 deposit tests pass<br><strong>Onramp:</strong> Phase 3 (Coinbase Onramp wire-up)"
+        },
+        {
+          "title": "90-day inactivity trigger",
+          "status": "built",
+          "date": "2026-05-25",
+          "date_label": "ADDED",
+          "what": "Owner pings to prove alive. 90 days silence → heir can inherit. Threshold immutable at deploy, min 7-day floor.",
+          "shane_note": "Should add in-depth steps before anything else fires off because choices may be given.",
+          "tech": "<strong>Contract:</strong> ping() + inherit() + OwnerStillActive error<br><strong>Tests:</strong> Reverts before threshold, succeeds after, ping-resets-clock",
+          "choices": ["Threshold length at deploy (7d to unlimited)", "Auto-sign monthly (set-and-forget)", "Manual ping anytime", "Deposit also refreshes heartbeat"]
+        },
+        {
+          "title": "RC 1.02 fires — funds to heir",
+          "status": "built",
+          "date": "2026-05-25",
+          "date_label": "ADDED",
+          "what": "After threshold, beneficiary calls inherit(). Entire aToken position withdraws to heir. Vault locks forever.",
+          "shane_note": "Big measures to offer our product to family for years — creating users' own Legacy.",
+          "tech": "<strong>Contract:</strong> inherit() (CEI, ReentrancyGuard)<br><strong>RC code:</strong> 1.02 Heir Transfer<br><strong>One-shot:</strong> inherited=true blocks re-entry",
+          "choices": ["Cash out", "One-click new vault for THEIR heirs (Founding Family discount)", "30-day grace before deciding", "First LegacyAI session free as part of inheritance"]
+        },
+        {
+          "title": "Non-custodial — only key holds",
+          "status": "built",
+          "date": "2026-05-25",
+          "date_label": "ADDED",
+          "what": "No admin keys. No backdoor. Shane / Angel Cloud / Pulsar cannot move user funds.",
+          "shane_note": "Mourning then rejoicing — family meets LegacyAI at the same time the vault transfers."
+        },
+        {
+          "title": "Transparent cost basis on-chain",
+          "status": "built",
+          "date": "2026-05-25",
+          "date_label": "ADDED",
+          "what": "Every Deposited / Pinged / Inherited event lives on-chain forever.",
+          "shane_note": "Where we can offer routes based on User preferences — CPA / family digest / charity / pure privacy."
+        },
+        {
+          "title": "Skips probate delays",
+          "status": "built",
+          "date": "2026-05-25",
+          "date_label": "ADDED",
+          "what": "Heir calls inherit() — funds transfer same block. No 9-month estate, no court queue."
+        },
+        {
+          "title": "Pseudonymous (wallet-addressed)",
+          "status": "built",
+          "date": "2026-05-25",
+          "date_label": "ADDED",
+          "what": "Vault owned by wallet, not name. Chain shows balances but never identities."
+        },
+        {
+          "title": "Cryptographic proof",
+          "status": "built",
+          "date": "2026-05-25",
+          "date_label": "ADDED",
+          "what": "Every tx signed by caller's private key. ECDSA secp256k1."
+        },
+        {
+          "title": "Foundry test suite — 33/33 GREEN",
+          "status": "built",
+          "date": "2026-05-25",
+          "date_label": "VERIFIED",
+          "what": "Run on gulfshores with forge 1.7.1 + solc 0.8.24. Suite completed ~90ms. Zero failures.",
+          "tech": "<strong>Tests:</strong> 33 pass / 0 fail / 0 skip<br><strong>Fuzz:</strong> 3000 cases pass<br><strong>Invariant:</strong> heartbeat-monotonic pass"
+        },
+        {
+          "title": "inherit() local variable name",
+          "status": "modified",
+          "date": "2026-05-25",
+          "date_label": "INITIAL",
+          "date_cut": "2026-05-25",
+          "what": "Renamed inherit() local var silenceDuration → elapsed to avoid shadowing the external view function. Behavior unchanged, tests still 33/33 green.",
+          "prior": "uint256 silenceDuration = block.timestamp - lastHeartbeat;",
+          "now": "uint256 elapsed = block.timestamp - lastHeartbeat;",
+          "change_commit": "3dda132",
+          "change_reason": "Shadowing fix — auditor preference"
+        },
+        {
+          "title": "block.timestamp lint documented as accepted",
+          "status": "built",
+          "date": "2026-05-25",
+          "date_label": "DOC",
+          "what": "forge-lint flagged block-timestamp. Base L2 ~2s drift vs 90-day threshold = 0.0000003% manipulation window. Acknowledged in NatSpec + threat model.",
+          "tech": "<strong>Commit:</strong> c688756"
+        }
+      ],
+      "phase-2": [
+        {"title": "Conditional Distribution", "status": "planned", "date": "2026-05-25", "what": "Heirs receive at age 25, graduation, marriage, home purchase. Oracle-verified."},
+        {"title": "Drip Distribution Schedule", "status": "planned", "date": "2026-05-25", "what": "Releases over months/years instead of lump sum. Sablier-style streaming."},
+        {"title": "Multi-Gen / Skip-Generation", "status": "planned", "date": "2026-05-25", "what": "Multiple beneficiaries with split percentages. Or beneficiary = Safe wallet for 3-of-5 sons multi-sig."},
+        {"title": "Education Earmarks", "status": "planned", "date": "2026-05-25", "what": "Lock portion for tuition only."},
+        {"title": "Care for Dependent Heirs", "status": "planned", "date": "2026-05-25", "what": "Guardian co-sign + paced releases for minors / heirs who can't manage funds."},
+        {"title": "Charitable Provisions", "status": "planned", "date": "2026-05-25", "what": "% to 501(c)(3) addresses. Auto-generated tax receipts."},
+        {"title": "Income Stream (Monthly)", "status": "planned", "date": "2026-05-25", "what": "Same streaming pattern, monthly cadence presentation."},
+        {"title": "Heir Onboarding Wizard", "status": "planned", "date": "2026-05-25", "what": "At inherit(), guided dapp flow: cash out OR open YOUR OWN LegacyVault."},
+        {"title": "Chainlink Automation hook", "status": "planned", "date": "2026-05-25", "what": "Auto-calls inherit() at 90-day mark, ~$5/yr per vault."},
+        {"title": "30-day grace + Founding Family discount", "status": "planned", "date": "2026-05-25", "what": "Heir who re-vaults inside 30 days keeps original Founding Member pricing forever."},
+        {"title": "LegacyAI inheritance welcome", "status": "planned", "date": "2026-05-25", "what": "Heir's first session with deceased's TheirNameBrain free as part of inheritance flow.", "shane_note": "A YourLegacy inheritance is the chance to meet the person you lost."}
+      ],
+      "open-removed": [
+        {"title": "Lawyer item #9 — Aspirational vs Phase 1 cards", "status": "decision", "date": "2026-05-25", "what": "Page lists ~22 benefits, contract delivers ~4. Is \"Designed to deliver\" softening enough?", "tech": "<strong>Fires:</strong> 2026-05-26 9am Central"},
+        {"title": "Lawyer item #10 — Digital-self inheritance", "status": "decision", "date": "2026-05-25", "what": "Page promises encrypted data + photos + LegacyAI inherit alongside funds. Distinct legal treatment?"},
+        {"title": "Cluster repo drift fix — Pi-authoritative", "status": "decision", "date": "2026-05-25", "what": "Pi is single writer to GitHub. Other nodes rsync to Pi inbox; Pi commits + pushes.", "tech": "<strong>Weaviate UUID:</strong> 7304f231-7f06-4ffc-98d9-3ee8f2727ef2"},
+        {"title": "Unified cockpit — one big computer", "status": "decision", "date": "2026-05-25", "what": "3 layers: Windows Terminal panes, Mega Dashboard expansion, tmux fleet sync.", "tech": "<strong>Weaviate UUID:</strong> b545a13c-7571-4768-846c-99b0900be38e"},
+        {"title": "Path B — Custodian-only architecture", "status": "removed", "date": "2026-05-25", "date_cut": "2026-05-25", "why_removed": "Too slow, too regulated for solo builder. Non-custodial (Path A) ships first; custodian rails added in v2 once revenue funds compliance."},
+        {"title": "Open WebUI on cluster", "status": "removed", "date": "2026-04-30", "date_cut": "2026-05-17", "why_removed": "Replaced by Claude API + Mega Dashboard direct integration. Port 3000 reclaimed."},
+        {"title": "Ollama on Pi cluster", "status": "removed", "date": "2026-02-15", "date_cut": "2026-04-30", "why_removed": "RAM-hungry on Pi, latency bad on dispatch use cases. Replaced with Claude Haiku via API. Saved 5.5GB RAM."},
+        {"title": "theangel.cloud domain", "status": "removed", "date": "2025-09-28", "date_cut": "2026-03-15", "why_removed": "Consolidated under shanebrain.cloud."},
+        {"title": "jaxton / mexico node duplicate", "status": "removed", "date": "2026-03-01", "date_cut": "2026-05-07", "why_removed": "Re-enrolled as 'mexico' (single identity)."}
+      ],
+      "timeline": [
+        {"date": "2025-09-28", "label": "Trust fund first sketched"},
+        {"date": "2026-05-12", "label": "Pulsar Sentinel LIVE"},
+        {"date": "2026-05-25", "label": "YourLegacy Phase 1 SEALED — 33/33 tests green", "major": true},
+        {"date": "2026-05-26", "label": "Lawyer consult 9am Central", "major": true},
+        {"date": "2026 Q3", "label": "Founding 100 launch target"}
+      ]
+    },
+    "pulsar-sentinel": {
+      "title": "Pulsar Sentinel",
+      "subtitle": "PQC + Q-Day countdown · LIVE since 2026-05-12",
+      "phase-1": [
+        {"title": "ML-KEM-768 (CRYSTALS-Kyber)", "status": "built", "date": "2026-05-12", "what": "NIST-approved lattice-based KEM via liboqs-python v0.15.0."},
+        {"title": "HybridEncryptor (ML-KEM → HKDF → AES-256-GCM)", "status": "built", "date": "2026-05-12", "what": "End-to-end hybrid PQC encryption."},
+        {"title": "MetaMask JWT auth", "status": "built", "date": "2026-05-12", "what": "Wallet signs nonce → 24h JWT for user-facing API."},
+        {"title": "Internal service key", "status": "built", "date": "2026-05-12", "what": "Bearer shanebrain-internal-2026 for MCP tools + scripts."},
+        {"title": "Stripe billing (live mode)", "status": "built", "date": "2026-05-12", "what": "Three tiers: Legacy $10.99, Sentinel $24.99, Guild $49.99/mo."},
+        {"title": "/security page", "status": "built", "date": "2026-05-12", "what": "Q-Day countdown, YourLegacy waitlist, RSA vs ML-KEM demo. Live at sentinel.shanebrain.cloud/security."}
+      ],
+      "phase-2": [],
+      "open-removed": [],
+      "timeline": [
+        {"date": "2026-05-12", "label": "LIVE on Pi:8250", "major": true}
+      ]
+    },
+    "srm-dispatch": {
+      "title": "SRM Dispatch Manager",
+      "subtitle": "North Alabama · 14 triaxle drivers · daily rotation",
+      "phase-1": [
+        {"title": "Fair-rotation scheduler", "status": "built", "date": "2026-04-01", "what": "Avoids driver burnout, balances scrap runs + Bridgeport hauls + zone rotation."},
+        {"title": "POD tracking", "status": "built", "date": "2026-04-01", "what": "Daily Proof-of-Delivery roll-up."}
+      ],
+      "phase-2": [],
+      "open-removed": [],
+      "timeline": []
+    },
+    "book-2": {
+      "title": "Book 2: You Probably Think This Song",
+      "subtitle": "17 tracks · architecture locked · demo status",
+      "phase-1": [
+        {"title": "Architecture locked", "status": "built", "date": "2026-03-01", "what": "17 tracks, structure committed. Demo recordings underway."}
+      ],
+      "phase-2": [],
+      "open-removed": [],
+      "timeline": []
+    },
+    "claim-cruncher": {
+      "title": "Claim Cruncher",
+      "subtitle": "Medical billing platform · Gavin building",
+      "phase-1": [
+        {"title": "FastAPI + PostgreSQL skeleton", "status": "built", "date": "2026-03-01", "what": "Repo: thebardchat/Greenfield. Gavin owns the build."}
+      ],
+      "phase-2": [],
+      "open-removed": [],
+      "timeline": []
+    },
+    "ai-trainer-max": {
+      "title": "AI-Trainer-MAX",
+      "subtitle": "36-module local AI curriculum · 5 phases shipped",
+      "phase-1": [
+        {"title": "Phase 1-5 modules shipped", "status": "built", "date": "2026-04-01", "what": "5 of 7 phases complete. Repo: thebardchat/AI-Trainer-MAX."}
+      ],
+      "phase-2": [],
+      "open-removed": [],
+      "timeline": []
+    },
+    "halofinance": {
+      "title": "HaloFinance",
+      "subtitle": "Private family financial dashboard",
+      "phase-1": [
+        {"title": "31-bill SMS reminder system", "status": "built", "date": "2026-04-15", "what": "Automated payment reminders + due-date tracking."}
+      ],
+      "phase-2": [],
+      "open-removed": [],
+      "timeline": []
+    },
+    "mega-crew": {
+      "title": "MEGA Crew",
+      "subtitle": "17 Docker bots · Arc gatekeeper · 24/7",
+      "phase-1": [
+        {"title": "Arc gatekeeper", "status": "built", "date": "2026-03-01", "what": "Sole authority for core-file writes. Nothing bypasses Arc."},
+        {"title": "Weld execution layer", "status": "built", "date": "2026-03-01", "what": "Executes Arc-approved changes."},
+        {"title": "Gemini Strategist (bot 17)", "status": "built", "date": "2026-04-15", "what": "Gemini 4x/day under shanebrain constitution."}
+      ],
+      "phase-2": [],
+      "open-removed": [],
+      "timeline": []
+    },
+    "wrestling-facility": {
+      "title": "Wrestling Facility",
+      "subtitle": "Hazel Green youth program · FreeCAD done",
+      "phase-1": [
+        {"title": "FreeCAD facility design", "status": "built", "date": "2026-03-15", "what": "Complete 3D model of the build."}
+      ],
+      "phase-2": [],
+      "open-removed": [],
+      "timeline": []
+    }
+  },
+  "last_updated": "2026-05-25T22:00:00+00:00",
+  "processed_deltas": []
+}

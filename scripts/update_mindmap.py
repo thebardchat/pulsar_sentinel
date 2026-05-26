@@ -87,6 +87,10 @@ from typing import Any
 
 # ── Configuration ──────────────────────────────────────────────────────────
 WEAVIATE_URL = os.environ.get("WEAVIATE_URL", "http://100.100.90.66:8080")
+# Default: post deltas to local mindmap server. Falls back to file-write if unreachable.
+MINDMAP_SERVER_URL = os.environ.get(
+    "MINDMAP_SERVER_URL", "http://localhost:8600"
+)
 MINDMAP_PATH = Path(
     os.environ.get(
         "MINDMAP_PATH",
@@ -479,20 +483,50 @@ def main() -> int:
     state["processed_deltas"] = sorted(processed)
     print(f"Applied {applied} new deltas")
 
-    # Render and write
-    html = render_html(state)
-    MINDMAP_PATH.parent.mkdir(parents=True, exist_ok=True)
-    MINDMAP_PATH.write_text(html, encoding="utf-8")
-    save_state(state)
-    print(f"Wrote {MINDMAP_PATH} ({len(html):,} bytes)")
-    print(f"State cache: {STATE_PATH}")
+    # Primary path: POST each new delta to the mindmap server. Live update.
+    server_posted = 0
+    server_ok = True
+    try:
+        for delta in deltas:
+            key = delta.get("_timestamp", "") + "|" + delta.get("session_id", "")
+            if key not in state.get("processed_deltas", []) and not args.rebuild:
+                continue  # already-applied
+            # Strip internal field before POST
+            payload = {k: v for k, v in delta.items() if not k.startswith("_")}
+            req = urllib.request.Request(
+                f"{MINDMAP_SERVER_URL}/api/delta",
+                data=json.dumps(payload).encode(),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=10) as r:
+                json.load(r)
+            server_posted += 1
+        if server_posted:
+            print(f"Posted {server_posted} deltas to {MINDMAP_SERVER_URL}/api/delta")
+    except Exception as e:
+        server_ok = False
+        print(
+            f"  WARN: server post failed ({e}). Falling back to file write.",
+            file=sys.stderr,
+        )
+
+    # Fallback / dual-write: write a static HTML copy alongside the live server.
+    # Useful when the server is down or for offline export.
+    if not server_ok or os.environ.get("MINDMAP_DUAL_WRITE"):
+        html = render_html(state)
+        MINDMAP_PATH.parent.mkdir(parents=True, exist_ok=True)
+        MINDMAP_PATH.write_text(html, encoding="utf-8")
+        save_state(state)
+        print(f"Wrote static fallback {MINDMAP_PATH} ({len(html):,} bytes)")
 
     # Optional second target (e.g. for Taildrop to Hubby Desktop)
     desktop = os.environ.get("MINDMAP_DESKTOP_PATH")
-    if desktop:
-        Path(desktop).write_text(html, encoding="utf-8")
+    if desktop and (not server_ok or os.environ.get("MINDMAP_DUAL_WRITE")):
+        Path(desktop).write_text(render_html(state), encoding="utf-8")
         print(f"Also wrote {desktop}")
 
+    save_state(state)
     return 0
 
 

@@ -1,0 +1,19 @@
+[Unit]
+Description=ShaneBrain Universal Mindmap Server — Tailscale-accessible at Pi:8600
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=shanebrain
+WorkingDirectory=/mnt/shanebrain-raid/shanebrain-core
+Environment="MINDMAP_PORT=8600"
+Environment="MINDMAP_STATE_PATH=/mnt/shanebrain-raid/shanebrain-core/mindmap-state.json"
+ExecStart=/usr/bin/python3 /mnt/shanebrain-raid/shanebrain-core/scripts/mindmap_server.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
