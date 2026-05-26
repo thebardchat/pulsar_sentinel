@@ -1,0 +1,14 @@
+[Unit]
+Description=Run YourLegacy mindmap update every hour
+Requires=update-mindmap.service
+
+[Timer]
+# Every hour at :05 — gives a 5 min buffer after the top-of-hour so
+# any in-flight session log writes have time to land in Weaviate.
+OnCalendar=hourly
+OnBootSec=2min
+Persistent=true
+
+# Daily nudge to the briefing as a separate one-shot at 5:00 Central.
+[Install]
+WantedBy=timers.target

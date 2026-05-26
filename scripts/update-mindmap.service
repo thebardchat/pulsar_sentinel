@@ -1,0 +1,16 @@
+[Unit]
+Description=YourLegacy Mindmap update — pulls Weaviate deltas, rewrites canonical HTML
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=shanebrain
+Environment="WEAVIATE_URL=http://100.100.90.66:8080"
+Environment="MINDMAP_PATH=/mnt/shanebrain-raid/shanebrain-core/yourlegacy-mindmap.html"
+WorkingDirectory=/mnt/shanebrain-raid/shanebrain-core
+ExecStart=/usr/bin/python3 /mnt/shanebrain-raid/shanebrain-core/scripts/update_mindmap.py --since 24h
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
