@@ -41,9 +41,9 @@ forge --version
 
 ```bash
 cd ~/pulsar_sentinel/contracts
-forge install foundry-rs/forge-std --no-commit
-forge install OpenZeppelin/openzeppelin-contracts --no-commit
-forge install aave/aave-v3-core --no-commit
+forge install foundry-rs/forge-std
+forge install OpenZeppelin/openzeppelin-contracts
+forge install aave/aave-v3-core
 ls lib/  # expect: aave-v3-core/ forge-std/ openzeppelin-contracts/
 ```
 

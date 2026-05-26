@@ -106,6 +106,8 @@ Print this. Walk through it together. Open questions in bold.
 6. **Waitlist copy.** Pre-launch page currently softens all claims to "designed to" / "will" with a "BUILDING NOW · NOT YET OPERATIONAL · WAITLIST OPEN" banner. **Is that sufficient to avoid pre-effective-date issues?**
 7. **Geographic restrictions.** Does Shane need to geo-block any jurisdictions (NY BitLicense, Texas SB, etc.) at the dapp level?
 8. **Disclaimer placement.** Honest-risk list currently in the architecture doc. Where does it need to live in the UI (page footer? Modal before deposit?) to count?
+9. **Aspirational benefit cards vs Phase 1 reality.** The `/security` page (`ui/templates/security.html` ~line 1539) lists ~22 trust-fund benefits under "Designed to deliver what a traditional trust fund does". Phase 1's `LegacyVault.sol` delivers ~4 of them mechanically: single-heir non-custodial transfer, Aave yield, 90-day trigger, on-chain audit trail. The other ~18 (Conditional Distribution, Drip Schedule, Multi-Generational, Education Earmarks, Care for Dependent Heirs, Charitable Provisions, Income Stream, etc.) describe specific mechanisms that don't exist yet. **Is "Designed to deliver" softening enough cover, or do we need to (a) remove unbuilt cards from launch, (b) caveat each one with "Phase 2/3 feature", or (c) accelerate them into v1?**
+10. **Digital-self inheritance language.** Same page promises "your encrypted data, your photos, your TheirNameBrain AI persona" inherit alongside the financial vault. That's a different technical surface (Pulsar Sentinel ASR + Weaviate, not `LegacyVault.sol`). **Is the legal treatment of digital-asset inheritance distinct from financial-asset inheritance? Does the page need to separate the two flows explicitly?**
 
 ---
 
@@ -116,9 +118,9 @@ These commands assume gulfshores (Linux dev box). Do **not** run forge install o
 ```bash
 # One-time setup on gulfshores
 cd ~/pulsar_sentinel/contracts
-forge install foundry-rs/forge-std --no-commit
-forge install OpenZeppelin/openzeppelin-contracts --no-commit
-forge install aave/aave-v3-core --no-commit
+forge install foundry-rs/forge-std
+forge install OpenZeppelin/openzeppelin-contracts
+forge install aave/aave-v3-core
 
 # Run the suite — local only, no RPC needed
 forge test -vvv

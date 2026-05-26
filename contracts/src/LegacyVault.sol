@@ -146,9 +146,9 @@ contract LegacyVault is ReentrancyGuard {
         if (msg.sender != beneficiary) revert NotBeneficiary();
         if (inherited) revert AlreadyInherited();
 
-        uint256 silenceDuration = block.timestamp - lastHeartbeat;
-        if (silenceDuration < inactivityThreshold) {
-            revert OwnerStillActive(inactivityThreshold - silenceDuration);
+        uint256 elapsed = block.timestamp - lastHeartbeat;
+        if (elapsed < inactivityThreshold) {
+            revert OwnerStillActive(inactivityThreshold - elapsed);
         }
 
         // Mark inherited BEFORE external call (checks-effects-interactions).
@@ -162,7 +162,7 @@ contract LegacyVault is ReentrancyGuard {
             beneficiary
         );
 
-        emit Inherited(msg.sender, withdrawn, silenceDuration);
+        emit Inherited(msg.sender, withdrawn, elapsed);
     }
 
     // ─── View helpers ────────────────────────────────────────────────────────
