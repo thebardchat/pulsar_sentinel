@@ -27,6 +27,14 @@ import {IAavePool} from "./interfaces/IAavePool.sol";
 ///        I4: deposit() always pulls then supplies — vault never holds USDC
 ///            outside of an in-progress call
 ///        I5: inherit() empties the entire aToken position to beneficiary
+///
+///      Known finding (informational, accepted):
+///        block.timestamp comparisons in inherit() and inheritable(). Validator
+///        or sequencer timestamp manipulation on Base L2 is bounded to ~2 seconds.
+///        Our inactivityThreshold is 90 days (7,776,000 seconds), making any
+///        manipulation 0.0000003% of the comparison window — no practical effect.
+///        Flagged by forge-lint as `block-timestamp`. Acknowledged and accepted
+///        as a documented design choice; not a vulnerability at our threshold scale.
 contract LegacyVault is ReentrancyGuard {
     using SafeERC20 for IERC20;
 

@@ -78,6 +78,7 @@ These are the truths the contract must never violate. The test suite enforces th
 | USDC depeg                            | Out of scope. Documented on the user-facing page.                                    |
 | Double-inherit                        | `inherited` boolean prevents re-entry. Also blocks ping/deposit post-inherit.        |
 | Allowance leak to Aave                | `forceApprove(pool, amount)` resets allowance per deposit. No lingering approvals.   |
+| `block.timestamp` manipulation        | Acknowledged. Base L2 validator drift is ~2s; our threshold is 90 days. Manipulation is 0.0000003% of the comparison window — no practical effect. Flagged by `forge-lint` as `block-timestamp` (informational). Documented in `LegacyVault.sol` NatSpec. |
 
 ---
 
