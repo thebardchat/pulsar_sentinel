@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 # deploy_family_homebase.sh — Pi-side one-shot deploy for Family Homebase Cloud
 #
-# Run AFTER the bullfrog TrueNAS dataset + NFS share are created in the UI.
-# Run this from the Pi:  bash /mnt/shanebrain-raid/pulsar-sentinel/scripts/deploy_family_homebase.sh
+# v2 (2026-05-26): Pi-local storage on RAID. NFS removed.
+# Bullfrog hardware died; 8TB ZFS pool migrated to Pi but kept read-only
+# overnight pending verification. users.json + sessions.json land on
+# /mnt/shanebrain-raid/family-homebase/ (Pi RAID 1, 1.8TB mirrored NVMe).
+#
+# When tank pool is promoted to read-write (tomorrow), migrate the JSON files
+# to /tank/shanebrain/shared/family-homebase/ — 30 second move.
+#
+# Run from the Pi:  bash /mnt/shanebrain-raid/pulsar-sentinel/scripts/deploy_family_homebase.sh
 #
 # Idempotent: re-running is safe. Skips steps already done.
 
@@ -10,8 +17,10 @@ set -euo pipefail
 
 REPO=/mnt/shanebrain-raid/pulsar-sentinel
 CORE=/mnt/shanebrain-raid/shanebrain-core
-NAS=/mnt/nas/shanebrain
-BULLFROG=100.92.153.3
+HOMEBASE=/mnt/shanebrain-raid/family-homebase
+# mindmap_auth.py defaults to /mnt/nas/shanebrain/users.json — we symlink that
+# to our actual storage path so no code edit is needed.
+COMPAT_NAS_LINK=/mnt/nas/shanebrain
 
 banner() { echo; echo "=== $* ==="; }
 
@@ -22,17 +31,16 @@ git pull origin main
 banner "Step 2/6 — Python deps (fastapi, uvicorn, bcrypt)"
 pip3 install --user --upgrade fastapi 'uvicorn[standard]' bcrypt
 
-banner "Step 3/6 — NFS mount of bullfrog:/mnt/tank/shanebrain"
-if ! dpkg -s nfs-common >/dev/null 2>&1; then
-  sudo apt-get update -y && sudo apt-get install -y nfs-common
+banner "Step 3/6 — Pi-local storage (Pi RAID, no NFS)"
+sudo mkdir -p "$HOMEBASE"
+sudo chown shanebrain:shanebrain "$HOMEBASE"
+# Compatibility symlink so mindmap_auth.py finds its expected path
+sudo mkdir -p /mnt/nas
+if [[ ! -e "$COMPAT_NAS_LINK" ]]; then
+  sudo ln -s "$HOMEBASE" "$COMPAT_NAS_LINK"
 fi
-sudo mkdir -p "$NAS"
-FSTAB_LINE="${BULLFROG}:/mnt/tank/shanebrain  ${NAS}  nfs  rw,hard,intr,_netdev  0  0"
-if ! grep -qF "${BULLFROG}:/mnt/tank/shanebrain" /etc/fstab; then
-  echo "$FSTAB_LINE" | sudo tee -a /etc/fstab
-fi
-mountpoint -q "$NAS" || sudo mount -a
-echo "NAS mount check:"; ls -lah "$NAS"
+echo "Storage path:"; ls -lah "$HOMEBASE"
+echo "Compat symlink:"; ls -lah "$COMPAT_NAS_LINK"
 
 banner "Step 4/6 — copy server + auth + CLI + seed into shanebrain-core"
 sudo mkdir -p "$CORE/scripts"
@@ -59,15 +67,11 @@ curl -sS http://localhost:8600/api/health || true
 echo
 echo
 echo "DEPLOY DONE."
+echo "Storage backend: $HOMEBASE  (compat link: $COMPAT_NAS_LINK)"
+echo
 echo "Next: create owner + family accounts (interactive):"
 echo "  cd $CORE/scripts"
 echo "  python3 add_mindmap_user.py init   # you (shane) — owner"
 echo "  python3 add_mindmap_user.py add tiffany --role family --display-name 'Tiffany'"
 echo "  python3 add_mindmap_user.py add gavin   --role family --display-name 'Gavin'"
-echo "  python3 add_mindmap_user.py add angel   --role family --display-name 'Angel'"
-echo "  python3 add_mindmap_user.py add kai     --role family --display-name 'Kai'"
-echo "  python3 add_mindmap_user.py add pierce  --role family --display-name 'Pierce'"
-echo "  python3 add_mindmap_user.py add jaxton  --role family --display-name 'Jaxton'"
-echo "  python3 add_mindmap_user.py add ryker   --role viewer --display-name 'Ryker'"
-echo
-echo "Then visit:  http://100.67.120.6:8600  from any Tailscale device."
+ech
