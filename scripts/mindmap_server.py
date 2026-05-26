@@ -60,25 +60,65 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from fastapi import FastAPI, HTTPException, Request
-    from fastapi.responses import HTMLResponse, JSONResponse
+    from fastapi import Cookie, Depends, FastAPI, HTTPException, Request
+    from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
     import uvicorn
 except ImportError:
-    print("Install deps: pip3 install fastapi 'uvicorn[standard]'", file=sys.stderr)
+    print("Install deps: pip3 install fastapi 'uvicorn[standard]' bcrypt", file=sys.stderr)
     raise
 
+# Local module (lives next to this file)
+sys.path.insert(0, str(Path(__file__).parent))
+from mindmap_auth import Auth, require_login  # noqa: E402
+
+# State path — defaults to NAS mount when available, falls back to local.
 STATE_PATH = Path(
     os.environ.get(
         "MINDMAP_STATE_PATH",
-        "/mnt/shanebrain-raid/shanebrain-core/mindmap-state.json",
+        "/mnt/nas/shanebrain/mindmap-state.json"
+        if Path("/mnt/nas/shanebrain").exists()
+        else "/mnt/shanebrain-raid/shanebrain-core/mindmap-state.json",
+    )
+)
+AUDIT_LOG_PATH = Path(
+    os.environ.get(
+        "MINDMAP_AUDIT_LOG",
+        str(STATE_PATH.parent / "mindmap-audit.log"),
     )
 )
 PORT = int(os.environ.get("MINDMAP_PORT", "8600"))
 
+# Auth — enabled when USERS_FILE env var is set (NAS path recommended).
+auth = Auth(
+    users_file=os.environ.get(
+        "USERS_FILE",
+        "/mnt/nas/shanebrain/users.json"
+        if Path("/mnt/nas/shanebrain").exists()
+        else None,
+    ),
+    sessions_file=os.environ.get(
+        "SESSIONS_FILE",
+        "/mnt/nas/shanebrain/sessions.json"
+        if Path("/mnt/nas/shanebrain").exists()
+        else None,
+    ),
+)
+
 app = FastAPI(
     title="ShaneBrain Mindmap",
-    description="Universal living mindmap across all projects. Tailscale-only.",
+    description="Universal living mindmap across all projects. Tailscale + family multi-user.",
 )
+
+
+def audit(user: str, action: str, detail: str = "") -> None:
+    """Append a line to the per-user audit log. Best-effort; never blocks."""
+    try:
+        AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        line = f"{datetime.now(timezone.utc).isoformat()}\t{user}\t{action}\t{detail}\n"
+        with AUDIT_LOG_PATH.open("a") as f:
+            f.write(line)
+    except Exception:
+        pass
 
 # ── State persistence ──────────────────────────────────────────────────────
 
@@ -204,12 +244,80 @@ def apply_delta_to_state(state: dict[str, Any], delta: dict[str, Any]) -> None:
 
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "service": "shanebrain-mindmap", "port": PORT}
+    return {
+        "status": "ok",
+        "service": "shanebrain-mindmap",
+        "port": PORT,
+        "auth_enabled": auth.enabled,
+        "state_path": str(STATE_PATH),
+    }
+
+
+# ── Auth endpoints ─────────────────────────────────────────────────────────
+
+
+@app.post("/api/login")
+async def login(request: Request):
+    body = await request.json()
+    username = (body.get("username") or "").strip()
+    password = body.get("password") or ""
+    token = auth.login(username, password)
+    if not token:
+        audit(username or "anon", "login.fail", "bad credentials")
+        raise HTTPException(status_code=401, detail="invalid credentials")
+    audit(username, "login.ok", "")
+    resp = JSONResponse(
+        {
+            "ok": True,
+            "user": username,
+            "display_name": auth.whoami(token)["display_name"],
+            "role": auth.whoami(token)["role"],
+        }
+    )
+    resp.set_cookie(
+        "mm_session",
+        token,
+        max_age=60 * 60 * 24 * 30,  # 30 days
+        httponly=True,
+        samesite="strict",
+        secure=False,  # we're on Tailscale, not public HTTPS by default
+    )
+    return resp
+
+
+@app.post("/api/logout")
+async def logout(mm_session: str | None = Cookie(default=None)):
+    if mm_session:
+        sess = auth.whoami(mm_session)
+        if sess:
+            audit(sess["user"], "logout", "")
+        auth.logout(mm_session)
+    resp = JSONResponse({"ok": True})
+    resp.delete_cookie("mm_session")
+    return resp
+
+
+@app.get("/api/whoami")
+async def whoami(mm_session: str | None = Cookie(default=None)):
+    sess = auth.whoami(mm_session)
+    if not sess:
+        return {"logged_in": False, "auth_enabled": auth.enabled}
+    return {
+        "logged_in": True,
+        "auth_enabled": auth.enabled,
+        "user": sess["user"],
+        "display_name": sess["display_name"],
+        "role": sess["role"],
+    }
+
+
+# ── Project + state endpoints (require login when auth enabled) ───────────
 
 
 @app.get("/api/projects")
-async def list_projects():
+async def list_projects(user=Depends(require_login(auth))):
     state = load_state()
+    audit(user["user"], "projects.list", "")
     return {
         key: {
             "title": proj.get("title"),
@@ -225,24 +333,36 @@ async def list_projects():
 
 
 @app.get("/api/state")
-async def get_state():
+async def get_state(user=Depends(require_login(auth))):
+    audit(user["user"], "state.read", "")
     return load_state()
 
 
 @app.get("/api/state/{project_key}")
-async def get_project(project_key: str):
+async def get_project(project_key: str, user=Depends(require_login(auth))):
     state = load_state()
     if project_key not in state.get("projects", {}):
         raise HTTPException(status_code=404, detail=f"Unknown project: {project_key}")
+    audit(user["user"], "project.read", project_key)
     return state["projects"][project_key]
 
 
 @app.post("/api/delta")
-async def post_delta(request: Request):
+async def post_delta(
+    request: Request,
+    user=Depends(require_login(auth, min_role="family")),
+):
     delta = await request.json()
     state = load_state()
     apply_delta_to_state(state, delta)
     save_state(state)
+    audit(
+        user["user"],
+        "delta.post",
+        f"project={delta.get('project', 'yourlegacy')} "
+        f"+{len(delta.get('added', []))} ~{len(delta.get('modified', []))} "
+        f"-{len(delta.get('removed', []))}",
+    )
     return {
         "ok": True,
         "project": delta.get("project", "yourlegacy"),
@@ -255,9 +375,129 @@ async def post_delta(request: Request):
 # ── HTML UI ────────────────────────────────────────────────────────────────
 
 
+@app.get("/login", response_class=HTMLResponse)
+async def login_page():
+    return HTMLResponse(content=LOGIN_HTML)
+
+
 @app.get("/", response_class=HTMLResponse)
-async def root():
+async def root(mm_session: str | None = Cookie(default=None)):
+    if auth.enabled and not auth.whoami(mm_session):
+        return RedirectResponse("/login", status_code=302)
     return HTMLResponse(content=UI_HTML)
+
+
+LOGIN_HTML = r"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>ShaneBrain Mindmap — Sign In</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --void-dark: #0a0a12; --stellar-gray: #1a1a24; --node-gray: #14141e;
+    --border-faint: #2a2a36; --text-primary: #f0f0f5; --text-secondary: #b0b0c0;
+    --text-muted: #707080; --pulsar-magenta: #ff2b8f; --plasma-gold: #ffd700;
+    --matrix-green: #00ff88; --alert-red: #ff3052;
+    --font-mono: 'SF Mono', 'Consolas', monospace;
+    --font-display: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: radial-gradient(ellipse at top, #15151f 0%, var(--void-dark) 70%);
+    color: var(--text-primary); font-family: var(--font-display);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    max-width: 380px; width: 100%;
+    background: var(--stellar-gray);
+    border: 1px solid var(--border-faint);
+    border-radius: 14px; padding: 28px 26px;
+    box-shadow: 0 0 40px rgba(255, 43, 143, 0.15);
+  }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--pulsar-magenta); margin-bottom: 8px;
+  }
+  h1 { margin: 0 0 18px; font-size: 1.4rem; }
+  h1 .accent { color: var(--plasma-gold); }
+  label {
+    display: block; font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted);
+    margin: 14px 0 6px;
+  }
+  input {
+    width: 100%; padding: 10px 12px; background: var(--node-gray);
+    border: 1px solid var(--border-faint); border-radius: 8px;
+    color: var(--text-primary); font-family: var(--font-display); font-size: 0.95rem;
+    outline: none; transition: border-color 0.15s;
+  }
+  input:focus { border-color: var(--pulsar-magenta); }
+  button {
+    width: 100%; margin-top: 20px; padding: 11px;
+    background: var(--pulsar-magenta); color: white;
+    border: none; border-radius: 8px; font-family: var(--font-display);
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: opacity 0.15s; letter-spacing: 0.02em;
+  }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .error {
+    margin-top: 14px; padding: 8px 12px; color: var(--alert-red);
+    font-size: 0.85rem; border: 1px solid var(--alert-red);
+    background: rgba(255, 48, 82, 0.08); border-radius: 6px; display: none;
+  }
+  .error.show { display: block; }
+  .hint {
+    text-align: center; margin-top: 18px; color: var(--text-muted);
+    font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em;
+  }
+</style>
+</head><body>
+<div class="card">
+  <div class="eyebrow">ShaneBrain Mindmap</div>
+  <h1>Family <span class="accent">Sign In</span></h1>
+  <form id="f">
+    <label>Username</label>
+    <input id="u" autocomplete="username" autofocus required>
+    <label>Password</label>
+    <input id="p" type="password" autocomplete="current-password" required>
+    <div class="error" id="err"></div>
+    <button id="btn" type="submit">Sign in</button>
+  </form>
+  <p class="hint">Tailscale-only · Family use</p>
+</div>
+<script>
+const f = document.getElementById('f');
+const btn = document.getElementById('btn');
+const err = document.getElementById('err');
+f.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  btn.disabled = true; err.classList.remove('show');
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        username: document.getElementById('u').value,
+        password: document.getElementById('p').value,
+      })
+    });
+    if (r.ok) { location.href = '/'; }
+    else {
+      const j = await r.json().catch(() => ({}));
+      err.textContent = j.detail || 'Sign-in failed';
+      err.classList.add('show');
+    }
+  } catch (e) {
+    err.textContent = 'Network error';
+    err.classList.add('show');
+  } finally { btn.disabled = false; }
+});
+</script>
+</body></html>
+"""
 
 
 # Inline HTML — single-file, no external deps, mobile-friendly.

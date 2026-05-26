@@ -152,6 +152,139 @@ curl http://localhost:8600/api/health
 
 ---
 
+## Multi-user on the NAS (bullfrog · TrueNAS Scale)
+
+Every family member gets their own login. Credentials live on bullfrog. Pi mounts them via NFS. Sessions persist across reboots.
+
+### One-time bullfrog setup (TrueNAS web UI clicks)
+
+These are the only steps that can't be automated — TrueNAS requires UI interaction.
+
+1. **Web UI** at `http://100.92.153.3` → log in as your TrueNAS admin.
+2. **Datasets** → tank → Add Dataset:
+   - Name: `shanebrain`
+   - Permissions Type: POSIX
+   - Compression: lz4
+   - Save
+3. **Shares → UNIX (NFS) Shares** → Add:
+   - Path: `/mnt/tank/shanebrain`
+   - Authorized Networks: `100.64.0.0/10` (entire Tailscale CGNAT range)
+   - Maproot User: `nobody`
+   - Maproot Group: `nogroup`
+   - Save → enable NFS service when prompted.
+
+That's it for bullfrog. ~3 minutes of clicking.
+
+### Pi-side mount (one-time)
+
+```bash
+ssh shanebrain@100.67.120.6
+sudo apt-get install -y nfs-common
+sudo mkdir -p /mnt/nas/shanebrain
+# Add the mount to /etc/fstab (persistent across reboots)
+echo '100.92.153.3:/mnt/tank/shanebrain  /mnt/nas/shanebrain  nfs  rw,hard,intr,_netdev  0  0' | sudo tee -a /etc/fstab
+sudo mount -a
+ls -lah /mnt/nas/shanebrain   # should list (empty directory ready for use)
+```
+
+### Initialize the users file (interactive)
+
+```bash
+# On the Pi
+cd /mnt/shanebrain-raid/shanebrain-core/scripts
+python3 add_mindmap_user.py init
+# Prompts you for owner username (default: shane), display name, password.
+# Creates /mnt/nas/shanebrain/users.json with chmod 600.
+
+# Add family members
+python3 add_mindmap_user.py add tiffany --role family --display-name "Tiffany"
+python3 add_mindmap_user.py add gavin   --role family --display-name "Gavin"
+python3 add_mindmap_user.py add angel   --role family --display-name "Angel"
+python3 add_mindmap_user.py add kai     --role family --display-name "Kai"
+python3 add_mindmap_user.py add pierce  --role family --display-name "Pierce"
+python3 add_mindmap_user.py add jaxton  --role family --display-name "Jaxton"
+python3 add_mindmap_user.py add ryker   --role viewer --display-name "Ryker"   # he's 5
+
+python3 add_mindmap_user.py list
+```
+
+### Switch the mindmap server to multi-user mode
+
+```bash
+# Restart the server — it auto-detects the NAS mount and enables auth.
+sudo systemctl restart mindmap-server.service
+sudo journalctl -u mindmap-server.service -n 10
+
+# Verify
+curl http://localhost:8600/api/health
+# Should now show "auth_enabled": true and state_path under /mnt/nas/shanebrain
+```
+
+### Family onboarding (~30 seconds per person)
+
+For each family member, send them this:
+
+> Open Safari (iPhone) or any browser. Make sure Tailscale is connected and shows the green dot. Go to: **http://100.67.120.6:8600**
+> Sign in:
+> - Username: `tiffany` (or whatever Shane gave you)
+> - Password: (the one Shane set for you)
+>
+> Bookmark it. On iPhone: Share → Add to Home Screen → name it "Mindmap".
+
+That's it. They're in.
+
+### Migrate existing state to the NAS (one-time)
+
+If you already have `/mnt/shanebrain-raid/shanebrain-core/mindmap-state.json` from earlier deploys, move it to the NAS so the server reads from one canonical location:
+
+```bash
+sudo cp /mnt/shanebrain-raid/shanebrain-core/mindmap-state.json /mnt/nas/shanebrain/mindmap-state.json
+sudo systemctl restart mindmap-server.service
+```
+
+### Audit log
+
+Every login, logout, read, and delta-write is appended to `/mnt/nas/shanebrain/mindmap-audit.log` with timestamp + user + action. Tail it any time:
+
+```bash
+tail -n 20 /mnt/nas/shanebrain/mindmap-audit.log
+```
+
+Example lines:
+
+```
+2026-05-26T14:32:09+00:00  shane    state.read
+2026-05-26T14:33:01+00:00  tiffany  login.ok
+2026-05-26T14:33:18+00:00  tiffany  project.read   yourlegacy
+```
+
+### Roles
+
+| Role     | Read state | Post deltas | Use case |
+|----------|------------|-------------|----------|
+| `owner`  | ✅         | ✅          | Shane    |
+| `family` | ✅         | ✅          | Tiffany, Gavin, Angel, older sons |
+| `viewer` | ✅         | ❌          | Ryker, future kids' accounts |
+
+Role is set when you create the user (`add_mindmap_user.py add ... --role family`).
+
+### Disable auth (revert to Tailscale-only)
+
+```bash
+# Unmount the NAS or unset USERS_FILE
+sudo systemctl edit mindmap-server.service
+# Add under [Service]:
+#   Environment="USERS_FILE="
+sudo systemctl daemon-reload
+sudo systemctl restart mindmap-server.service
+```
+
+Now the server is back to "anyone on Tailscale can see it" — no logins. Useful for solo dev.
+
+---
+
+---
+
 ## Daily briefing integration
 
 Add this to the existing `shanebrain_daily_briefing` MCP tool body (server.py on Pi):
