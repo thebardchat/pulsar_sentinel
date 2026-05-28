@@ -150,3 +150,74 @@ async def radar_panel(panel: str):
         "ok": True, "panel": panel, "endpoint": RADAR_ENDPOINTS[panel],
         "cached": False, "data": data,
     }
+
+
+# === HONEYPOT MESH ENDPOINTS (L.3 Phase 3a, 2026-05-28) ===
+from datetime import datetime, timezone
+
+HONEYPOT_WEAVIATE_URL = "http://100.100.90.66:8080"
+
+HONEYPOT_SENSORS = [
+    {
+        "uuid": "7d0d835e-58e3-11f1-a327-6228bf6b930a",
+        "location": "NYC1",
+        "provider": "DigitalOcean",
+        "status": "online",
+    },
+]
+
+
+@recon_router.get("/honeypot/recent")
+async def honeypot_recent(limit: int = 50):
+    """Latest attack events from the Pulsar honeypot mesh."""
+    safe_limit = max(1, min(limit, 200))
+    query = (
+        '{ Get { HoneypotEvent(limit: ' + str(safe_limit) + ') '
+        '{ src_ip username password command event_id timestamp sensor_location } } '
+        'Aggregate { HoneypotEvent { meta { count } } } }'
+    )
+    async with httpx.AsyncClient(timeout=5.0) as client:
+        try:
+            r = await client.post(f"{HONEYPOT_WEAVIATE_URL}/v1/graphql", json={"query": query})
+            data = (r.json() or {}).get("data", {}) or {}
+            events = (data.get("Get") or {}).get("HoneypotEvent") or []
+            agg = (data.get("Aggregate") or {}).get("HoneypotEvent") or [{}]
+            total = (agg[0].get("meta") or {}).get("count", 0)
+            return {
+                "total_events": total,
+                "events": events,
+                "sensors": HONEYPOT_SENSORS,
+                "fetched_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            }
+        except Exception as e:
+            logger.error(f"honeypot_recent error: {e}")
+            return {"error": str(e), "total_events": 0, "events": [], "sensors": HONEYPOT_SENSORS}
+
+
+@recon_router.get("/honeypot/stats")
+async def honeypot_stats():
+    """Aggregated honeypot stats — totals + top usernames."""
+    total_q = '{ Aggregate { HoneypotEvent { meta { count } } } }'
+    users_q = '{ Aggregate { HoneypotEvent(groupBy: "username") { groupedBy { value } meta { count } } } }'
+    async with httpx.AsyncClient(timeout=5.0) as client:
+        try:
+            r1 = await client.post(f"{HONEYPOT_WEAVIATE_URL}/v1/graphql", json={"query": total_q})
+            r2 = await client.post(f"{HONEYPOT_WEAVIATE_URL}/v1/graphql", json={"query": users_q})
+            agg = ((r1.json() or {}).get("data", {}).get("Aggregate", {}).get("HoneypotEvent") or [{}])
+            total = (agg[0].get("meta") or {}).get("count", 0)
+            users = (r2.json() or {}).get("data", {}).get("Aggregate", {}).get("HoneypotEvent") or []
+            top = sorted(users, key=lambda u: (u.get("meta") or {}).get("count", 0), reverse=True)[:10]
+            return {
+                "total_attacks": total,
+                "top_usernames": [
+                    {"username": (u.get("groupedBy") or {}).get("value", ""),
+                     "count": (u.get("meta") or {}).get("count", 0)}
+                    for u in top
+                ],
+                "active_sensors": len([s for s in HONEYPOT_SENSORS if s["status"] == "online"]),
+                "fetched_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            }
+        except Exception as e:
+            logger.error(f"honeypot_stats error: {e}")
+            return {"error": str(e), "total_attacks": 0, "top_usernames": [], "active_sensors": 0}
+# === END HONEYPOT ENDPOINTS ===
