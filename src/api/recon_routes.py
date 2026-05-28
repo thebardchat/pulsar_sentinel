@@ -60,6 +60,50 @@ async def get_pts(request: Request):
     return {"ok": True, "pts": round(score, 1), "method": used, "timestamp": time.time()}
 
 
+@recon_router.get("/squad/{wallet}")
+async def get_squad(wallet: str):
+    """Return squad (referral network) stats for a wallet.
+    MOCK for now — wires to AccessController referrals in follow-up."""
+    if not wallet.startswith("0x") or len(wallet) < 6:
+        return {"ok": False, "error": "invalid wallet format"}
+    # TODO: query AccessController for real referral count
+    count = 0
+    pts_boost = min(50, count)  # 1% per recruit, cap 50%
+    milestones = [
+        {"at": 5,  "reward": "+5% PTS BOOST", "achieved": count >= 5},
+        {"at": 10, "reward": "1 MONTH FREE",  "achieved": count >= 10},
+        {"at": 25, "reward": "LIFETIME SENTINEL CORE", "achieved": count >= 25},
+    ]
+    next_m = next((m for m in milestones if not m["achieved"]), None)
+    invite_url = f"https://sentinel.shanebrain.cloud/recon?ref={wallet}"
+    return {
+        "ok": True,
+        "wallet": wallet,
+        "count": count,
+        "pts_boost_pct": pts_boost,
+        "next_milestone": next_m,
+        "milestones": milestones,
+        "invite_url": invite_url,
+    }
+
+
+@recon_router.post("/squad/join")
+async def squad_join(payload: dict):
+    """Record a squad-join when a new user signs up via ?ref=0xINVITER.
+    MOCK for now — wires to AccessController in follow-up."""
+    inviter = payload.get("inviter_wallet", "")
+    invitee = payload.get("invitee_wallet", "")
+    if not inviter or not invitee:
+        return {"ok": False, "error": "missing inviter_wallet or invitee_wallet"}
+    if not inviter.startswith("0x") or not invitee.startswith("0x"):
+        return {"ok": False, "error": "invalid wallet format"}
+    if inviter.lower() == invitee.lower():
+        return {"ok": False, "error": "cannot recruit yourself"}
+    # TODO: persist via AccessController + emit blockchain audit
+    logger.info("squad_join_recorded", inviter=inviter, invitee=invitee)
+    return {"ok": True, "inviter": inviter, "invitee": invitee, "recorded": True}
+
+
 @recon_router.get("/radar/{panel}")
 async def radar_panel(panel: str):
     if panel not in RADAR_ENDPOINTS:

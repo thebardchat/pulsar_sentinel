@@ -896,6 +896,80 @@
   .ticker-content .item .sev-high { color: var(--amber); font-weight: 700; }
   .ticker-content .item .geo { color: var(--green); font-weight: 700; }
   body { padding-bottom: 62px; }  /* leave space for fixed ticker */
+
+  /* === SQUAD INVITE PANEL === */
+  .squad-panel {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--cyan);
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .squad-panel .ttl {
+    color: var(--cyan);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .squad-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .squad-stats .stat {
+    background: var(--bg-0);
+    padding: 10px;
+    border: 1px solid var(--line);
+    text-align: center;
+  }
+  .squad-stats .stat .n {
+    font-size: 24px;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+    font-weight: 300;
+  }
+  .squad-stats .stat .l {
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .squad-invite {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .squad-invite input {
+    flex: 1;
+    background: var(--bg-0);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 8px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+  .squad-invite button {
+    background: var(--cyan);
+    color: #000;
+    border: none;
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .squad-invite button:hover { background: #fff; }
+  .squad-milestones { font-size: 10px; line-height: 1.6; color: var(--text-dim); }
+  .squad-milestones .m { padding: 3px 0; }
+  .squad-milestones .m.done { color: var(--green); }
+  .squad-milestones .m.next { color: var(--cyan); font-weight: 700; }
+
 </style>
 </head>
 <body>
@@ -1146,6 +1220,23 @@
 
   <!-- RIGHT COLUMN: Live Event Ticker + Blockchain Ledger -->
   <div>
+    <div class="squad-panel" id="squadPanel">
+      <div class="ttl">▣ DEPLOY YOUR SQUAD</div>
+      <div class="squad-stats">
+        <div class="stat"><div class="n" id="squadCount">—</div><div class="l">Operators recruited</div></div>
+        <div class="stat"><div class="n" id="squadBoost">—</div><div class="l">PTS boost</div></div>
+      </div>
+      <div class="squad-invite">
+        <input type="text" id="squadInviteLink" readonly value="connect wallet first">
+        <button id="squadCopyBtn" onclick="copySquadLink()">COPY</button>
+      </div>
+      <div class="squad-milestones" id="squadMilestones">
+        <div class="m">5 Operators = +5% PTS BOOST</div>
+        <div class="m">10 Operators = 1 month free</div>
+        <div class="m">25 Operators = lifetime Sentinel Core</div>
+      </div>
+    </div>
+
     <div class="panel" style="margin-bottom: 16px;">
       <div class="panel-title">
         <span class="led"></span> LIVE EVENT STREAM
@@ -1845,8 +1936,72 @@ function toggleAudio() {
   }
 }
 
+// ============ SQUAD (referral network) ============
+// Capture ?ref=0xINVITER from URL and persist to localStorage
+(function () {
+  const url = new URL(window.location.href);
+  const ref = url.searchParams.get("ref");
+  if (ref && ref.startsWith("0x")) {
+    try { localStorage.setItem("pulsar_inviter_wallet", ref); } catch (e) {}
+  }
+})();
+
+async function loadSquadPanel(myWallet) {
+  if (!myWallet || !myWallet.startsWith("0x")) return;
+  try {
+    const r = await fetch("/api/v1/recon/squad/" + myWallet);
+    const j = await r.json();
+    if (!j.ok) return;
+    const elN = document.getElementById("squadCount");
+    const elB = document.getElementById("squadBoost");
+    const elI = document.getElementById("squadInviteLink");
+    const elM = document.getElementById("squadMilestones");
+    if (elN) elN.textContent = j.count;
+    if (elB) elB.textContent = "+" + j.pts_boost_pct + "%";
+    if (elI) elI.value = j.invite_url;
+    if (elM && j.milestones) {
+      elM.innerHTML = j.milestones.map(m =>
+        '<div class="m ' + (m.achieved ? "done" : (j.next_milestone && j.next_milestone.at === m.at ? "next" : "")) + '">' +
+        (m.achieved ? "✓ " : (j.next_milestone && j.next_milestone.at === m.at ? "▸ " : "○ ")) +
+        m.at + " Operators = " + m.reward + '</div>'
+      ).join("");
+    }
+  } catch (e) { console.warn("squad load failed", e); }
+}
+
+function copySquadLink() {
+  const el = document.getElementById("squadInviteLink");
+  if (!el) return;
+  el.select();
+  try {
+    document.execCommand("copy");
+    const btn = document.getElementById("squadCopyBtn");
+    if (btn) { const t = btn.textContent; btn.textContent = "COPIED"; setTimeout(() => btn.textContent = t, 1500); }
+  } catch (e) {}
+}
+
+// Optional: if a previous session captured the wallet, load it now (demo mode reuses)
+(function () {
+  const saved = (() => { try { return localStorage.getItem("pulsar_my_wallet"); } catch (e) { return null; } })();
+  if (saved) loadSquadPanel(saved);
+})();
+
 // ============ CONNECT WALLET ============
 async function connectWallet() {
+  // MOCK wallet for now — replace with real eth_requestAccounts when wired
+  const mockWallet = "0x7f3a" + Math.random().toString(16).slice(2, 6) + "...d2e9";
+  try { localStorage.setItem("pulsar_my_wallet", mockWallet); } catch (e) {}
+  // If this user came via ?ref=0xINVITER, record the squad join
+  const inviter = (() => { try { return localStorage.getItem("pulsar_inviter_wallet"); } catch (e) { return null; } })();
+  if (inviter && inviter !== mockWallet) {
+    fetch("/api/v1/recon/squad/join", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inviter_wallet: inviter, invitee_wallet: mockWallet }),
+    }).catch(() => {});
+  }
+  loadSquadPanel(mockWallet);
+
   // MOCK: in real implementation, use window.ethereum.request({ method: 'eth_requestAccounts' })
   document.getElementById('connectOverlay').classList.add('hidden');
   // Seed the ticker
