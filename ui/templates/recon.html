@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+<link rel="apple-touch-icon" href="/static/icon-512.png">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#03030f">
 <title>SENTINEL RECON // mesh ops live</title>
 <style>
   :root {
@@ -1038,10 +1042,6 @@
           </defs>
           <path d="M 100 100 L 100 5 A 95 95 0 0 1 195 100 Z" fill="url(#sweepGrad)"/>
         </g>
-        <circle class="blip fade" cx="140" cy="60" r="4"/>
-        <circle class="blip fade" cx="65" cy="135" r="4" style="animation-delay: 1.2s;"/>
-        <circle class="blip threat fade" cx="155" cy="155" r="5" style="animation-delay: 2.4s;"/>
-        <circle class="blip fade" cx="45" cy="80" r="4" style="animation-delay: 3.1s;"/>
       </svg>
     </div>
 
@@ -1298,10 +1298,7 @@ function addTickerLine() {
     else if (line.type === 'crypto') playAudio('audio-beep', 0.15);
   }
 
-  // Adjust PTS slightly based on event type
-  if (line.type === 'threat') ptsValue = Math.max(60, ptsValue - 2);
-  else if (line.type === 'ok') ptsValue = Math.min(99, ptsValue + 0.5);
-  updatePTS();
+  // (fake PTS adjustments removed — real value from /api/v1/recon/pts)
 }
 function updatePTS() {
   const v = Math.round(ptsValue);
@@ -1311,6 +1308,15 @@ function updatePTS() {
   big.className = 'num' + (v < 70 ? ' alert' : v < 85 ? ' warn' : '');
 }
 setInterval(addTickerLine, 2200);
+
+async function pollRealPTS() {
+  try {
+    const r = await fetch("/api/v1/recon/pts");
+    const j = await r.json();
+    if (j.ok && typeof j.pts === "number") { ptsValue = j.pts; updatePTS(); }
+  } catch (e) {}
+}
+pollRealPTS(); setInterval(pollRealPTS, 10000);
 
 // ============ GLOBAL ATTACK MAP (animated arcs over world map) ============
 // All coordinates are real-ish (approximate lat/lng → SVG x/y on 1000x320 viewBox).

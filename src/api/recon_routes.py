@@ -9,7 +9,7 @@ The Recon dashboard JS fetches from /api/v1/recon/radar/ddos-l3 (etc).
 import time
 from typing import Any
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from config.settings import get_settings
 from config.logging import get_logger
 
@@ -35,6 +35,30 @@ async def health():
         "token_configured": bool(settings.cloudflare_api_token),
         "cache_ttl_seconds": CACHE_TTL_SECONDS,
     }
+
+@recon_router.get("/pts")
+async def get_pts(request: Request):
+    """Real Post-quantum Threat Score from PTSCalculator."""
+    pts_calc = getattr(request.app.state, "pts_calculator", None)
+    if pts_calc is None:
+        return {"ok": False, "pts": None, "error": "PTSCalculator not initialized"}
+    import asyncio
+    score = None; used = None
+    for name in ["get_current_score", "calculate", "current_pts", "get_score", "score", "compute"]:
+        m = getattr(pts_calc, name, None)
+        if callable(m):
+            try:
+                r = await m() if asyncio.iscoroutinefunction(m) else m()
+                if isinstance(r, (int, float)): score = float(r)
+                elif isinstance(r, dict) and "score" in r: score = float(r["score"])
+                elif hasattr(r, "score"): score = float(r.score)
+                used = name; break
+            except Exception: continue
+    if score is None:
+        return {"ok": False, "pts": None, "error": "no compatible method",
+                "available": [n for n in dir(pts_calc) if not n.startswith("_")][:20]}
+    return {"ok": True, "pts": round(score, 1), "method": used, "timestamp": time.time()}
+
 
 @recon_router.get("/radar/{panel}")
 async def radar_panel(panel: str):
