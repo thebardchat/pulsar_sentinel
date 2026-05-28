@@ -1,0 +1,84 @@
+"""Recon dashboard routes — Cloudflare Radar proxy + recon UI surface.
+
+Provides /api/v1/recon/radar/{panel} that proxies the 4 main Cloudflare Radar
+endpoints with the server-side CLOUDFLARE_API_TOKEN. Responses are cached in
+memory for 60 seconds per panel to stay well under Cloudflare's rate limits.
+
+The Recon dashboard JS fetches from /api/v1/recon/radar/ddos-l3 (etc).
+"""
+import time
+from typing import Any
+import httpx
+from fastapi import APIRouter, HTTPException
+from config.settings import get_settings
+from config.logging import get_logger
+
+logger = get_logger("recon")
+recon_router = APIRouter(prefix="/recon", tags=["recon"])
+
+RADAR_ENDPOINTS = {
+    "ddos-l3":   "/radar/attacks/layer3/summary/VECTOR",
+    "ddos-l7":   "/radar/attacks/layer7/summary/HTTP_METHOD",
+    "outages":   "/radar/annotations/outages?limit=10",
+    "bgp":       "/radar/bgp/hijacks/events?minConfidence=8&per_page=10&sortBy=TIME&sortOrder=DESC",
+}
+
+_cache: dict[str, tuple[float, dict[str, Any]]] = {}
+CACHE_TTL_SECONDS = 60
+
+@recon_router.get("/health")
+async def health():
+    settings = get_settings()
+    return {
+        "ok": True,
+        "panels": list(RADAR_ENDPOINTS.keys()),
+        "token_configured": bool(settings.cloudflare_api_token),
+        "cache_ttl_seconds": CACHE_TTL_SECONDS,
+    }
+
+@recon_router.get("/radar/{panel}")
+async def radar_panel(panel: str):
+    if panel not in RADAR_ENDPOINTS:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Unknown panel. Available: {list(RADAR_ENDPOINTS.keys())}",
+        )
+    now = time.time()
+    if panel in _cache:
+        ts, data = _cache[panel]
+        if now - ts < CACHE_TTL_SECONDS:
+            return {
+                "ok": True, "panel": panel, "endpoint": RADAR_ENDPOINTS[panel],
+                "cached": True, "age_seconds": round(now - ts, 1), "data": data,
+            }
+    settings = get_settings()
+    if not settings.cloudflare_api_token:
+        raise HTTPException(
+            status_code=503,
+            detail="CLOUDFLARE_API_TOKEN not configured on server",
+        )
+    url = "https://api.cloudflare.com/client/v4" + RADAR_ENDPOINTS[panel]
+    headers = {
+        "Authorization": f"Bearer {settings.cloudflare_api_token}",
+        "Accept": "application/json",
+        "User-Agent": "pulsar-sentinel-recon/1.0",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+    except httpx.HTTPStatusError as e:
+        logger.error("radar_upstream_error", panel=panel, status=e.response.status_code)
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=f"Cloudflare Radar HTTP {e.response.status_code}",
+        )
+    except httpx.RequestError as e:
+        logger.error("radar_request_error", panel=panel, error=str(e))
+        raise HTTPException(status_code=502, detail=f"Request failed: {e}")
+    _cache[panel] = (now, data)
+    return {
+        "ok": True, "panel": panel, "endpoint": RADAR_ENDPOINTS[panel],
+        "cached": False, "data": data,
+    }

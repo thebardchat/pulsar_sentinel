@@ -28,6 +28,7 @@ from api.routes import router, init_routes
 from api.auth import MetaMaskAuth
 from api.ui_routes import ui_router
 from billing.routes import billing_router, init_billing
+from api.recon_routes import recon_router
 from core.asr_engine import ASREngine
 from governance.access_control import AccessController
 from governance.pts_calculator import PTSCalculator
@@ -144,6 +145,7 @@ def create_app() -> FastAPI:
 
     # Include billing routes
     app.include_router(billing_router, prefix="/api/v1")
+    app.include_router(recon_router, prefix="/api/v1")
 
     # Setup static files and templates
     project_root = Path(__file__).parent.parent.parent
@@ -257,6 +259,12 @@ def create_app() -> FastAPI:
         if templates:
             return templates.TemplateResponse("security.html", {"request": request})
         return HTMLResponse("Security - templates not found")
+
+    @app.get("/recon", response_class=HTMLResponse)
+    async def recon_page(request: Request):
+        if templates:
+            return templates.TemplateResponse("recon.html", {"request": request})
+        return HTMLResponse("Recon dashboard - templates not found")
 
     # Global exception handler
     @app.exception_handler(Exception)

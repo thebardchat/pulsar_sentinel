@@ -28,6 +28,12 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    # Cloudflare Radar (live threat intelligence feed for Recon dashboard)
+    cloudflare_api_token: str = Field(
+        default="",
+        description="Cloudflare API token (cfut_*) for Radar proxy",
+    )
+
     # Blockchain Configuration
     polygon_mainnet_rpc: str = Field(
         default="https://polygon-rpc.com",
