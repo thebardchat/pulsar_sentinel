@@ -1062,28 +1062,51 @@
   </div>
 </div>
 
-<!-- ============ PULSAR ATTACK MAP — LIVE FROM YOUR HONEYPOT MESH (M1b 2026-05-28) ============ -->
+<!-- ============ PULSAR ATTACK MAP × KASPERSKY (hybrid overlay) ============ -->
 <section class="atk-map-section" id="pulsar-attack-map">
   <div class="atk-map-head">
-    <span class="ttl" style="color: var(--red-bright);">🛰 PULSAR ATTACK MAP</span>
-    <span class="sub">// LIVE FROM YOUR HONEYPOT MESH</span>
-    <span class="legend">
-      <span style="color: var(--cyan); font-size: 9px;">data: pulsar sensor mesh · <span id="patk-sensor-count">1</span> sensor(s) online · <span id="patk-sensor-locs">NYC1</span></span>
-    </span>
+    <span class="ttl" style="color: var(--cyan-bright);">🛰 PULSAR × 🌐 KASPERSKY</span>
+    <span class="sub">// my honeypot mesh overlaid on Kaspersky's worldwide threat network</span>
+    <span class="legend"><span style="color: var(--cyan-bright); font-size: 10px;">free embed · equal billing · brand rule #29</span></span>
   </div>
-  <div class="atk-map-wrap" style="height: 640px; padding: 0; background: #050808; position: relative; overflow: hidden;">
-    <svg id="patk-svg" style="width: 100%; height: 100%; display: block;"></svg>
-    <div id="patk-countries-panel" style="position: absolute; top: 16px; right: 16px; width: 200px; background: rgba(10, 14, 14, 0.85); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 4px; padding: 10px; font-family: var(--font-mono); font-size: 11px; z-index: 10;">
-      <div style="color: var(--cyan-bright); font-weight: 700; border-bottom: 1px solid rgba(0, 255, 255, 0.3); padding-bottom: 6px; margin-bottom: 6px;">TOP ATTACK ORIGINS</div>
-      <div id="patk-countries">loading...</div>
+  <div class="atk-map-wrap" style="height: 640px; padding: 0; position: relative; overflow: hidden; background: var(--bg-0);">
+    <!-- Kaspersky iframe (background, full canvas) -->
+    <iframe src="https://cybermap.kaspersky.com/en/widget/dynamic/dark"
+            width="100%" height="640" frameborder="0"
+            style="border: none; display: block; position: absolute; inset: 0; z-index: 1;"
+            title="Kaspersky Cyberthreat Live Map" loading="lazy"></iframe>
+
+    <!-- PULSAR SVG overlay (foreground, transparent) -->
+    <svg id="patk-svg"
+         viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid slice"
+         style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; background: transparent;"></svg>
+
+    <!-- PULSAR HUD (top-left, cyan) -->
+    <div style="position: absolute; top: 14px; left: 14px; background: rgba(0, 10, 14, 0.88); border: 1px solid var(--cyan-bright); border-radius: 4px; padding: 10px 12px; font-family: var(--font-mono); font-size: 11px; z-index: 20; min-width: 200px;">
+      <div style="color: var(--cyan-bright); font-weight: 700; border-bottom: 1px solid var(--cyan-bright); padding-bottom: 4px; margin-bottom: 6px; letter-spacing: 0.5px;">🛰 PULSAR LIVE</div>
+      <div style="line-height: 1.7;">
+        <div>attacks: <span id="patk-total" style="color: var(--cyan-bright); font-weight: 700;">--</span></div>
+        <div>unique IPs: <span id="patk-unique" style="color: var(--cyan-bright);">--</span></div>
+        <div>sensors: <span id="patk-sensors" style="color: var(--cyan-bright);">1</span> · NYC1</div>
+        <div>feeds: <span id="patk-feeds" style="color: #ffb030;">--</span> dots</div>
+      </div>
+      <div style="color: var(--text-dim); font-size: 9px; margin-top: 6px; font-style: italic;">my honeypot + federation</div>
     </div>
-    <div style="position: absolute; bottom: 16px; left: 16px; display: flex; gap: 8px; align-items: center; z-index: 10;">
-      <button id="patk-rotate-toggle" style="background: rgba(0, 255, 255, 0.1); color: var(--cyan-bright); border: 1px solid rgba(0, 255, 255, 0.4); padding: 4px 10px; font-family: var(--font-mono); font-size: 10px; cursor: pointer;">⏸ FREEZE</button>
-      <span id="patk-status" style="color: var(--red-bright); font-family: var(--font-mono); font-size: 10px;">🔴 LIVE · drifting</span>
+
+    <!-- KASPERSKY brand panel (top-right, cyan — equal billing) -->
+    <div style="position: absolute; top: 14px; right: 14px; background: rgba(0, 10, 14, 0.88); border: 1px solid var(--cyan-bright); border-radius: 4px; padding: 10px 12px; font-family: var(--font-mono); font-size: 11px; z-index: 20; min-width: 200px;">
+      <div style="color: var(--cyan-bright); font-weight: 700; border-bottom: 1px solid var(--cyan-bright); padding-bottom: 4px; margin-bottom: 6px; letter-spacing: 0.5px;">🌐 KASPERSKY</div>
+      <div style="line-height: 1.7;">
+        <div>Cyberthreat Real-Time Map</div>
+        <div>Kaspersky Security Network</div>
+        <div>license: <span style="color: var(--cyan-bright);">CC BY 4.0</span></div>
+        <div>cost: <span style="color: #00ff88;">$0</span></div>
+      </div>
+      <div style="color: var(--text-dim); font-size: 9px; margin-top: 6px; font-style: italic;">their global sensor network</div>
     </div>
   </div>
   <div style="margin-top: 8px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.5px; line-height: 1.6;">
-    ⚛ <strong style="color: var(--red-bright);">EVERY DOT IS A REAL ATTACK</strong> on Pulsar sensors or known global attackers. <span style="color: var(--cyan-bright);">CYAN</span> = Pulsar honeypot mesh · <span style="color: #ffb030;">AMBER</span> = DShield/ISC + abuse.ch URLhaus federation · all real, all attributed. Brand rule #29: no fake numbers, no unattributed sources.
+    🛰 <strong style="color: var(--cyan-bright);">PULSAR SENSOR MESH</strong> × 🌐 <strong style="color: var(--cyan-bright);">KASPERSKY CYBERTHREAT FEED</strong>. Equal billing, both real, both attributed. <span style="color: var(--red-bright);">RED MISSILES</span> = real attacks on Pulsar honeypots · <span style="color: #ffb030;">AMBER DOTS</span> = federated threat intel (DShield + abuse.ch + Spamhaus). Brand rule #29: no fake numbers, every source named.
   </div>
 </section>
 
@@ -2029,106 +2052,66 @@ if (document.readyState === 'loading') {
 }
 // ============ END PULSAR LIVE SENSORS ============
 
-// ============ PULSAR ATTACK MAP (M1b — hybrid rotating globe) ============
+// ============ PULSAR × KASPERSKY OVERLAY (no D3 globe — flat SVG over iframe) ============
 const PATK_NYC1 = [-74.0060, 40.7128];
-const PATK_POLL_MS = 10000;
-const PATK_DRIFT_DEG_PER_SEC = 1.2;
-let patkSvg, patkProj, patkSphere, patkLand, patkGraticule, patkSensorGroup, patkAttacksGroup;
-let patkRotation = [30, -20, 0];
-let patkRotating = true;
+const PATK_W = 1000, PATK_H = 640;
+let patkSvg = null;
+let patkFeedDots = [];
 let patkLastTs = '';
-let patkLockUntil = 0;
-let patkLastFrame = performance.now();
 
-function patkVisible(coord) {
-  return d3.geoDistance(coord, [-patkRotation[0], -patkRotation[1]]) < Math.PI / 2;
-}
-
-function patkRender() {
-  const path = d3.geoPath(patkProj);
-  patkSphere.attr('d', path);
-  patkGraticule.attr('d', path);
-  patkLand.selectAll('path').attr('d', path);
-  patkSensorGroup.selectAll('*').remove();
-  patkRenderFeeds();
-  if (patkVisible(PATK_NYC1)) {
-    const [nx, ny] = patkProj(PATK_NYC1);
-    patkSensorGroup.append('circle').attr('cx', nx).attr('cy', ny).attr('r', 4)
-      .attr('fill', 'var(--cyan-bright)').attr('stroke', '#fff').attr('stroke-width', 1);
-    patkSensorGroup.append('text').attr('x', nx + 8).attr('y', ny - 4)
-      .attr('fill', 'var(--cyan-bright)').attr('font-family', 'monospace').attr('font-size', '10px')
-      .text('🛰 NYC1');
-  }
-}
-
-function patkAnimate() {
-  requestAnimationFrame(patkAnimate);
-  const now = performance.now();
-  const dt = (now - patkLastFrame) / 1000;
-  patkLastFrame = now;
-  if (patkRotating) {
-    patkRotation[0] += PATK_DRIFT_DEG_PER_SEC * dt;
-    if (patkRotation[0] > 180) patkRotation[0] -= 360;
-    patkProj.rotate(patkRotation);
-    patkRender();
-  }
-}
-
-function patkPanTo(lat, lng) {
-  const target = [-lng, -lat, 0];
-  const interp = d3.interpolate(patkRotation.slice(), target);
-  const start = performance.now();
-  const duration = 1500;
-  patkLockUntil = performance.now() + 4000;
-  const statusEl = document.getElementById('patk-status');
-  if (statusEl) statusEl.textContent = 'tracking attack';
-  function tick() {
-    const t = Math.min(1, (performance.now() - start) / duration);
-    patkRotation = interp(d3.easeCubicInOut(t));
-    patkProj.rotate(patkRotation);
-    patkRender();
-    if (t < 1) requestAnimationFrame(tick);
-    else if (statusEl) statusEl.textContent = patkRotating ? 'rotating...' : 'frozen';
-  }
-  tick();
+function patkLngLatToScreen(lng, lat) {
+  // Simple equirectangular: lng -180..180 → 0..W, lat 90..-90 → 0..H
+  return [((lng + 180) / 360) * PATK_W, ((90 - lat) / 180) * PATK_H];
 }
 
 function patkFireMissile(src_lat, src_lng, evtType) {
-  const srcCoord = [src_lng, src_lat];
-  const srcVis = patkVisible(srcCoord);
-  const tgtVis = patkVisible(PATK_NYC1);
-  if (!srcVis && !tgtVis) return;
+  if (!patkSvg) return;
+  const [sx, sy] = patkLngLatToScreen(src_lng, src_lat);
+  const [tx, ty] = patkLngLatToScreen(PATK_NYC1[0], PATK_NYC1[1]);
   const color = evtType === 'cowrie.login.success' ? '#ff3030' :
                 evtType === 'cowrie.command.input' ? '#ff8030' : '#ff5050';
-  if (srcVis) {
-    const src = patkProj(srcCoord);
-    patkSvg.append('circle').attr('cx', src[0]).attr('cy', src[1])
-      .attr('r', 0).attr('fill', color)
-      .transition().duration(300).attr('r', 5).attr('opacity', 0.8)
-      .transition().duration(1500).attr('opacity', 0).remove();
-  }
-  const interp = d3.geoInterpolate(srcCoord, PATK_NYC1);
-  const pts = [];
-  for (let i = 0; i <= 30; i++) {
-    const ll = interp(i / 30);
-    if (patkVisible(ll)) pts.push(patkProj(ll));
-  }
-  if (pts.length < 2) return;
+  // Source flash
+  patkSvg.append('circle')
+    .attr('cx', sx).attr('cy', sy).attr('r', 0).attr('fill', color)
+    .transition().duration(300).attr('r', 6).attr('opacity', 0.95)
+    .transition().duration(1500).attr('opacity', 0).remove();
+  // Curved arc
+  const mx = (sx + tx) / 2;
+  const my = Math.min(sy, ty) - 90;
   const trail = patkSvg.append('path')
-    .attr('d', d3.line().curve(d3.curveBasis)(pts))
-    .attr('fill', 'none').attr('stroke', color).attr('stroke-width', 1.5).attr('opacity', 0.9);
+    .attr('d', `M${sx},${sy} Q${mx},${my} ${tx},${ty}`)
+    .attr('fill', 'none').attr('stroke', color).attr('stroke-width', 2).attr('opacity', 0.95);
   const length = trail.node().getTotalLength();
   trail.attr('stroke-dasharray', length).attr('stroke-dashoffset', length)
     .transition().duration(1000).ease(d3.easeQuadIn).attr('stroke-dashoffset', 0)
     .on('end', function() {
-      if (tgtVis) {
-        const tgt = patkProj(PATK_NYC1);
-        patkSvg.append('circle').attr('cx', tgt[0]).attr('cy', tgt[1])
-          .attr('r', 0).attr('fill', 'none').attr('stroke', color).attr('stroke-width', 2)
-          .transition().duration(700).attr('r', 25).attr('opacity', 0).remove();
-      }
+      patkSvg.append('circle').attr('cx', tx).attr('cy', ty)
+        .attr('r', 0).attr('fill', 'none').attr('stroke', color).attr('stroke-width', 2.5)
+        .transition().duration(800).attr('r', 35).attr('opacity', 0).remove();
       trail.transition().duration(2500).attr('opacity', 0).remove();
     });
+}
+
+function patkRenderFeeds() {
+  if (!patkSvg || patkFeedDots.length === 0) return;
+  let layer = patkSvg.select('g.patk-feed-layer');
+  if (layer.empty()) layer = patkSvg.append('g').attr('class', 'patk-feed-layer');
+  layer.selectAll('circle').remove();
+  patkFeedDots.forEach(dot => {
+    const [x, y] = patkLngLatToScreen(dot.lng, dot.lat);
+    layer.append('circle').attr('cx', x).attr('cy', y)
+      .attr('r', 3).attr('fill', '#ffb030').attr('opacity', 0.75)
+      .attr('stroke', '#ffe080').attr('stroke-width', 0.5);
+  });
+}
+
+function patkPulseRandomFeed() {
+  if (!patkSvg || patkFeedDots.length === 0) return;
+  const dot = patkFeedDots[Math.floor(Math.random() * patkFeedDots.length)];
+  const [x, y] = patkLngLatToScreen(dot.lng, dot.lat);
+  patkSvg.append('circle').attr('cx', x).attr('cy', y)
+    .attr('r', 2).attr('fill', 'none').attr('stroke', '#ffb030').attr('stroke-width', 1.5).attr('opacity', 0.9)
+    .transition().duration(1100).attr('r', 18).attr('opacity', 0).remove();
 }
 
 async function patkPoll() {
@@ -2137,137 +2120,47 @@ async function patkPoll() {
     const data = await r.json();
     const evts = (data.events || []).filter(e => e.src_lat && e.src_lng);
     const newOnes = evts.filter(e => !patkLastTs || e.timestamp > patkLastTs).slice(0, 10);
-    // (auto-pan removed — globe always drifts. patkPanTo still available for user-click.)
     newOnes.reverse().forEach((e, i) => setTimeout(() => patkFireMissile(e.src_lat, e.src_lng, e.event_id), i * 600));
     if (evts.length > 0) patkLastTs = evts[0].timestamp;
-    const sc = document.getElementById('patk-sensor-count');
-    const sl = document.getElementById('patk-sensor-locs');
-    if (sc) sc.textContent = (data.sensors || []).length;
-    if (sl) sl.textContent = (data.sensors || []).map(s => s.location).join(', ') || '—';
+    const tot = document.getElementById('patk-total');
+    if (tot) tot.textContent = (data.total_events || 0).toLocaleString();
+    const unique = new Set(evts.map(e => e.src_ip)).size;
+    const u = document.getElementById('patk-unique');
+    if (u) u.textContent = unique;
   } catch (e) { console.warn('patk poll', e); }
 }
-
-
-// ============ FEDERATED THREAT FEEDS (AMBER dots — DShield + URLhaus) ============
-let patkFeedDots = [];
 
 async function patkPollFeeds() {
   try {
     const r = await fetch('/api/v1/recon/feeds/external');
     const data = await r.json();
     const dots = [];
-    [...(data.dshield || []), ...(data.urlhaus || [])].forEach(item => {
+    [...(data.dshield||[]), ...(data.urlhaus||[]), ...(data.spamhaus||[]), ...(data.feodo||[]), ...(data.threatfox||[])].forEach(item => {
       if (item.src_lat && item.src_lng) {
-        dots.push({
-          lat: item.src_lat, lng: item.src_lng,
-          source: item.source || 'feed',
-          ip: item.ip,
-          isp: item.src_isp || '',
-          attacks: item.attacks || 0
-        });
+        dots.push({lat: item.src_lat, lng: item.src_lng, source: item.source || 'feed', ip: item.ip});
       }
     });
     patkFeedDots = dots;
-    console.log('[patk] federated dots loaded:', dots.length);
+    const fe = document.getElementById('patk-feeds');
+    if (fe) fe.textContent = dots.length.toLocaleString();
   } catch (e) { console.warn('feeds poll', e); }
 }
 
-function patkRenderFeeds() {
-  if (!patkSvg || !patkProj || patkFeedDots.length === 0) return;
-  let layer = patkSvg.select('g.patk-feed-layer');
-  if (layer.empty()) layer = patkSvg.append('g').attr('class', 'patk-feed-layer');
-  layer.selectAll('circle').remove();
-  patkFeedDots.forEach(dot => {
-    if (!patkVisible([dot.lng, dot.lat])) return;
-    const pt = patkProj([dot.lng, dot.lat]);
-    if (!pt) return;
-    layer.append('circle')
-      .attr('cx', pt[0]).attr('cy', pt[1])
-      .attr('r', 2.2).attr('fill', '#ffb030').attr('opacity', 0.65)
-      .attr('data-ip', dot.ip).attr('data-isp', dot.isp);
-  });
-}
-
-function patkPulseRandomFeed() {
-  if (!patkFeedDots || patkFeedDots.length === 0) return;
-  const visible = patkFeedDots.filter(d => patkVisible([d.lng, d.lat]));
-  if (visible.length === 0) return;
-  const dot = visible[Math.floor(Math.random() * visible.length)];
-  const pt = patkProj([dot.lng, dot.lat]);
-  if (!pt) return;
-  patkSvg.append('circle')
-    .attr('cx', pt[0]).attr('cy', pt[1])
-    .attr('r', 2).attr('fill', 'none')
-    .attr('stroke', '#ffb030').attr('stroke-width', 1.5).attr('opacity', 0.9)
-    .transition().duration(1100)
-    .attr('r', 16).attr('opacity', 0).remove();
-}
-// ============ END FEDERATED FEEDS ============
-
-async function patkPollCountries() {
-  try {
-    const r = await fetch('/api/v1/recon/honeypot/recent?limit=200');
-    const data = await r.json();
-    const counts = {};
-    (data.events || []).forEach(e => {
-      const c = (e.src_country || '').trim();
-      if (c) counts[c] = (counts[c] || 0) + 1;
-    });
-    const top = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 8);
-    const el = document.getElementById('patk-countries');
-    if (el) el.innerHTML = top.map(([c, n]) =>
-      `<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(0,255,255,0.08);">
-        <span style="color:var(--text-base);">${c}</span><span style="color:#ff5050;">×${n}</span></div>`
-    ).join('') || '<span style="color:var(--text-dim);">awaiting data...</span>';
-  } catch (e) { console.warn('patk countries', e); }
-}
-
 function patkInit() {
-  if (typeof d3 === 'undefined' || typeof topojson === 'undefined') return setTimeout(patkInit, 200);
-  const svgEl = document.getElementById('patk-svg');
-  if (!svgEl) return;
   patkSvg = d3.select('#patk-svg');
-  const bbox = svgEl.getBoundingClientRect();
-  const w = bbox.width || 800, h = bbox.height || 640;
-  const size = Math.min(w, h);
-  patkProj = d3.geoOrthographic().scale(size * 0.42).translate([w / 2, h / 2]).rotate(patkRotation).clipAngle(90);
-  patkSphere = patkSvg.append('path').datum({type: 'Sphere'})
-    .attr('fill', '#040a0a').attr('stroke', 'rgba(0, 255, 255, 0.4)').attr('stroke-width', 1);
-  patkGraticule = patkSvg.append('path').datum(d3.geoGraticule10())
-    .attr('fill', 'none').attr('stroke', 'rgba(0, 255, 255, 0.08)').attr('stroke-width', 0.5);
-  patkLand = patkSvg.append('g').attr('class', 'patk-land');
-  patkSensorGroup = patkSvg.append('g').attr('class', 'patk-sensors');
-  patkAttacksGroup = patkSvg.append('g').attr('class', 'patk-attacks');
-  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(world => {
-    const countries = topojson.feature(world, world.objects.countries).features;
-    patkLand.selectAll('path').data(countries).join('path')
-      .attr('fill', '#0d1818').attr('stroke', 'rgba(0, 255, 255, 0.15)').attr('stroke-width', 0.4);
-    patkRender();
-    patkAnimate();
-    patkPoll();
-    patkPollCountries();
-    setInterval(patkPoll, PATK_POLL_MS);
-    setInterval(patkPollCountries, 30000);
-    patkPollFeeds();
-    setInterval(patkPollFeeds, 120000);
-    setInterval(patkPulseRandomFeed, 700);
-  });
-  const btn = document.getElementById('patk-rotate-toggle');
-  if (btn) btn.addEventListener('click', () => {
-    patkRotating = !patkRotating;
-    btn.textContent = patkRotating ? '⏸ FREEZE' : '▶ RESUME';
-    const s = document.getElementById('patk-status');
-    if (s) s.textContent = patkRotating ? '🔴 LIVE · drifting' : '⏸ frozen';
-  });
+  patkPoll();
+  patkPollFeeds();
+  setInterval(patkPoll, 10000);
+  setInterval(patkPollFeeds, 120000);
+  setInterval(patkRenderFeeds, 5000);
+  setInterval(patkPulseRandomFeed, 250);
 }
 
-(function patkBoot() {
+(function() {
   function ls(src, cb) { const s = document.createElement('script'); s.src = src; s.onload = cb; document.head.appendChild(s); }
   function start() {
-    let pending = 0, done = () => { if (--pending <= 0) patkInit(); };
-    if (typeof d3 === 'undefined') { pending++; ls('https://d3js.org/d3.v7.min.js', done); }
-    if (typeof topojson === 'undefined') { pending++; ls('https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js', done); }
-    if (pending === 0) patkInit();
+    if (typeof d3 !== 'undefined') return patkInit();
+    ls('https://d3js.org/d3.v7.min.js', patkInit);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
