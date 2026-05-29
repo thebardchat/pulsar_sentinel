@@ -1220,6 +1220,32 @@
 
   <!-- RIGHT COLUMN: Live Event Ticker + Blockchain Ledger -->
   <div>
+    <!-- ===== PULSAR LIVE SENSORS (L.3 Phase 3b — real honeypot data) ===== -->
+    <div class="panel" id="livesensors-panel" style="margin-bottom: 16px; border-left-color: var(--cyan-bright);">
+      <div class="panel-title" style="color: var(--cyan-bright);">
+        <span class="led" style="background: var(--cyan-bright);"></span>
+        🛰 PULSAR LIVE SENSORS
+        <span class="meta" id="livesensors-meta" style="margin-left: auto; font-size: 11px;">loading...</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 8px 12px;">
+        <div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 4px;">TOTAL ATTACKS LOGGED</div>
+          <div id="livesensors-total" style="font-size: 38px; font-weight: 700; color: var(--cyan-bright); font-family: var(--font-mono); line-height: 1;">--</div>
+          <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;">
+            <span id="livesensors-sensorcount">--</span> sensor(s) online · <span id="livesensors-locations">--</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 4px;">TOP USERNAMES TRIED</div>
+          <div id="livesensors-users" style="font-family: var(--font-mono); font-size: 11px; line-height: 1.6;">loading...</div>
+        </div>
+      </div>
+      <div style="border-top: 1px solid rgba(0,255,255,0.15); padding: 8px 12px;">
+        <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 4px;">LATEST BOT ACTIVITY</div>
+        <div id="livesensors-recent" style="font-family: var(--font-mono); font-size: 11px; line-height: 1.6; max-height: 110px; overflow-y: auto;">loading...</div>
+      </div>
+    </div>
+
     <div class="squad-panel" id="squadPanel">
       <div class="ttl">▣ DEPLOY YOUR SQUAD</div>
       <div class="squad-stats">
@@ -1935,6 +1961,71 @@ function toggleAudio() {
     stopStatic();
   }
 }
+
+
+// ============ PULSAR LIVE SENSORS (L.3 Phase 3b — real honeypot data) ============
+const HONEYPOT_STATS_URL = '/api/v1/recon/honeypot/stats';
+const HONEYPOT_RECENT_URL = '/api/v1/recon/honeypot/recent?limit=5';
+const HONEYPOT_POLL_MS = 10000;
+
+function escHtml(s) {
+  return String(s || '').replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+}
+
+async function fetchHoneypotStats() {
+  try {
+    const r = await fetch(HONEYPOT_STATS_URL);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    document.getElementById('livesensors-total').textContent = (data.total_attacks || 0).toLocaleString();
+    document.getElementById('livesensors-sensorcount').textContent = data.active_sensors || 0;
+    const bars = (data.top_usernames || []).slice(0, 5).map(u => {
+      const name = u.username || '<empty>';
+      return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(0,255,255,0.08);padding:2px 0;">
+        <span style="color:var(--cyan-bright);">${escHtml(name)}</span>
+        <span style="color:var(--text-dim);">×${u.count}</span></div>`;
+    }).join('');
+    document.getElementById('livesensors-users').innerHTML = bars || '<span style="color:var(--text-dim);">no data yet</span>';
+    document.getElementById('livesensors-meta').textContent = 'updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    console.warn('honeypot stats fetch', e);
+    document.getElementById('livesensors-meta').textContent = 'fetch error';
+  }
+}
+
+async function fetchHoneypotRecent() {
+  try {
+    const r = await fetch(HONEYPOT_RECENT_URL);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const locs = [...new Set((data.sensors || []).map(s => s.location))].join(', ');
+    document.getElementById('livesensors-locations').textContent = locs || '--';
+    const lines = (data.events || []).slice(0, 5).map(e => {
+      const ip = escHtml(e.src_ip || '?');
+      const evt = escHtml((e.event_id || '').replace('cowrie.', ''));
+      const detail = escHtml((e.command || e.username || '').substring(0, 50));
+      return `<div>
+        <span style="color:var(--cyan-bright);">${ip}</span>
+        <span style="color:var(--red-bright);"> ${evt} </span>
+        <span style="color:var(--text-dim);">${detail}</span></div>`;
+    }).join('');
+    document.getElementById('livesensors-recent').innerHTML = lines || '<span style="color:var(--text-dim);">awaiting first event...</span>';
+  } catch (e) { console.warn('honeypot recent fetch', e); }
+}
+
+function startHoneypotPolling() {
+  fetchHoneypotStats();
+  fetchHoneypotRecent();
+  setInterval(fetchHoneypotStats, HONEYPOT_POLL_MS);
+  setInterval(fetchHoneypotRecent, 30000);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startHoneypotPolling);
+} else {
+  startHoneypotPolling();
+}
+// ============ END PULSAR LIVE SENSORS ============
 
 // ============ SQUAD (referral network) ============
 // Capture ?ref=0xINVITER from URL and persist to localStorage
