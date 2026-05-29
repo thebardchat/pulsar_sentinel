@@ -1069,16 +1069,16 @@
     <span class="sub">// my honeypot mesh overlaid on Kaspersky's worldwide threat network</span>
     <span class="legend"><span style="color: var(--cyan-bright); font-size: 10px;">free embed · equal billing · brand rule #29</span></span>
   </div>
-  <div class="atk-map-wrap" style="height: 640px; padding: 0; position: relative; overflow: hidden; background: var(--bg-0);">
+  <div class="atk-map-wrap" style="height: 1280px; padding: 0; position: relative; overflow: hidden; background: var(--bg-0);">
     <!-- Kaspersky iframe (background, full canvas) -->
     <iframe src="https://cybermap.kaspersky.com/en/widget/dynamic/dark"
-            width="100%" height="640" frameborder="0"
+            width="100%" height="1280" frameborder="0"
             style="border: none; display: block; position: absolute; inset: 0; z-index: 1;"
             title="Kaspersky Cyberthreat Live Map" loading="lazy"></iframe>
 
     <!-- PULSAR SVG overlay (foreground, transparent) -->
     <svg id="patk-svg"
-         viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid slice"
+         viewBox="0 0 1000 1280" preserveAspectRatio="xMidYMid slice"
          style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; background: transparent;"></svg>
 
     <!-- PULSAR HUD (top-left, cyan) -->
@@ -2052,67 +2052,96 @@ if (document.readyState === 'loading') {
 }
 // ============ END PULSAR LIVE SENSORS ============
 
-// ============ PULSAR × KASPERSKY OVERLAY (decorative — no geo pretense) ============
-const PATK_W = 1000, PATK_H = 640;
-const PATK_CENTER = [500, 400]; // pulsar mesh symbol over Kaspersky's globe center
-let patkSvg = null;
-let patkFeedDots = [];
-let patkFeedTicker = [];
-let patkTickerIdx = 0;
+// ============ PULSAR × KASPERSKY SYNCED GLOBES (orthographic overlay) ============
+const PATK_NYC1 = [-74.0060, 40.7128];
+const PATK_W = 1000, PATK_H = 1280;
+const PATK_DRIFT_DEG_PER_SEC = 0.4;
+let patkSvg = null, patkProj = null;
+let patkSphere, patkLand, patkSensorGroup;
+let patkRotation = [70, -10, 0];
 let patkLastTs = '';
+let patkLastFrame = performance.now();
+let patkFeedTicker = [];
 
-function patkRandomEdgePoint() {
-  const side = Math.floor(Math.random() * 4);
-  if (side === 0) return [Math.random() * PATK_W, 30];
-  if (side === 1) return [PATK_W - 30, Math.random() * (PATK_H - 100) + 30];
-  if (side === 2) return [Math.random() * PATK_W, PATK_H - 100];
-  return [30, Math.random() * (PATK_H - 100) + 30];
+function patkVisible(coord) {
+  return d3.geoDistance(coord, [-patkRotation[0], -patkRotation[1]]) < Math.PI / 2;
 }
 
-function patkRenderCenter() {
-  if (!patkSvg) return;
-  let g = patkSvg.select('g.patk-center');
-  if (g.empty()) {
-    g = patkSvg.append('g').attr('class', 'patk-center');
-    // Center marker — pulsar mesh symbol
-    g.append('circle').attr('cx', PATK_CENTER[0]).attr('cy', PATK_CENTER[1])
-      .attr('r', 5).attr('fill', 'var(--cyan-bright)').attr('stroke', '#fff').attr('stroke-width', 1.5)
-      .attr('class', 'patk-mesh-core');
+function patkRender() {
+  if (!patkSvg || !patkProj) return;
+  const path = d3.geoPath(patkProj);
+  if (patkSphere) patkSphere.attr('d', path);
+  if (patkLand) patkLand.selectAll('path').attr('d', path);
+  if (patkSensorGroup) {
+    patkSensorGroup.selectAll('*').remove();
+    if (patkVisible(PATK_NYC1)) {
+      const [nx, ny] = patkProj(PATK_NYC1);
+      patkSensorGroup.append('circle').attr('cx', nx).attr('cy', ny).attr('r', 7)
+        .attr('fill', 'var(--cyan-bright)').attr('stroke', '#fff').attr('stroke-width', 2);
+      patkSensorGroup.append('text').attr('x', nx + 12).attr('y', ny - 8)
+        .attr('fill', 'var(--cyan-bright)').attr('font-family', 'monospace').attr('font-size', '12px')
+        .attr('font-weight', 'bold').text('🛰 NYC1');
+    }
   }
-  // Pulsing ring (heartbeat)
+}
+
+function patkAnimate() {
+  requestAnimationFrame(patkAnimate);
+  const now = performance.now();
+  const dt = (now - patkLastFrame) / 1000;
+  patkLastFrame = now;
+  patkRotation[0] += PATK_DRIFT_DEG_PER_SEC * dt;
+  if (patkRotation[0] > 180) patkRotation[0] -= 360;
+  patkProj.rotate(patkRotation);
+  patkRender();
+}
+
+function patkNycHeartbeat() {
+  if (!patkSvg || !patkVisible(PATK_NYC1)) return;
+  const [nx, ny] = patkProj(PATK_NYC1);
   patkSvg.append('circle')
-    .attr('cx', PATK_CENTER[0]).attr('cy', PATK_CENTER[1])
-    .attr('r', 5).attr('fill', 'none').attr('stroke', 'var(--cyan-bright)').attr('stroke-width', 1)
-    .attr('opacity', 0.8)
-    .transition().duration(2200)
-    .attr('r', 32).attr('opacity', 0).remove();
+    .attr('cx', nx).attr('cy', ny).attr('r', 7)
+    .attr('fill', 'none').attr('stroke', 'var(--cyan-bright)').attr('stroke-width', 1.5).attr('opacity', 0.9)
+    .transition().duration(2200).attr('r', 38).attr('opacity', 0).remove();
 }
 
 function patkFireMissile(src_lat, src_lng, evtType) {
-  if (!patkSvg) return;
-  const [sx, sy] = patkRandomEdgePoint();
-  const [tx, ty] = PATK_CENTER;
+  if (!patkSvg || !patkProj) return;
+  const srcCoord = [src_lng, src_lat];
+  const srcVis = patkVisible(srcCoord);
+  const tgtVis = patkVisible(PATK_NYC1);
+  if (!srcVis && !tgtVis) return;
   const color = evtType === 'cowrie.login.success' ? '#ff3030' :
                 evtType === 'cowrie.command.input' ? '#ff8030' : '#ff5050';
-  // Source flash
-  patkSvg.append('circle').attr('cx', sx).attr('cy', sy)
-    .attr('r', 0).attr('fill', color)
-    .transition().duration(250).attr('r', 4).attr('opacity', 0.9)
-    .transition().duration(1200).attr('opacity', 0).remove();
-  // Subtle curved arc (less vertical lift)
-  const mx = (sx + tx) / 2 + (Math.random() - 0.5) * 80;
-  const my = (sy + ty) / 2 - 30 - Math.random() * 40;
+  if (srcVis) {
+    const src = patkProj(srcCoord);
+    patkSvg.append('circle').attr('cx', src[0]).attr('cy', src[1])
+      .attr('r', 0).attr('fill', color)
+      .transition().duration(300).attr('r', 6).attr('opacity', 0.95)
+      .transition().duration(1500).attr('opacity', 0).remove();
+  }
+  // Great-circle arc through orthographic projection
+  const interp = d3.geoInterpolate(srcCoord, PATK_NYC1);
+  const pts = [];
+  for (let i = 0; i <= 40; i++) {
+    const ll = interp(i / 40);
+    if (patkVisible(ll)) pts.push(patkProj(ll));
+  }
+  if (pts.length < 2) return;
   const trail = patkSvg.append('path')
-    .attr('d', `M${sx},${sy} Q${mx},${my} ${tx},${ty}`)
-    .attr('fill', 'none').attr('stroke', color).attr('stroke-width', 1.4).attr('opacity', 0.75);
+    .attr('d', d3.line().curve(d3.curveBasis)(pts))
+    .attr('fill', 'none').attr('stroke', color).attr('stroke-width', 2.2).attr('opacity', 0.95);
   const length = trail.node().getTotalLength();
   trail.attr('stroke-dasharray', length).attr('stroke-dashoffset', length)
-    .transition().duration(900).ease(d3.easeQuadIn).attr('stroke-dashoffset', 0)
+    .transition().duration(1100).ease(d3.easeQuadIn).attr('stroke-dashoffset', 0)
     .on('end', function() {
-      patkSvg.append('circle').attr('cx', tx).attr('cy', ty)
-        .attr('r', 0).attr('fill', 'none').attr('stroke', color).attr('stroke-width', 2)
-        .transition().duration(600).attr('r', 22).attr('opacity', 0).remove();
-      trail.transition().duration(1800).attr('opacity', 0).remove();
+      if (tgtVis) {
+        const [tx, ty] = patkProj(PATK_NYC1);
+        patkSvg.append('circle').attr('cx', tx).attr('cy', ty)
+          .attr('r', 0).attr('fill', 'none').attr('stroke', color).attr('stroke-width', 2.5)
+          .transition().duration(800).attr('r', 36).attr('opacity', 0).remove();
+      }
+      trail.transition().duration(2500).attr('opacity', 0).remove();
     });
 }
 
@@ -2121,25 +2150,22 @@ function patkRenderTicker() {
   let g = patkSvg.select('g.patk-ticker');
   if (g.empty()) {
     g = patkSvg.append('g').attr('class', 'patk-ticker');
-    g.append('rect').attr('x', 0).attr('y', PATK_H - 30)
-      .attr('width', PATK_W).attr('height', 30)
-      .attr('fill', 'rgba(0, 10, 14, 0.85)').attr('stroke', 'rgba(0, 255, 255, 0.3)').attr('stroke-width', 1);
+    g.append('rect').attr('x', 0).attr('y', PATK_H - 32)
+      .attr('width', PATK_W).attr('height', 32)
+      .attr('fill', 'rgba(0, 10, 14, 0.9)').attr('stroke', 'rgba(0, 255, 255, 0.3)').attr('stroke-width', 1);
     g.append('text').attr('class', 'patk-ticker-text')
-      .attr('x', PATK_W).attr('y', PATK_H - 10)
-      .attr('fill', '#ffb030').attr('font-family', 'monospace').attr('font-size', '12px')
-      .attr('text-anchor', 'start');
+      .attr('x', PATK_W).attr('y', PATK_H - 12)
+      .attr('fill', '#ffb030').attr('font-family', 'monospace').attr('font-size', '13px');
   }
-  // Build a long string of ticker items
-  const items = patkFeedTicker.slice(0, 60).map(it =>
+  const items = patkFeedTicker.slice(0, 80).map(it =>
     `▸ ${it.source}: ${it.ip} (${it.country || '?'})`
   ).join('     ');
   const txt = g.select('text.patk-ticker-text');
   txt.text(items);
-  // Animate scroll right-to-left
-  const txtWidth = (txt.node() && txt.node().getComputedTextLength) ? txt.node().getComputedTextLength() : 1000;
+  const tw = (txt.node() && txt.node().getComputedTextLength) ? txt.node().getComputedTextLength() : 2000;
   txt.attr('x', PATK_W)
-    .transition().duration(items.length * 120).ease(d3.easeLinear)
-    .attr('x', -txtWidth)
+    .transition().duration(Math.max(30000, items.length * 100)).ease(d3.easeLinear)
+    .attr('x', -tw)
     .on('end', patkRenderTicker);
 }
 
@@ -2176,18 +2202,45 @@ async function patkPollFeeds() {
 }
 
 function patkInit() {
+  if (typeof d3 === 'undefined' || typeof topojson === 'undefined') return setTimeout(patkInit, 200);
+  const svgEl = document.getElementById('patk-svg');
+  if (!svgEl) return;
   patkSvg = d3.select('#patk-svg');
-  patkRenderCenter();
-  patkPoll();
-  patkPollFeeds();
-  setInterval(patkPoll, 10000);
-  setInterval(patkPollFeeds, 120000);
-  setInterval(patkRenderCenter, 2200); // heartbeat
+  // Use viewBox coordinates directly (works with preserveAspectRatio)
+  const w = PATK_W, h = PATK_H;
+  const usable = h - 60; // leave bottom for ticker
+  const size = Math.min(w, usable);
+  patkProj = d3.geoOrthographic()
+    .scale(size * 0.42)
+    .translate([w / 2, usable / 2])
+    .rotate(patkRotation)
+    .clipAngle(90);
+  patkSphere = patkSvg.append('path').datum({type: 'Sphere'})
+    .attr('fill', 'none').attr('stroke', 'rgba(0, 255, 255, 0.55)').attr('stroke-width', 1.8);
+  patkLand = patkSvg.append('g').attr('class', 'patk-land');
+  patkSensorGroup = patkSvg.append('g').attr('class', 'patk-sensors');
+  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(world => {
+    const countries = topojson.feature(world, world.objects.countries).features;
+    patkLand.selectAll('path').data(countries).join('path')
+      .attr('fill', 'none').attr('stroke', 'rgba(0, 255, 255, 0.18)').attr('stroke-width', 0.5);
+    patkRender();
+    patkAnimate();
+    patkPoll();
+    patkPollFeeds();
+    setInterval(patkPoll, 10000);
+    setInterval(patkPollFeeds, 120000);
+    setInterval(patkNycHeartbeat, 2200);
+  });
 }
 
 (function() {
   function ls(s, cb) { const x = document.createElement('script'); x.src = s; x.onload = cb; document.head.appendChild(x); }
-  function start() { if (typeof d3 !== 'undefined') return patkInit(); ls('https://d3js.org/d3.v7.min.js', patkInit); }
+  function start() {
+    let pending = 0, done = () => { if (--pending <= 0) patkInit(); };
+    if (typeof d3 === 'undefined') { pending++; ls('https://d3js.org/d3.v7.min.js', done); }
+    if (typeof topojson === 'undefined') { pending++; ls('https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js', done); }
+    if (pending === 0) patkInit();
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
 })();
