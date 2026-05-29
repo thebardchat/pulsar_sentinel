@@ -158,6 +158,7 @@ def create_app() -> FastAPI:
     # Mount static files if directory exists
     if static_dir.exists():
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+        app.mount("/audio", StaticFiles(directory="ui/static/audio"), name="audio")
 
     # Setup templates
     templates = None
