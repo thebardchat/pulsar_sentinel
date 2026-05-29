@@ -1083,7 +1083,7 @@
     </div>
   </div>
   <div style="margin-top: 8px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.5px; line-height: 1.6;">
-    ⚛ <strong style="color: var(--red-bright);">EVERY DOT IS A REAL ATTACK</strong> on Pulsar infrastructure in the last 24h. Brand rule #29: no fake numbers, no fake blips, no licensed data — this is YOUR sensor mesh. Globe drifts slowly when idle, pans to face new attacks, freezes on Q-Day.
+    ⚛ <strong style="color: var(--red-bright);">EVERY DOT IS A REAL ATTACK</strong> on Pulsar sensors or known global attackers. <span style="color: var(--cyan-bright);">CYAN</span> = Pulsar honeypot mesh · <span style="color: #ffb030;">AMBER</span> = DShield/ISC + abuse.ch URLhaus federation · all real, all attributed. Brand rule #29: no fake numbers, no unattributed sources.
   </div>
 </section>
 
@@ -2050,6 +2050,7 @@ function patkRender() {
   patkGraticule.attr('d', path);
   patkLand.selectAll('path').attr('d', path);
   patkSensorGroup.selectAll('*').remove();
+  patkRenderFeeds();
   if (patkVisible(PATK_NYC1)) {
     const [nx, ny] = patkProj(PATK_NYC1);
     patkSensorGroup.append('circle').attr('cx', nx).attr('cy', ny).attr('r', 4)
@@ -2146,6 +2147,63 @@ async function patkPoll() {
   } catch (e) { console.warn('patk poll', e); }
 }
 
+
+// ============ FEDERATED THREAT FEEDS (AMBER dots — DShield + URLhaus) ============
+let patkFeedDots = [];
+
+async function patkPollFeeds() {
+  try {
+    const r = await fetch('/api/v1/recon/feeds/external');
+    const data = await r.json();
+    const dots = [];
+    [...(data.dshield || []), ...(data.urlhaus || [])].forEach(item => {
+      if (item.src_lat && item.src_lng) {
+        dots.push({
+          lat: item.src_lat, lng: item.src_lng,
+          source: item.source || 'feed',
+          ip: item.ip,
+          isp: item.src_isp || '',
+          attacks: item.attacks || 0
+        });
+      }
+    });
+    patkFeedDots = dots;
+    console.log('[patk] federated dots loaded:', dots.length);
+  } catch (e) { console.warn('feeds poll', e); }
+}
+
+function patkRenderFeeds() {
+  if (!patkSvg || !patkProj || patkFeedDots.length === 0) return;
+  let layer = patkSvg.select('g.patk-feed-layer');
+  if (layer.empty()) layer = patkSvg.append('g').attr('class', 'patk-feed-layer');
+  layer.selectAll('circle').remove();
+  patkFeedDots.forEach(dot => {
+    if (!patkVisible([dot.lng, dot.lat])) return;
+    const pt = patkProj([dot.lng, dot.lat]);
+    if (!pt) return;
+    layer.append('circle')
+      .attr('cx', pt[0]).attr('cy', pt[1])
+      .attr('r', 2.2).attr('fill', '#ffb030').attr('opacity', 0.65)
+      .attr('data-ip', dot.ip).attr('data-isp', dot.isp);
+  });
+}
+
+function patkPulseRandomFeed() {
+  if (!patkFeedDots || patkFeedDots.length === 0) return;
+  const visible = patkFeedDots.filter(d => patkVisible([d.lng, d.lat]));
+  if (visible.length === 0) return;
+  const dot = visible[Math.floor(Math.random() * visible.length)];
+  const pt = patkProj([dot.lng, dot.lat]);
+  if (!pt) return;
+  patkSvg.append('circle')
+    .attr('cx', pt[0]).attr('cy', pt[1])
+    .attr('r', 2).attr('fill', 'none')
+    .attr('stroke', '#ffb030').attr('stroke-width', 1.5).attr('opacity', 0.9)
+    .transition().duration(1100)
+    .attr('r', 16).attr('opacity', 0).remove();
+}
+// ============ END FEDERATED FEEDS ============
+
 async function patkPollCountries() {
   try {
     const r = await fetch('/api/v1/recon/honeypot/recent?limit=200');
@@ -2190,6 +2248,9 @@ function patkInit() {
     patkPollCountries();
     setInterval(patkPoll, PATK_POLL_MS);
     setInterval(patkPollCountries, 30000);
+    patkPollFeeds();
+    setInterval(patkPollFeeds, 120000);
+    setInterval(patkPulseRandomFeed, 700);
   });
   const btn = document.getElementById('patk-rotate-toggle');
   if (btn) btn.addEventListener('click', () => {
