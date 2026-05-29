@@ -1,0 +1,19 @@
+[Unit]
+Description=Pulsar Sentinel Node Agent
+After=network.target
+
+[Service]
+Type=simple
+User=__USER__
+Environment=SENTINEL_URL=http://shanebrain:8250
+Environment=SENTINEL_KEY=shanebrain-internal-2026
+Environment=SENTINEL_NODE_ID=__NODE_ID__
+Environment=SENTINEL_INTERVAL=60
+ExecStart=/usr/bin/python3 /opt/sentinel/sentinel_agent.py
+Restart=always
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

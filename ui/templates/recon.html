@@ -1113,6 +1113,18 @@
   </div>
 </section>
 
+<!-- ============ SENTINEL CLUSTER MESH ============ -->
+<div id="meshPanel" style="margin: 0; padding: 12px 20px; background: var(--bg-1); border-bottom: 2px solid var(--cyan-dim);">
+  <div style="display:flex; align-items:center; gap:16px; margin-bottom:10px;">
+    <span style="font-size:11px; color:var(--cyan-bright); letter-spacing:3px; font-weight:700;">⬡ SENTINEL CLUSTER MESH</span>
+    <span id="meshOnline" style="font-size:10px; color:var(--text-dim); letter-spacing:1px;">scanning...</span>
+    <span style="flex:1;"></span>
+    <span style="font-size:9px; color:var(--text-muted); letter-spacing:1px;">AGENTS REPORTING IN</span>
+  </div>
+  <div id="meshNodes" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+  <div id="meshRecentEvents" style="margin-top:10px; font-size:10px; color:var(--text-dim); min-height:14px; font-family:var(--font-mono); letter-spacing:0.5px;"></div>
+</div>
+
 <!-- ============ MAIN OPS GRID ============ -->
 <div class="ops-grid">
 
@@ -1358,6 +1370,50 @@
 </div>
 
 <script>
+// ============ SENTINEL MESH ============
+const MESH_COLORS = {online:'#00f0ff', stale:'#ffb030', offline:'#444'};
+const THREAT_COLOR = ['','#00ff41','#00f0ff','#ffb030','#ff6b35','#ff003c'];
+
+async function meshPoll() {
+  try {
+    const r = await fetch('/api/v1/recon/mesh');
+    const d = await r.json();
+    const wrap = document.getElementById('meshNodes');
+    if (!wrap) return;
+    wrap.innerHTML = d.nodes.map(n => {
+      const col = MESH_COLORS[n.status] || '#444';
+      const tl = n.threat_level || 1;
+      const tc = THREAT_COLOR[tl] || '#aaa';
+      const stale = n.status === 'offline' ? ' opacity:0.4;' : '';
+      return `<div style="background:var(--bg-0);border:1px solid ${col};padding:8px 12px;min-width:140px;${stale}">
+        <div style="font-size:9px;color:${col};letter-spacing:2px;margin-bottom:4px;text-transform:uppercase;">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:4px;vertical-align:middle;${n.status==='online'?'animation:pulse 1.5s infinite':''}"></span>
+          ${n.hostname}
+        </div>
+        <div style="font-size:11px;color:var(--text);font-family:var(--font-mono);">
+          <span style="color:var(--text-dim);">cpu</span> ${n.cpu_pct}%
+          <span style="color:var(--text-dim);margin-left:6px;">ram</span> ${n.ram_pct}%
+        </div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">
+          disk ${n.disk_pct}% · up ${n.uptime_days}d
+        </div>
+        <div style="font-size:9px;color:${tc};margin-top:3px;letter-spacing:1px;">TL-${tl}</div>
+      </div>`;
+    }).join('');
+    const onEl = document.getElementById('meshOnline');
+    if (onEl) onEl.textContent = `${d.online}/${d.total} online`;
+    const evEl = document.getElementById('meshRecentEvents');
+    if (evEl && d.recent_events && d.recent_events.length) {
+      const ev = d.recent_events[0];
+      evEl.textContent = `▸ ${ev.node_id} · ${ev.event_type} · ${ev.source_ip || 'local'} · ${ev.timestamp ? ev.timestamp.slice(11,19) : ''}`;
+    }
+  } catch(e) { /* server may not have agents yet */ }
+}
+
+meshPoll();
+setInterval(meshPoll, 30000);
+// ============ END SENTINEL MESH ============
+
 // ============ DASHBOARD STATE ============
 let audioOn = false;
 let ptsValue = 94;

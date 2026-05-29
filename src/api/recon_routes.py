@@ -237,3 +237,38 @@ async def feeds_external():
         logger.error(f"feeds/external error: {e}")
         return {"error": str(e), "dshield": [], "urlhaus": [], "total": 0}
 # === END FEDERATED FEEDS ===
+
+
+# === SENTINEL MESH (agent node status for recon dashboard) ===
+@recon_router.get("/mesh")
+async def mesh_status():
+    """Public endpoint — returns cluster node status for recon dashboard.
+    Read-only: no secrets exposed, just hostnames and health metrics."""
+    import time as _time
+    from api.agent_routes import _nodes, _events
+    now_ts = _time.time()
+    nodes = []
+    for n in _nodes.values():
+        age_s = now_ts - n.get("last_seen_ts", 0)
+        status = "online" if age_s < 90 else ("stale" if age_s < 300 else "offline")
+        nodes.append({
+            "node_id":      n["node_id"],
+            "hostname":     n["hostname"],
+            "cpu_pct":      n.get("cpu_pct", 0),
+            "ram_pct":      n.get("ram_pct", 0),
+            "disk_pct":     n.get("disk_pct", 0),
+            "uptime_days":  n.get("uptime_days", 0),
+            "threat_level": n.get("threat_level", 1),
+            "last_seen":    n.get("last_seen", ""),
+            "status":       status,
+        })
+    nodes.sort(key=lambda x: x["node_id"])
+    recent = list(reversed(_events))[:10]
+    return {
+        "nodes": nodes,
+        "total": len(nodes),
+        "online": sum(1 for n in nodes if n["status"] == "online"),
+        "recent_events": recent,
+        "fetched_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat().replace("+00:00", "Z"),
+    }
+# === END SENTINEL MESH ===

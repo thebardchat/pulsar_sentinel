@@ -29,6 +29,7 @@ from api.auth import MetaMaskAuth
 from api.ui_routes import ui_router
 from billing.routes import billing_router, init_billing
 from api.recon_routes import recon_router
+from api.agent_routes import agent_router
 from core.asr_engine import ASREngine
 from governance.access_control import AccessController
 from governance.pts_calculator import PTSCalculator
@@ -146,6 +147,7 @@ def create_app() -> FastAPI:
     # Include billing routes
     app.include_router(billing_router, prefix="/api/v1")
     app.include_router(recon_router, prefix="/api/v1")
+    app.include_router(agent_router, prefix="/api/v1")
 
     # Setup static files and templates
     project_root = Path(__file__).parent.parent.parent
