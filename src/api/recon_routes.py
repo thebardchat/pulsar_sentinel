@@ -173,7 +173,7 @@ async def honeypot_recent(limit: int = 50):
     safe_limit = max(1, min(limit, 200))
     query = (
         '{ Get { HoneypotEvent(limit: ' + str(safe_limit) + ') '
-        '{ src_ip username password command event_id timestamp sensor_location } } '
+        '{ src_ip username password command event_id timestamp sensor_location src_country src_country_code src_city src_region src_lat src_lng src_isp src_asn } } '
         'Aggregate { HoneypotEvent { meta { count } } } }'
     )
     async with httpx.AsyncClient(timeout=5.0) as client:
