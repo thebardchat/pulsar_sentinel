@@ -23,10 +23,13 @@
     --green-dim: #007f44;
     --amber: #ffb800;
     --cyan: #00f0ff;
+    --cyan-bright: #00f0ff;
+    --cyan-dim: #006070;
     --text: #d4d4d4;
     --text-dim: #777;
     --text-muted: #555;
     --mono: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
+    --font-mono: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -458,7 +461,6 @@
     display: flex;
     align-items: stretch;
     gap: 20px;
-    position: relative;
     overflow: hidden;
   }
   .qday-strip::before {
@@ -1008,7 +1010,7 @@
   <span class="brand">SENTINEL.RECON</span>
   <span class="stat"><span class="pulse"></span> MESH <strong>ONLINE</strong></span>
   <span class="stat">TIER <strong style="color: var(--cyan);">RECON</strong></span>
-  <span class="stat">WALLET <strong id="walletDisplay" style="color: var(--cyan);">0x7f3a...d2e9</strong></span>
+  <span class="stat">WALLET <strong id="walletDisplay" style="color: var(--text-muted);">NOT CONNECTED</strong></span>
   <span class="stat">PTS <strong id="ptsDisplay">94</strong></span>
   <span class="stat warn">THREATS BLOCKED 24h <strong>17</strong></span>
   <span class="spacer"></span>
@@ -1165,10 +1167,10 @@
     </div>
 
     <div class="health-row">
-      <div class="health-cell"><div class="v">99.97%</div><div class="l">uptime</div></div>
+      <div class="health-cell"><div class="v" id="healthUptime">--</div><div class="l">pi uptime</div></div>
       <div class="health-cell"><div class="v">384</div><div class="l">vec dim</div></div>
-      <div class="health-cell"><div class="v">5/5</div><div class="l">nodes</div></div>
-      <div class="health-cell"><div class="v">163°F</div><div class="l">pi temp</div></div>
+      <div class="health-cell"><div class="v" id="healthNodes">--</div><div class="l">nodes</div></div>
+      <div class="health-cell"><div class="v" id="healthTemp">--°F</div><div class="l">pi temp</div></div>
     </div>
   </div>
 
@@ -1180,53 +1182,9 @@
       <span class="meta">REAL-TIME</span>
     </div>
 
-    <div class="mesh-wrap">
-      <svg class="mesh-svg" viewBox="0 0 400 320">
-        <!-- Edges -->
-        <line class="mesh-edge" x1="120" y1="100" x2="280" y2="100"/>
-        <line class="mesh-edge" x1="200" y1="100" x2="200" y2="200"/>
-        <line class="mesh-edge" x1="120" y1="100" x2="200" y2="200"/>
-        <line class="mesh-edge" x1="280" y1="100" x2="200" y2="200"/>
-        <line class="mesh-edge" x1="200" y1="200" x2="120" y2="270"/>
-        <line class="mesh-edge dead" x1="200" y1="200" x2="280" y2="270"/>
-        <line class="mesh-edge" x1="280" y1="100" x2="350" y2="60"/>
-
-        <!-- Nodes -->
-        <g class="mesh-node">
-          <circle cx="120" cy="100" r="22"/>
-          <text x="120" y="103" dy=".3em">GULF</text>
-          <text x="120" y="135" dy=".3em" style="font-size:7px; fill: var(--green);">DEV</text>
-        </g>
-        <g class="mesh-node">
-          <circle cx="200" cy="100" r="22"/>
-          <text x="200" y="103" dy=".3em">NOLA</text>
-          <text x="200" y="135" dy=".3em" style="font-size:7px; fill: var(--green);">WEAVIATE</text>
-        </g>
-        <g class="mesh-node">
-          <circle cx="280" cy="100" r="22"/>
-          <text x="280" y="103" dy=".3em">PI</text>
-          <text x="280" y="135" dy=".3em" style="font-size:7px; fill: var(--green);">ORCHESTRATOR</text>
-        </g>
-        <g class="mesh-node user">
-          <circle cx="200" cy="200" r="20"/>
-          <text x="200" y="203" dy=".3em" style="fill: var(--cyan);">YOU</text>
-          <text x="200" y="230" dy=".3em" style="font-size:7px; fill: var(--cyan);">METAMASK</text>
-        </g>
-        <g class="mesh-node">
-          <circle cx="120" cy="270" r="18"/>
-          <text x="120" y="273" dy=".3em">PULSAR00100</text>
-          <text x="120" y="297" dy=".3em" style="font-size:7px; fill: var(--green);">COCKPIT</text>
-        </g>
-        <g class="mesh-node dead">
-          <circle cx="280" cy="270" r="18"/>
-          <text x="280" y="273" dy=".3em">BULLFROG</text>
-          <text x="280" y="297" dy=".3em" style="font-size:7px; fill: var(--red-dim);">╳ DEAD ╳</text>
-        </g>
-        <g class="mesh-node">
-          <circle cx="350" cy="60" r="14"/>
-          <text x="350" y="63" dy=".3em" style="font-size:8px;">IPHONE</text>
-        </g>
-      </svg>
+    <div class="mesh-wrap" style="position:relative;">
+      <svg id="liveMeshSvg" class="mesh-svg" viewBox="0 0 400 320"></svg>
+      <div id="liveMeshEmpty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:10px;letter-spacing:2px;">SCANNING MESH...</div>
     </div>
 
     <div class="locked-features">
@@ -1374,44 +1332,122 @@
 const MESH_COLORS = {online:'#00f0ff', stale:'#ffb030', offline:'#444'};
 const THREAT_COLOR = ['','#00ff41','#00f0ff','#ffb030','#ff6b35','#ff003c'];
 
-async function meshPoll() {
+// Live mesh SVG — node positions for up to 6 nodes in a ring
+const MESH_POSITIONS = [
+  {x:200,y:60},{x:330,y:140},{x:290,y:270},{x:110,y:270},{x:70,y:140},{x:200,y:200}
+];
+const NODE_ROLE = {neworleans:'WEAVIATE',gulfshores:'DEV',alaska:'COMPUTE',mexico:'MEDIA',shanebrain:'ORCH'};
+
+function renderLiveMesh(data) {
+  const svg = document.getElementById('liveMeshSvg');
+  const empty = document.getElementById('liveMeshEmpty');
+  if (!svg) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  svg.innerHTML = '';
+  if (!data.nodes || !data.nodes.length) { if (empty) empty.style.display='flex'; return; }
+  if (empty) empty.style.display='none';
+  const nodes = data.nodes.slice(0, MESH_POSITIONS.length);
+  // Draw edges between all online nodes
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i+1; j < nodes.length; j++) {
+      if (nodes[i].status !== 'offline' && nodes[j].status !== 'offline') {
+        const p1 = MESH_POSITIONS[i], p2 = MESH_POSITIONS[j];
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+        line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+        line.setAttribute('class', 'mesh-edge');
+        svg.appendChild(line);
+      }
+    }
+  }
+  // Draw nodes
+  nodes.forEach((n, i) => {
+    const pos = MESH_POSITIONS[i];
+    const col = MESH_COLORS[n.status] || '#444';
+    const dead = n.status === 'offline';
+    const g = document.createElementNS(ns, 'g');
+    g.setAttribute('class', 'mesh-node' + (dead ? ' dead' : ''));
+    const c = document.createElementNS(ns, 'circle');
+    c.setAttribute('cx', pos.x); c.setAttribute('cy', pos.y); c.setAttribute('r', 22);
+    g.appendChild(c);
+    const label = document.createElementNS(ns, 'text');
+    label.setAttribute('x', pos.x); label.setAttribute('y', pos.y);
+    label.setAttribute('dy', '.3em');
+    label.textContent = n.hostname.toUpperCase().slice(0,5);
+    g.appendChild(label);
+    const role = document.createElementNS(ns, 'text');
+    role.setAttribute('x', pos.x); role.setAttribute('y', pos.y + 32);
+    role.setAttribute('dy', '.3em');
+    role.setAttribute('style', `font-size:7px;fill:${dead?'var(--red-dim)':col}`);
+    role.textContent = dead ? '╳ OFFLINE' : (NODE_ROLE[n.hostname] || 'AGENT');
+    g.appendChild(role);
+    svg.appendChild(g);
+  });
+  // Update health row
+  const online = data.online || 0;
+  const total = data.total || 0;
+  const nodesEl = document.getElementById('healthNodes');
+  if (nodesEl) nodesEl.textContent = `${online}/${total}`;
+}
+
+async function meshPollFull() {
   try {
     const r = await fetch('/api/v1/recon/mesh');
     const d = await r.json();
+    // existing strip panel
     const wrap = document.getElementById('meshNodes');
-    if (!wrap) return;
-    wrap.innerHTML = d.nodes.map(n => {
-      const col = MESH_COLORS[n.status] || '#444';
-      const tl = n.threat_level || 1;
-      const tc = THREAT_COLOR[tl] || '#aaa';
-      const stale = n.status === 'offline' ? ' opacity:0.4;' : '';
-      return `<div style="background:var(--bg-0);border:1px solid ${col};padding:8px 12px;min-width:140px;${stale}">
-        <div style="font-size:9px;color:${col};letter-spacing:2px;margin-bottom:4px;text-transform:uppercase;">
-          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:4px;vertical-align:middle;${n.status==='online'?'animation:pulse 1.5s infinite':''}"></span>
-          ${n.hostname}
-        </div>
-        <div style="font-size:11px;color:var(--text);font-family:var(--font-mono);">
-          <span style="color:var(--text-dim);">cpu</span> ${n.cpu_pct}%
-          <span style="color:var(--text-dim);margin-left:6px;">ram</span> ${n.ram_pct}%
-        </div>
-        <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">
-          disk ${n.disk_pct}% · up ${n.uptime_days}d
-        </div>
-        <div style="font-size:9px;color:${tc};margin-top:3px;letter-spacing:1px;">TL-${tl}</div>
-      </div>`;
-    }).join('');
-    const onEl = document.getElementById('meshOnline');
-    if (onEl) onEl.textContent = `${d.online}/${d.total} online`;
-    const evEl = document.getElementById('meshRecentEvents');
-    if (evEl && d.recent_events && d.recent_events.length) {
-      const ev = d.recent_events[0];
-      evEl.textContent = `▸ ${ev.node_id} · ${ev.event_type} · ${ev.source_ip || 'local'} · ${ev.timestamp ? ev.timestamp.slice(11,19) : ''}`;
+    if (wrap) {
+      wrap.innerHTML = d.nodes.map(n => {
+        const col = MESH_COLORS[n.status] || '#444';
+        const tl = n.threat_level || 1;
+        const tc = THREAT_COLOR[tl] || '#aaa';
+        const stale = n.status === 'offline' ? ' opacity:0.4;' : '';
+        return `<div style="background:var(--bg-0);border:1px solid ${col};padding:8px 12px;min-width:140px;${stale}">
+          <div style="font-size:9px;color:${col};letter-spacing:2px;margin-bottom:4px;text-transform:uppercase;">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:4px;vertical-align:middle;${n.status==='online'?'animation:pulse 1.5s infinite':''}"></span>
+            ${n.hostname}
+          </div>
+          <div style="font-size:11px;color:var(--text);font-family:var(--font-mono);">
+            <span style="color:var(--text-dim);">cpu</span> ${n.cpu_pct}%
+            <span style="color:var(--text-dim);margin-left:6px;">ram</span> ${n.ram_pct}%
+          </div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">
+            disk ${n.disk_pct}% · up ${n.uptime_days}d
+          </div>
+          <div style="font-size:9px;color:${tc};margin-top:3px;letter-spacing:1px;">TL-${tl}</div>
+        </div>`;
+      }).join('');
+      const onEl = document.getElementById('meshOnline');
+      if (onEl) onEl.textContent = `${d.online}/${d.total} online`;
+      const evEl = document.getElementById('meshRecentEvents');
+      if (evEl && d.recent_events && d.recent_events.length) {
+        const ev = d.recent_events[0];
+        evEl.textContent = `▸ ${ev.node_id} · ${ev.event_type} · ${ev.source_ip || 'local'} · ${ev.timestamp ? ev.timestamp.slice(11,19) : ''}`;
+      }
     }
-  } catch(e) { /* server may not have agents yet */ }
+    renderLiveMesh(d);
+  } catch(e) {}
 }
 
-meshPoll();
-setInterval(meshPoll, 30000);
+async function pollPiStats() {
+  try {
+    const r = await fetch('/api/v1/recon/pi-stats');
+    const d = await r.json();
+    const tempEl = document.getElementById('healthTemp');
+    const uptEl  = document.getElementById('healthUptime');
+    if (tempEl && d.temp_f != null) tempEl.textContent = Math.round(d.temp_f) + '°F';
+    if (uptEl  && d.uptime_days != null) uptEl.textContent = d.uptime_days + 'd';
+  } catch(e) {
+    // endpoint not yet live — read Pi temp inline
+    const tempEl = document.getElementById('healthTemp');
+    if (tempEl && tempEl.textContent === '--°F') tempEl.textContent = '—°F';
+  }
+}
+
+meshPollFull();
+setInterval(meshPollFull, 30000);
+pollPiStats();
+setInterval(pollPiStats, 60000);
 // ============ END SENTINEL MESH ============
 
 // ============ DASHBOARD STATE ============
@@ -1422,18 +1458,17 @@ let demoMode = false;
 
 const TICKER_LINES = [
   { type: 'crypto', txt: 'PQC handshake complete — gulf ↔ pi (ML-KEM-768)' },
-  { type: 'ok',     txt: 'Mesh heartbeat: 5/5 nodes online' },
+  { type: 'ok',     txt: 'Mesh heartbeat: 4/4 nodes online' },
   { type: 'crypto', txt: 'Weaviate vectorized session (384-dim) → 12.4ms' },
-  { type: 'ok',     txt: 'Caddy serving logistics.html @ 8350 — 200 OK' },
-  { type: 'warn',   txt: 'Pi temp climbing: 158°F → 163°F (safe zone)' },
+  { type: 'ok',     txt: 'Caddy serving recon.html @ 8250 — 200 OK' },
+  { type: 'warn',   txt: 'Pi temp climbing: safe zone <176°F' },
   { type: 'threat', txt: 'Failed SSH attempt from 1.2.3.4 → blocked by Arc' },
-  { type: 'ok',     txt: 'Cron logistics-pull executed — docs/ refreshed' },
+  { type: 'ok',     txt: 'Sentinel agent heartbeat — alaska · mexico · gulfshores · neworleans' },
   { type: 'crypto', txt: 'Blockchain audit batch sealed: 247 events → Polygon' },
-  { type: 'ok',     txt: 'MEGA Crew bot heartbeat: 16/16 reporting' },
+  { type: 'ok',     txt: 'MEGA Crew bot heartbeat: 18/18 reporting' },
   { type: 'threat', txt: 'Anomaly score spike on neworleans → RC 1.02 evaluating' },
   { type: 'crypto', txt: 'PQC key rotation initiated — Sentinel Core nodes' },
-  { type: 'ok',     txt: 'Tailscale relay handshake — iphone-13 connected' },
-  { type: 'warn',   txt: 'Bullfrog node offline 2d 7h — drive migrated to Pi' },
+  { type: 'ok',     txt: 'Tailscale relay handshake — shanebrain mesh connected' },
   { type: 'crypto', txt: 'Smart contract call: heir_check() → no action' },
 ];
 

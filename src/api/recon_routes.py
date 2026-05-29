@@ -272,3 +272,22 @@ async def mesh_status():
         "fetched_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 # === END SENTINEL MESH ===
+
+@recon_router.get("/pi-stats")
+async def pi_stats():
+    """Pi system stats — temp and uptime for the health row."""
+    import pathlib, datetime as dt
+    temp_f = None
+    try:
+        raw = pathlib.Path("/sys/class/thermal/thermal_zone0/temp").read_text().strip()
+        temp_c = int(raw) / 1000.0
+        temp_f = round(temp_c * 9 / 5 + 32, 1)
+    except Exception:
+        pass
+    uptime_days = None
+    try:
+        uptime_s = float(pathlib.Path("/proc/uptime").read_text().split()[0])
+        uptime_days = round(uptime_s / 86400, 1)
+    except Exception:
+        pass
+    return {"temp_f": temp_f, "uptime_days": uptime_days}
