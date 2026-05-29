@@ -1062,26 +1062,28 @@
   </div>
 </div>
 
-<!-- ============ GLOBAL ATTACK MAP — Kaspersky embed (CC BY commercial OK) ============ -->
-<section class="atk-map-section">
+<!-- ============ PULSAR ATTACK MAP — LIVE FROM YOUR HONEYPOT MESH (M1b 2026-05-28) ============ -->
+<section class="atk-map-section" id="pulsar-attack-map">
   <div class="atk-map-head">
-    <span class="ttl">GLOBAL ATTACK MAP</span>
-    <span class="sub">// powered by Kaspersky Cyberthreat Real-Time Map · pulsar honeypot mesh in build</span>
+    <span class="ttl" style="color: var(--red-bright);">🛰 PULSAR ATTACK MAP</span>
+    <span class="sub">// LIVE FROM YOUR HONEYPOT MESH</span>
     <span class="legend">
-      <span style="color: var(--cyan); font-size: 9px;">data source: Kaspersky Lab</span>
+      <span style="color: var(--cyan); font-size: 9px;">data: pulsar sensor mesh · <span id="patk-sensor-count">1</span> sensor(s) online · <span id="patk-sensor-locs">NYC1</span></span>
     </span>
   </div>
-  <div class="atk-map-wrap" style="height: 640px; padding: 0; background: var(--bg-0);">
-    <iframe src="https://cybermap.kaspersky.com/en/widget/dynamic/dark"
-            width="100%"
-            height="640"
-            frameborder="0"
-            style="border: none; display: block;"
-            title="Kaspersky Cyberthreat Live Map"
-            loading="lazy"></iframe>
+  <div class="atk-map-wrap" style="height: 640px; padding: 0; background: #050808; position: relative; overflow: hidden;">
+    <svg id="patk-svg" style="width: 100%; height: 100%; display: block;"></svg>
+    <div id="patk-countries-panel" style="position: absolute; top: 16px; right: 16px; width: 200px; background: rgba(10, 14, 14, 0.85); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 4px; padding: 10px; font-family: var(--font-mono); font-size: 11px; z-index: 10;">
+      <div style="color: var(--cyan-bright); font-weight: 700; border-bottom: 1px solid rgba(0, 255, 255, 0.3); padding-bottom: 6px; margin-bottom: 6px;">TOP ATTACK ORIGINS</div>
+      <div id="patk-countries">loading...</div>
+    </div>
+    <div style="position: absolute; bottom: 16px; left: 16px; display: flex; gap: 8px; align-items: center; z-index: 10;">
+      <button id="patk-rotate-toggle" style="background: rgba(0, 255, 255, 0.1); color: var(--cyan-bright); border: 1px solid rgba(0, 255, 255, 0.4); padding: 4px 10px; font-family: var(--font-mono); font-size: 10px; cursor: pointer;">⏸ FREEZE</button>
+      <span id="patk-status" style="color: var(--text-dim); font-family: var(--font-mono); font-size: 10px;">rotating...</span>
+    </div>
   </div>
   <div style="margin-top: 8px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.5px; line-height: 1.6;">
-    ⚛ Live cyber threat data from Kaspersky's global sensor network. <strong style="color: var(--cyan);">PHASE 0 — Pulsar Sentinel honeypot mesh in build.</strong> When live, this map will show OUR sensor data — every blip a real attack on Pulsar infrastructure or customer mesh, audit-hashed to Polygon. Until then we proudly credit Kaspersky for the live view.
+    ⚛ <strong style="color: var(--red-bright);">EVERY DOT IS A REAL ATTACK</strong> on Pulsar infrastructure in the last 24h. Brand rule #29: no fake numbers, no fake blips, no licensed data — this is YOUR sensor mesh. Globe drifts slowly when idle, pans to face new attacks, freezes on Q-Day.
   </div>
 </section>
 
@@ -2026,6 +2028,190 @@ if (document.readyState === 'loading') {
   startHoneypotPolling();
 }
 // ============ END PULSAR LIVE SENSORS ============
+
+// ============ PULSAR ATTACK MAP (M1b — hybrid rotating globe) ============
+const PATK_NYC1 = [-74.0060, 40.7128];
+const PATK_POLL_MS = 10000;
+const PATK_DRIFT_DEG_PER_SEC = 0.5;
+let patkSvg, patkProj, patkSphere, patkLand, patkGraticule, patkSensorGroup, patkAttacksGroup;
+let patkRotation = [60, -10, 0];
+let patkRotating = true;
+let patkLastTs = '';
+let patkLockUntil = 0;
+let patkLastFrame = performance.now();
+
+function patkVisible(coord) {
+  return d3.geoDistance(coord, [-patkRotation[0], -patkRotation[1]]) < Math.PI / 2;
+}
+
+function patkRender() {
+  const path = d3.geoPath(patkProj);
+  patkSphere.attr('d', path);
+  patkGraticule.attr('d', path);
+  patkLand.selectAll('path').attr('d', path);
+  patkSensorGroup.selectAll('*').remove();
+  if (patkVisible(PATK_NYC1)) {
+    const [nx, ny] = patkProj(PATK_NYC1);
+    patkSensorGroup.append('circle').attr('cx', nx).attr('cy', ny).attr('r', 4)
+      .attr('fill', 'var(--cyan-bright)').attr('stroke', '#fff').attr('stroke-width', 1);
+    patkSensorGroup.append('text').attr('x', nx + 8).attr('y', ny - 4)
+      .attr('fill', 'var(--cyan-bright)').attr('font-family', 'monospace').attr('font-size', '10px')
+      .text('🛰 NYC1');
+  }
+}
+
+function patkAnimate() {
+  requestAnimationFrame(patkAnimate);
+  const now = performance.now();
+  const dt = (now - patkLastFrame) / 1000;
+  patkLastFrame = now;
+  if (patkRotating && now > patkLockUntil) {
+    patkRotation[0] += PATK_DRIFT_DEG_PER_SEC * dt;
+    if (patkRotation[0] > 180) patkRotation[0] -= 360;
+    patkProj.rotate(patkRotation);
+    patkRender();
+  }
+}
+
+function patkPanTo(lat, lng) {
+  const target = [-lng, -lat, 0];
+  const interp = d3.interpolate(patkRotation.slice(), target);
+  const start = performance.now();
+  const duration = 1500;
+  patkLockUntil = performance.now() + 4000;
+  const statusEl = document.getElementById('patk-status');
+  if (statusEl) statusEl.textContent = 'tracking attack';
+  function tick() {
+    const t = Math.min(1, (performance.now() - start) / duration);
+    patkRotation = interp(d3.easeCubicInOut(t));
+    patkProj.rotate(patkRotation);
+    patkRender();
+    if (t < 1) requestAnimationFrame(tick);
+    else if (statusEl) statusEl.textContent = patkRotating ? 'rotating...' : 'frozen';
+  }
+  tick();
+}
+
+function patkFireMissile(src_lat, src_lng, evtType) {
+  const srcCoord = [src_lng, src_lat];
+  const srcVis = patkVisible(srcCoord);
+  const tgtVis = patkVisible(PATK_NYC1);
+  if (!srcVis && !tgtVis) return;
+  const color = evtType === 'cowrie.login.success' ? '#ff3030' :
+                evtType === 'cowrie.command.input' ? '#ff8030' : '#ff5050';
+  if (srcVis) {
+    const src = patkProj(srcCoord);
+    patkSvg.append('circle').attr('cx', src[0]).attr('cy', src[1])
+      .attr('r', 0).attr('fill', color)
+      .transition().duration(300).attr('r', 5).attr('opacity', 0.8)
+      .transition().duration(1500).attr('opacity', 0).remove();
+  }
+  const interp = d3.geoInterpolate(srcCoord, PATK_NYC1);
+  const pts = [];
+  for (let i = 0; i <= 30; i++) {
+    const ll = interp(i / 30);
+    if (patkVisible(ll)) pts.push(patkProj(ll));
+  }
+  if (pts.length < 2) return;
+  const trail = patkSvg.append('path')
+    .attr('d', d3.line().curve(d3.curveBasis)(pts))
+    .attr('fill', 'none').attr('stroke', color).attr('stroke-width', 1.5).attr('opacity', 0.9);
+  const length = trail.node().getTotalLength();
+  trail.attr('stroke-dasharray', length).attr('stroke-dashoffset', length)
+    .transition().duration(1000).ease(d3.easeQuadIn).attr('stroke-dashoffset', 0)
+    .on('end', function() {
+      if (tgtVis) {
+        const tgt = patkProj(PATK_NYC1);
+        patkSvg.append('circle').attr('cx', tgt[0]).attr('cy', tgt[1])
+          .attr('r', 0).attr('fill', 'none').attr('stroke', color).attr('stroke-width', 2)
+          .transition().duration(700).attr('r', 25).attr('opacity', 0).remove();
+      }
+      trail.transition().duration(2500).attr('opacity', 0).remove();
+    });
+}
+
+async function patkPoll() {
+  try {
+    const r = await fetch('/api/v1/recon/honeypot/recent?limit=20');
+    const data = await r.json();
+    const evts = (data.events || []).filter(e => e.src_lat && e.src_lng);
+    const newOnes = evts.filter(e => !patkLastTs || e.timestamp > patkLastTs).slice(0, 10);
+    if (newOnes.length > 0) patkPanTo(newOnes[0].src_lat, newOnes[0].src_lng);
+    newOnes.reverse().forEach((e, i) => setTimeout(() => patkFireMissile(e.src_lat, e.src_lng, e.event_id), i * 600));
+    if (evts.length > 0) patkLastTs = evts[0].timestamp;
+    const sc = document.getElementById('patk-sensor-count');
+    const sl = document.getElementById('patk-sensor-locs');
+    if (sc) sc.textContent = (data.sensors || []).length;
+    if (sl) sl.textContent = (data.sensors || []).map(s => s.location).join(', ') || '—';
+  } catch (e) { console.warn('patk poll', e); }
+}
+
+async function patkPollCountries() {
+  try {
+    const r = await fetch('/api/v1/recon/honeypot/recent?limit=200');
+    const data = await r.json();
+    const counts = {};
+    (data.events || []).forEach(e => {
+      const c = (e.src_country || '').trim();
+      if (c) counts[c] = (counts[c] || 0) + 1;
+    });
+    const top = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 8);
+    const el = document.getElementById('patk-countries');
+    if (el) el.innerHTML = top.map(([c, n]) =>
+      `<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(0,255,255,0.08);">
+        <span style="color:var(--text-base);">${c}</span><span style="color:#ff5050;">×${n}</span></div>`
+    ).join('') || '<span style="color:var(--text-dim);">awaiting data...</span>';
+  } catch (e) { console.warn('patk countries', e); }
+}
+
+function patkInit() {
+  if (typeof d3 === 'undefined' || typeof topojson === 'undefined') return setTimeout(patkInit, 200);
+  const svgEl = document.getElementById('patk-svg');
+  if (!svgEl) return;
+  patkSvg = d3.select('#patk-svg');
+  const bbox = svgEl.getBoundingClientRect();
+  const w = bbox.width || 800, h = bbox.height || 640;
+  const size = Math.min(w, h);
+  patkProj = d3.geoOrthographic().scale(size * 0.42).translate([w / 2, h / 2]).rotate(patkRotation).clipAngle(90);
+  patkSphere = patkSvg.append('path').datum({type: 'Sphere'})
+    .attr('fill', '#040a0a').attr('stroke', 'rgba(0, 255, 255, 0.4)').attr('stroke-width', 1);
+  patkGraticule = patkSvg.append('path').datum(d3.geoGraticule10())
+    .attr('fill', 'none').attr('stroke', 'rgba(0, 255, 255, 0.08)').attr('stroke-width', 0.5);
+  patkLand = patkSvg.append('g').attr('class', 'patk-land');
+  patkSensorGroup = patkSvg.append('g').attr('class', 'patk-sensors');
+  patkAttacksGroup = patkSvg.append('g').attr('class', 'patk-attacks');
+  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(world => {
+    const countries = topojson.feature(world, world.objects.countries).features;
+    patkLand.selectAll('path').data(countries).join('path')
+      .attr('fill', '#0d1818').attr('stroke', 'rgba(0, 255, 255, 0.15)').attr('stroke-width', 0.4);
+    patkRender();
+    patkAnimate();
+    patkPoll();
+    patkPollCountries();
+    setInterval(patkPoll, PATK_POLL_MS);
+    setInterval(patkPollCountries, 30000);
+  });
+  const btn = document.getElementById('patk-rotate-toggle');
+  if (btn) btn.addEventListener('click', () => {
+    patkRotating = !patkRotating;
+    btn.textContent = patkRotating ? '⏸ FREEZE' : '▶ RESUME';
+    const s = document.getElementById('patk-status');
+    if (s) s.textContent = patkRotating ? 'rotating...' : 'frozen';
+  });
+}
+
+(function patkBoot() {
+  function ls(src, cb) { const s = document.createElement('script'); s.src = src; s.onload = cb; document.head.appendChild(s); }
+  function start() {
+    let pending = 0, done = () => { if (--pending <= 0) patkInit(); };
+    if (typeof d3 === 'undefined') { pending++; ls('https://d3js.org/d3.v7.min.js', done); }
+    if (typeof topojson === 'undefined') { pending++; ls('https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js', done); }
+    if (pending === 0) patkInit();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+// ============ END PULSAR ATTACK MAP ============
 
 // ============ SQUAD (referral network) ============
 // Capture ?ref=0xINVITER from URL and persist to localStorage
