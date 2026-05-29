@@ -108,7 +108,7 @@ cp .env.template .env
 
 ```bash
 # Development mode
-python -m uvicorn api.server:app --reload --host 0.0.0.0 --port 8000
+python -m uvicorn api.server:app --reload --host 0.0.0.0 --port 8250
 
 # Production mode
 python -m api.server
@@ -117,8 +117,8 @@ python -m api.server
 ### API Documentation
 
 Once running, access the API docs at:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- Swagger UI: http://localhost:8250/docs
+- ReDoc: http://localhost:8250/redoc
 
 ## API Endpoints
 
