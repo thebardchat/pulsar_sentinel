@@ -2413,11 +2413,14 @@ async function connectWallet() {
 }
 function enterDemo() {
   demoMode = true;
-  document.getElementById('walletDisplay').textContent = 'DEMO MODE';
-  document.getElementById('walletDisplay').style.color = 'var(--amber)';
+  document.getElementById('walletDisplay').textContent = 'NOT CONNECTED';
+  document.getElementById('walletDisplay').style.color = 'var(--text-muted)';
   document.getElementById('connectOverlay').classList.add('hidden');
   for (let i = 0; i < 4; i++) addTickerLine();
 }
+
+// Auto-dismiss overlay — blockchain is Phase 2, no gate needed yet
+enterDemo();
 
 // ============ PULSAR LINK SCANNER (every external link gets scanned) ============
 // Trust list — domains we know are safe (gov, our own infra, NIST/NSA/CISA)
