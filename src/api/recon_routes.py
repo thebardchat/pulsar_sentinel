@@ -195,14 +195,20 @@ async def honeypot_stats():
     users_q = '{ Aggregate { HoneypotEvent(groupBy: "username") { groupedBy { value } meta { count } } } }'
     async with httpx.AsyncClient(timeout=5.0) as client:
         try:
+            cutoff = (datetime.now(timezone.utc) - __import__("datetime").timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            q24h = ('{ Aggregate { HoneypotEvent(where: {path:["timestamp"], operator:GreaterThan, valueDate:"' + cutoff + '"}) { meta { count } } } }')
             r1 = await client.post(f"{HONEYPOT_WEAVIATE_URL}/v1/graphql", json={"query": total_q})
             r2 = await client.post(f"{HONEYPOT_WEAVIATE_URL}/v1/graphql", json={"query": users_q})
+            r3 = await client.post(f"{HONEYPOT_WEAVIATE_URL}/v1/graphql", json={"query": q24h})
             agg = ((r1.json() or {}).get("data", {}).get("Aggregate", {}).get("HoneypotEvent") or [{}])
             total = (agg[0].get("meta") or {}).get("count", 0)
+            agg24 = ((r3.json() or {}).get("data", {}).get("Aggregate", {}).get("HoneypotEvent") or [{}])
+            last_24h = (agg24[0].get("meta") or {}).get("count", 0)
             users = (r2.json() or {}).get("data", {}).get("Aggregate", {}).get("HoneypotEvent") or []
             top = sorted(users, key=lambda u: (u.get("meta") or {}).get("count", 0), reverse=True)[:10]
             return {
                 "total_attacks": total,
+                "last_24h": last_24h,
                 "top_usernames": [
                     {"username": (u.get("groupedBy") or {}).get("value", ""),
                      "count": (u.get("meta") or {}).get("count", 0)}

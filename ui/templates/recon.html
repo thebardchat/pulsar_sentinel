@@ -940,7 +940,7 @@
   <span class="stat">TIER <strong style="color: var(--cyan);">RECON</strong></span>
   <span class="stat">WALLET <strong id="walletDisplay" style="color: var(--text-muted);">NOT CONNECTED</strong></span>
   <span class="stat">PTS <strong id="ptsDisplay">94</strong></span>
-  <span class="stat warn">THREATS BLOCKED 24h <strong>17</strong></span>
+  <span class="stat warn">THREATS BLOCKED 24h <strong id="hud24h">--</strong></span>
   <span class="spacer"></span>
   <span class="clock" id="clock">00:00:00 UTC</span>
 </div>
@@ -1499,6 +1499,16 @@ async function pollRealPTS() {
   } catch (e) {}
 }
 pollRealPTS(); setInterval(pollRealPTS, 10000);
+
+async function pollThreats24h() {
+  try {
+    const r = await fetch('/api/v1/recon/honeypot/stats');
+    const d = await r.json();
+    const el = document.getElementById('hud24h');
+    if (el && d.last_24h != null) el.textContent = d.last_24h;
+  } catch(e) {}
+}
+pollThreats24h(); setInterval(pollThreats24h, 300000);
 
 // ============ GLOBAL ATTACK MAP (animated arcs over world map) ============
 // All coordinates are real-ish (approximate lat/lng → SVG x/y on 1000x320 viewBox).
