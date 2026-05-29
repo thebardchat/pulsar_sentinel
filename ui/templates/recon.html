@@ -1079,7 +1079,7 @@
     </div>
     <div style="position: absolute; bottom: 16px; left: 16px; display: flex; gap: 8px; align-items: center; z-index: 10;">
       <button id="patk-rotate-toggle" style="background: rgba(0, 255, 255, 0.1); color: var(--cyan-bright); border: 1px solid rgba(0, 255, 255, 0.4); padding: 4px 10px; font-family: var(--font-mono); font-size: 10px; cursor: pointer;">⏸ FREEZE</button>
-      <span id="patk-status" style="color: var(--text-dim); font-family: var(--font-mono); font-size: 10px;">rotating...</span>
+      <span id="patk-status" style="color: var(--red-bright); font-family: var(--font-mono); font-size: 10px;">🔴 LIVE · drifting</span>
     </div>
   </div>
   <div style="margin-top: 8px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.5px; line-height: 1.6;">
@@ -2032,9 +2032,9 @@ if (document.readyState === 'loading') {
 // ============ PULSAR ATTACK MAP (M1b — hybrid rotating globe) ============
 const PATK_NYC1 = [-74.0060, 40.7128];
 const PATK_POLL_MS = 10000;
-const PATK_DRIFT_DEG_PER_SEC = 0.5;
+const PATK_DRIFT_DEG_PER_SEC = 1.2;
 let patkSvg, patkProj, patkSphere, patkLand, patkGraticule, patkSensorGroup, patkAttacksGroup;
-let patkRotation = [60, -10, 0];
+let patkRotation = [30, -20, 0];
 let patkRotating = true;
 let patkLastTs = '';
 let patkLockUntil = 0;
@@ -2065,7 +2065,7 @@ function patkAnimate() {
   const now = performance.now();
   const dt = (now - patkLastFrame) / 1000;
   patkLastFrame = now;
-  if (patkRotating && now > patkLockUntil) {
+  if (patkRotating) {
     patkRotation[0] += PATK_DRIFT_DEG_PER_SEC * dt;
     if (patkRotation[0] > 180) patkRotation[0] -= 360;
     patkProj.rotate(patkRotation);
@@ -2136,7 +2136,7 @@ async function patkPoll() {
     const data = await r.json();
     const evts = (data.events || []).filter(e => e.src_lat && e.src_lng);
     const newOnes = evts.filter(e => !patkLastTs || e.timestamp > patkLastTs).slice(0, 10);
-    if (newOnes.length > 0) patkPanTo(newOnes[0].src_lat, newOnes[0].src_lng);
+    // (auto-pan removed — globe always drifts. patkPanTo still available for user-click.)
     newOnes.reverse().forEach((e, i) => setTimeout(() => patkFireMissile(e.src_lat, e.src_lng, e.event_id), i * 600));
     if (evts.length > 0) patkLastTs = evts[0].timestamp;
     const sc = document.getElementById('patk-sensor-count');
@@ -2196,7 +2196,7 @@ function patkInit() {
     patkRotating = !patkRotating;
     btn.textContent = patkRotating ? '⏸ FREEZE' : '▶ RESUME';
     const s = document.getElementById('patk-status');
-    if (s) s.textContent = patkRotating ? 'rotating...' : 'frozen';
+    if (s) s.textContent = patkRotating ? '🔴 LIVE · drifting' : '⏸ frozen';
   });
 }
 
