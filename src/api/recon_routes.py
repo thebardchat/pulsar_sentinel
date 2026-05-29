@@ -38,26 +38,20 @@ async def health():
 
 @recon_router.get("/pts")
 async def get_pts(request: Request):
-    """Real Post-quantum Threat Score from PTSCalculator."""
+    """System-level Post-quantum Threat Score from PTSCalculator.
+    PTSCalculator is violation-based (higher = more dangerous), so we invert
+    to a 0-100 security health score (higher = safer) for the recon dashboard."""
     pts_calc = getattr(request.app.state, "pts_calculator", None)
     if pts_calc is None:
         return {"ok": False, "pts": None, "error": "PTSCalculator not initialized"}
-    import asyncio
-    score = None; used = None
-    for name in ["get_current_score", "calculate", "current_pts", "get_score", "score", "compute"]:
-        m = getattr(pts_calc, name, None)
-        if callable(m):
-            try:
-                r = await m() if asyncio.iscoroutinefunction(m) else m()
-                if isinstance(r, (int, float)): score = float(r)
-                elif isinstance(r, dict) and "score" in r: score = float(r["score"])
-                elif hasattr(r, "score"): score = float(r.score)
-                used = name; break
-            except Exception: continue
-    if score is None:
-        return {"ok": False, "pts": None, "error": "no compatible method",
-                "available": [n for n in dir(pts_calc) if not n.startswith("_")][:20]}
-    return {"ok": True, "pts": round(score, 1), "method": used, "timestamp": time.time()}
+    try:
+        result = pts_calc.calculate_pts("__system__")
+        threat = float(getattr(result, "total_score", 0))
+        pts = max(0, round(100 - threat, 1))
+        return {"ok": True, "pts": pts, "threat_score": threat,
+                "tier": str(getattr(result, "tier", "UNKNOWN")), "timestamp": time.time()}
+    except Exception as e:
+        return {"ok": False, "pts": None, "error": str(e)}
 
 
 @recon_router.get("/squad/{wallet}")
