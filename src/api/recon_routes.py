@@ -221,3 +221,19 @@ async def honeypot_stats():
             logger.error(f"honeypot_stats error: {e}")
             return {"error": str(e), "total_attacks": 0, "top_usernames": [], "active_sensors": 0}
 # === END HONEYPOT ENDPOINTS ===
+
+
+
+# === FEDERATED THREAT FEEDS (Task #51 — DShield + URLhaus + ...) ===
+from api.threat_feeds import fetch_all_feeds
+
+@recon_router.get("/feeds/external")
+async def feeds_external():
+    """Aggregated external threat intelligence — DShield, URLhaus.
+    All sources real, attributable. Cached 15 min server-side."""
+    try:
+        return await fetch_all_feeds()
+    except Exception as e:
+        logger.error(f"feeds/external error: {e}")
+        return {"error": str(e), "dshield": [], "urlhaus": [], "total": 0}
+# === END FEDERATED FEEDS ===
