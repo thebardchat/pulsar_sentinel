@@ -902,78 +902,6 @@
   .ticker-content .item .geo { color: var(--green); font-weight: 700; }
   body { padding-bottom: 62px; }  /* leave space for fixed ticker */
 
-  /* === SQUAD INVITE PANEL === */
-  .squad-panel {
-    background: var(--bg-1);
-    border: 1px solid var(--line);
-    border-left: 2px solid var(--cyan);
-    padding: 14px;
-    margin-bottom: 16px;
-  }
-  .squad-panel .ttl {
-    color: var(--cyan);
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    font-weight: 700;
-  }
-  .squad-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-  .squad-stats .stat {
-    background: var(--bg-0);
-    padding: 10px;
-    border: 1px solid var(--line);
-    text-align: center;
-  }
-  .squad-stats .stat .n {
-    font-size: 24px;
-    color: var(--cyan);
-    font-variant-numeric: tabular-nums;
-    font-weight: 300;
-  }
-  .squad-stats .stat .l {
-    font-size: 9px;
-    color: var(--text-muted);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-top: 4px;
-  }
-  .squad-invite {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 12px;
-  }
-  .squad-invite input {
-    flex: 1;
-    background: var(--bg-0);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 8px 10px;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.5px;
-  }
-  .squad-invite button {
-    background: var(--cyan);
-    color: #000;
-    border: none;
-    padding: 8px 14px;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    cursor: pointer;
-    font-weight: 700;
-  }
-  .squad-invite button:hover { background: #fff; }
-  .squad-milestones { font-size: 10px; line-height: 1.6; color: var(--text-dim); }
-  .squad-milestones .m { padding: 3px 0; }
-  .squad-milestones .m.done { color: var(--green); }
-  .squad-milestones .m.next { color: var(--cyan); font-weight: 700; }
 
 </style>
 </head>
@@ -1244,20 +1172,16 @@
       </div>
     </div>
 
-    <div class="squad-panel" id="squadPanel">
-      <div class="ttl">▣ DEPLOY YOUR SQUAD</div>
-      <div class="squad-stats">
-        <div class="stat"><div class="n" id="squadCount">—</div><div class="l">Operators recruited</div></div>
-        <div class="stat"><div class="n" id="squadBoost">—</div><div class="l">PTS boost</div></div>
+    <div class="panel" style="margin-bottom: 16px; border-left-color: var(--amber);">
+      <div class="panel-title" style="color: var(--amber);">
+        <span class="led" style="background: var(--amber); box-shadow: 0 0 4px var(--amber);"></span>
+        AGENT EVENT LOG
+        <span class="meta" id="agentEvCount" style="color: var(--text-muted);">no events</span>
       </div>
-      <div class="squad-invite">
-        <input type="text" id="squadInviteLink" readonly value="connect wallet first">
-        <button id="squadCopyBtn" onclick="copySquadLink()">COPY</button>
-      </div>
-      <div class="squad-milestones" id="squadMilestones">
-        <div class="m">5 Operators = +5% PTS BOOST</div>
-        <div class="m">10 Operators = 1 month free</div>
-        <div class="m">25 Operators = lifetime Sentinel Core</div>
+      <div id="agentEvLog" style="font-family: var(--font-mono); font-size: 10px; line-height: 1.7; min-height: 80px; color: var(--text-dim);">
+        <div style="color: var(--text-muted); font-size: 9px; letter-spacing: 1px; padding: 8px 0;">
+          ◉ all 4 nodes quiet — no auth log events detected
+        </div>
       </div>
     </div>
 
@@ -1426,6 +1350,28 @@ async function meshPollFull() {
       }
     }
     renderLiveMesh(d);
+    // Agent event log
+    const evLog = document.getElementById('agentEvLog');
+    const evCount = document.getElementById('agentEvCount');
+    if (evLog && d.recent_events) {
+      if (d.recent_events.length === 0) {
+        evLog.innerHTML = '<div style="color:var(--text-muted);font-size:9px;letter-spacing:1px;padding:8px 0;">◉ all ' + (d.total||4) + ' nodes quiet — no auth log events detected</div>';
+        if (evCount) evCount.textContent = 'no events';
+      } else {
+        evLog.innerHTML = d.recent_events.slice(0, 10).map(ev => {
+          const sev = (ev.event_type||'').includes('fail') || (ev.event_type||'').includes('brute') ? 'var(--red-bright)' : 'var(--amber)';
+          const ts = ev.timestamp ? ev.timestamp.slice(11,19) : '';
+          const ip = ev.source_ip ? ' · ' + ev.source_ip : '';
+          return `<div style="padding:3px 0;border-bottom:1px dotted var(--line-bright);">
+            <span style="color:var(--cyan);min-width:60px;display:inline-block;">${ts}</span>
+            <span style="color:${sev};">◆</span>
+            <span style="color:var(--text-muted);margin:0 4px;">${ev.node_id}</span>
+            <span>${ev.event_type||'event'}${ip}</span>
+          </div>`;
+        }).join('');
+        if (evCount) evCount.textContent = d.recent_events.length + ' event' + (d.recent_events.length !== 1 ? 's' : '');
+      }
+    }
   } catch(e) {}
 }
 
@@ -2350,45 +2296,6 @@ function patkInit() {
   }
 })();
 
-async function loadSquadPanel(myWallet) {
-  if (!myWallet || !myWallet.startsWith("0x")) return;
-  try {
-    const r = await fetch("/api/v1/recon/squad/" + myWallet);
-    const j = await r.json();
-    if (!j.ok) return;
-    const elN = document.getElementById("squadCount");
-    const elB = document.getElementById("squadBoost");
-    const elI = document.getElementById("squadInviteLink");
-    const elM = document.getElementById("squadMilestones");
-    if (elN) elN.textContent = j.count;
-    if (elB) elB.textContent = "+" + j.pts_boost_pct + "%";
-    if (elI) elI.value = j.invite_url;
-    if (elM && j.milestones) {
-      elM.innerHTML = j.milestones.map(m =>
-        '<div class="m ' + (m.achieved ? "done" : (j.next_milestone && j.next_milestone.at === m.at ? "next" : "")) + '">' +
-        (m.achieved ? "✓ " : (j.next_milestone && j.next_milestone.at === m.at ? "▸ " : "○ ")) +
-        m.at + " Operators = " + m.reward + '</div>'
-      ).join("");
-    }
-  } catch (e) { console.warn("squad load failed", e); }
-}
-
-function copySquadLink() {
-  const el = document.getElementById("squadInviteLink");
-  if (!el) return;
-  el.select();
-  try {
-    document.execCommand("copy");
-    const btn = document.getElementById("squadCopyBtn");
-    if (btn) { const t = btn.textContent; btn.textContent = "COPIED"; setTimeout(() => btn.textContent = t, 1500); }
-  } catch (e) {}
-}
-
-// Optional: if a previous session captured the wallet, load it now (demo mode reuses)
-(function () {
-  const saved = (() => { try { return localStorage.getItem("pulsar_my_wallet"); } catch (e) { return null; } })();
-  if (saved) loadSquadPanel(saved);
-})();
 
 // ============ CONNECT WALLET ============
 async function connectWallet() {
@@ -2404,8 +2311,6 @@ async function connectWallet() {
       body: JSON.stringify({ inviter_wallet: inviter, invitee_wallet: mockWallet }),
     }).catch(() => {});
   }
-  loadSquadPanel(mockWallet);
-
   // MOCK: in real implementation, use window.ethereum.request({ method: 'eth_requestAccounts' })
   document.getElementById('connectOverlay').classList.add('hidden');
   // Seed the ticker
