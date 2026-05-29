@@ -2289,23 +2289,133 @@ function patkInit() {
 
 // ============ CONNECT WALLET ============
 async function connectWallet() {
-  // MOCK wallet for now — replace with real eth_requestAccounts when wired
-  const mockWallet = "0x7f3a" + Math.random().toString(16).slice(2, 6) + "...d2e9";
-  try { localStorage.setItem("pulsar_my_wallet", mockWallet); } catch (e) {}
-  // If this user came via ?ref=0xINVITER, record the squad join
-  const inviter = (() => { try { return localStorage.getItem("pulsar_inviter_wallet"); } catch (e) { return null; } })();
-  if (inviter && inviter !== mockWallet) {
-    fetch("/api/v1/recon/squad/join", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inviter_wallet: inviter, invitee_wallet: mockWallet }),
-    }).catch(() => {});
+  const walletEl = document.getElementById('walletDisplay');
+  if (typeof window.ethereum === 'undefined') {
+    if (walletEl) {
+      walletEl.textContent = 'INSTALL METAMASK';
+      walletEl.style.color = 'var(--red, #ff0040)';
+    }
+    setTimeout(function(){ window.open('https://metamask.io/download/', '_blank'); }, 800);
+    return;
   }
-  // MOCK: in real implementation, use window.ethereum.request({ method: 'eth_requestAccounts' })
-  document.getElementById('connectOverlay').classList.add('hidden');
-  // Seed the ticker
-  for (let i = 0; i < 4; i++) addTickerLine();
+  try {
+    if (walletEl) {
+      walletEl.textContent = 'CONNECTING...';
+      walletEl.style.color = 'var(--cyan-dim, #00a0aa)';
+    }
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (!accounts || accounts.length === 0) throw new Error('No accounts returned');
+    const address = accounts[0];
+    const nonceResp = await fetch('/api/v1/auth/nonce', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet_address: address })
+    });
+    if (!nonceResp.ok) throw new Error('nonce failed: ' + nonceResp.status);
+    const nonceData = await nonceResp.json();
+    const signature = await window.ethereum.request({
+      method: 'personal_sign',
+      params: [nonceData.message, address]
+    });
+    const verifyResp = await fetch('/api/v1/auth/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet_address: address, signature: signature, nonce: nonceData.nonce })
+    });
+    if (!verifyResp.ok) throw new Error('verify failed: ' + verifyResp.status);
+    const authData = await verifyResp.json();
+    try {
+      localStorage.setItem('sentinel_jwt', authData.token);
+      localStorage.setItem('sentinel_wallet', authData.wallet_address);
+      localStorage.setItem('sentinel_expires', authData.expires_at);
+      localStorage.setItem('pulsar_my_wallet', authData.wallet_address);
+    } catch (e) {}
+    if (walletEl) {
+      const w = authData.wallet_address;
+      walletEl.textContent = w.slice(0,6) + '...' + w.slice(-4);
+      walletEl.style.color = 'var(--cyan, #00f0ff)';
+      walletEl.title = 'Connected: ' + w + ' (expires ' + authData.expires_at + ')';
+    }
+    const audio = document.getElementById('audio-upgrade');
+    if (audio) audio.play().catch(function(){});
+    const inviter = (function(){ try { return localStorage.getItem('pulsar_inviter_wallet'); } catch (e) { return null; } })();
+    if (inviter && inviter !== authData.wallet_address) {
+      fetch('/api/v1/recon/squad/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inviter_wallet: inviter, invitee_wallet: authData.wallet_address })
+      }).catch(function(){});
+    }
+    const overlay = document.getElementById('connectOverlay');
+    if (overlay) overlay.classList.add('hidden');
+    if (window.ethereum.on && !window.__sentinelEthListenerAdded) {
+      window.__sentinelEthListenerAdded = true;
+      window.ethereum.on('accountsChanged', function(){ sentinelDisconnect(); });
+      window.ethereum.on('chainChanged', function(){ location.reload(); });
+    }
+  } catch (err) {
+    console.error('Wallet connect failed:', err);
+    if (walletEl) {
+      walletEl.textContent = (err && err.code === 4001) ? 'REJECTED' : 'CONNECT FAILED';
+      walletEl.style.color = 'var(--red, #ff0040)';
+      setTimeout(function(){
+        walletEl.textContent = 'NOT CONNECTED';
+        walletEl.style.color = 'var(--text-muted)';
+      }, 3000);
+    }
+  }
 }
+
+function sentinelDisconnect() {
+  try {
+    localStorage.removeItem('sentinel_jwt');
+    localStorage.removeItem('sentinel_wallet');
+    localStorage.removeItem('sentinel_expires');
+  } catch (e) {}
+  const walletEl = document.getElementById('walletDisplay');
+  if (walletEl) {
+    walletEl.textContent = 'NOT CONNECTED';
+    walletEl.style.color = 'var(--text-muted)';
+    walletEl.title = '';
+  }
+}
+
+function sentinelRestoreSession() {
+  try {
+    const token = localStorage.getItem('sentinel_jwt');
+    const wallet = localStorage.getItem('sentinel_wallet');
+    const expires = localStorage.getItem('sentinel_expires');
+    if (!token || !wallet || !expires) return;
+    if (new Date(expires) < new Date()) { sentinelDisconnect(); return; }
+    const walletEl = document.getElementById('walletDisplay');
+    if (walletEl) {
+      walletEl.textContent = wallet.slice(0,6) + '...' + wallet.slice(-4);
+      walletEl.style.color = 'var(--cyan, #00f0ff)';
+      walletEl.title = 'Connected: ' + wallet + ' (expires ' + expires + ')';
+    }
+  } catch (e) {}
+}
+
+(function() {
+  function wire() {
+    const walletEl = document.getElementById('walletDisplay');
+    if (!walletEl) return;
+    walletEl.style.cursor = 'pointer';
+    walletEl.addEventListener('click', function() {
+      try {
+        if (localStorage.getItem('sentinel_jwt')) {
+          if (confirm('Disconnect wallet?')) sentinelDisconnect();
+        } else {
+          connectWallet();
+        }
+      } catch (e) { connectWallet(); }
+    });
+    sentinelRestoreSession();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wire);
+  } else { wire(); }
+})();
 function enterDemo() {
   demoMode = true;
   document.getElementById('walletDisplay').textContent = 'NOT CONNECTED';
