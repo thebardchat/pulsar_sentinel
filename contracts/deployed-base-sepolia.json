@@ -1,0 +1,18 @@
+{
+  "chain": "base-sepolia",
+  "chain_id": 84532,
+  "deployed_at": "2026-05-30T03:19:27Z",
+  "deployer": "0x6BFAC0d84C256d797D41cD9C713790708fa5d12F",
+  "beneficiary": "0xF8D1B0a5Bcdcb84B6FF21Ab07b76c9C45A09B790",
+  "inactivity_threshold_seconds": 604800,
+  "contracts": {
+    "LegacyVault": "",
+    "MockUSDC": "",
+    "MockAavePool": ""
+  },
+  "basescan": {
+    "vault": "https://sepolia.basescan.org/address/",
+    "usdc": "https://sepolia.basescan.org/address/",
+    "pool": "https://sepolia.basescan.org/address/"
+  }
+}
