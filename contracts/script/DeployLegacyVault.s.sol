@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import {Script, console} from "forge-std/Script.sol";
+import {LegacyVault} from "../src/LegacyVault.sol";
+import {MockUSDC} from "../test/mocks/MockUSDC.sol";
+import {MockAavePool} from "../test/mocks/MockAavePool.sol";
+
+contract DeployLegacyVault is Script {
+    function run() external {
+        uint256 deployerPK = vm.envUint("DEPLOY_PRIVATE_KEY");
+        address beneficiary = vm.envAddress("BENEFICIARY");
+        uint256 threshold = vm.envOr("INACTIVITY_THRESHOLD", uint256(7 days));
+
+        vm.startBroadcast(deployerPK);
+        MockUSDC usdc = new MockUSDC();
+        MockAavePool aavePool = new MockAavePool();
+        LegacyVault vault = new LegacyVault(
+            beneficiary, address(usdc), address(aavePool), threshold
+        );
+        vm.stopBroadcast();
+
+        console.log("MockUSDC      :", address(usdc));
+        console.log("MockAavePool  :", address(aavePool));
+        console.log("LegacyVault   :", address(vault));
+    }
+}
