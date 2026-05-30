@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a1410">
+<title>YourLegacy — for someone you love</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<style>
+:root {
+  --bg: #1a1410; --bg2: #221a13; --bg3: #2a1f17;
+  --amber: #c9a673; --sage: #8b9d83; --rose: #b08574;
+  --text: #f0e8de; --text-muted: #8a7f73; --text-soft: #b8ada0;
+  --border: #3a2e22;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-sans); max-width: 680px; margin: 0 auto; padding: 3rem 1.5rem 6rem; line-height: 1.6; min-height: 100vh; }
+header { text-align: center; margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+header h1 { font-family: var(--font-serif); font-weight: 500; font-size: 2.5rem; letter-spacing: 0.02em; color: var(--text); margin-bottom: 0.4rem; }
+header p { color: var(--text-muted); font-style: italic; font-size: 1.05rem; }
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 2rem; margin-bottom: 1.25rem; }
+.label { text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.6rem; font-weight: 500; }
+.primary { font-family: var(--font-serif); font-size: 1.6rem; color: var(--text); font-weight: 500; margin-bottom: 0.4rem; }
+.addr { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); word-break: break-all; }
+.amount { font-family: var(--font-serif); font-size: 2.6rem; color: var(--text); font-weight: 500; margin-bottom: 0.6rem; }
+.breakdown { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-size: 0.9rem; color: var(--text-soft); padding-top: 0.5rem; border-top: 1px dashed var(--border); margin-top: 0.5rem; }
+.breakdown span span { color: var(--text); margin-left: 0.3rem; }
+.status { font-size: 1.15rem; line-height: 1.5; }
+.status.active { color: var(--sage); }
+.status.waiting { color: var(--amber); }
+.status.available { color: var(--rose); font-family: var(--font-serif); font-size: 1.4rem; font-weight: 500; }
+.status.claimed { color: var(--sage); font-family: var(--font-serif); font-size: 1.4rem; font-weight: 500; }
+.status-detail { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.6rem; }
+button.claim { background: var(--rose); color: var(--bg); border: none; padding: 1rem 2.5rem; border-radius: 4px; font-family: var(--font-sans); font-size: 1.05rem; font-weight: 500; cursor: pointer; margin-top: 1.5rem; letter-spacing: 0.02em; transition: opacity 0.15s; }
+button.claim:hover:not(:disabled) { opacity: 0.85; }
+button.claim:disabled { background: var(--bg3); color: var(--text-muted); cursor: not-allowed; }
+button.connect { background: transparent; color: var(--text); border: 1px solid var(--border); padding: 0.7rem 1.5rem; border-radius: 4px; font-family: var(--font-sans); cursor: pointer; font-size: 0.95rem; }
+button.connect:hover { background: var(--bg3); border-color: var(--text-muted); }
+.sealed { text-align: center; padding: 1.5rem 0 0.5rem; opacity: 0.7; }
+.sealed .icon { font-size: 2.5rem; display: block; margin-bottom: 0.8rem; filter: sepia(0.3); }
+.sealed p { color: var(--text-soft); font-style: italic; }
+.sealed p.hint { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.6rem; font-style: normal; }
+.letter-revealed { font-family: var(--font-serif); font-size: 1.15rem; font-style: italic; line-height: 1.8; color: var(--text); white-space: pre-line; padding: 1rem 0; }
+footer { text-align: center; padding-top: 2rem; margin-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem; }
+footer p { margin-bottom: 0.5rem; }
+footer a { color: var(--amber); text-decoration: underline dotted; }
+footer a:hover { color: var(--rose); }
+.wallet-bar { text-align: right; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-muted); }
+.wallet-bar .addr { display: inline; }
+.error-msg { background: rgba(176, 133, 116, 0.1); border: 1px solid var(--rose); padding: 1rem; border-radius: 4px; color: var(--rose); font-size: 0.9rem; margin-top: 1rem; }
+@media (max-width: 540px) { body { padding: 2rem 1rem 4rem; } .card { padding: 1.5rem; } header h1 { font-size: 2rem; } .amount { font-size: 2rem; } .breakdown { flex-direction: column; gap: 0.3rem; } }
+</style>
+</head>
+<body>
+
+<div class="wallet-bar">
+  <button class="connect" id="btnConnect">Connect Wallet</button>
+  <span id="walletInfo" style="display:none">Connected: <span class="addr" id="walletAddr">—</span></span>
+</div>
+
+<header>
+  <h1>YourLegacy</h1>
+  <p id="subtitle">For someone you love.</p>
+</header>
+
+<div class="card">
+  <div class="label">Vault Owner</div>
+  <div class="primary" id="ownerName">—</div>
+  <div class="addr" id="ownerAddr">—</div>
+</div>
+
+<div class="card">
+  <div class="label">Current Value</div>
+  <div class="amount" id="totalAmount">$0.00</div>
+  <div class="breakdown">
+    <span>Principal: <span id="principalAmount">$0.00</span></span>
+    <span>Yield earned: <span id="yieldAmount">$0.00</span></span>
+  </div>
+</div>
+
+<div class="card" id="statusCard">
+  <div class="label">Status</div>
+  <div class="status" id="statusLine">Loading...</div>
+  <div class="status-detail" id="statusDetail"></div>
+  <button class="claim" id="btnClaim" style="display:none" disabled>Claim This Vault</button>
+  <div class="error-msg" id="errorMsg" style="display:none"></div>
+</div>
+
+<div class="card" id="letterCard">
+  <div class="label">A Letter From The Owner</div>
+  <div class="sealed" id="letterSealed">
+    <span class="icon">✉</span>
+    <p id="letterStatus">Sealed until the inheritance is claimed.</p>
+    <p class="hint">Phase 2: The owner can store a letter on-chain. It will be revealed at this moment, and only at this moment.</p>
+  </div>
+  <div class="letter-revealed" id="letterRevealed" style="display:none">
+    "My dear one — by the time you read this..."
+    <br><br>
+    <span style="font-size:0.85rem;color:var(--text-muted);font-style:normal">[Phase 2: actual letter will appear here from on-chain storage]</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="label">Inheritance Certificate</div>
+  <p style="color:var(--text-soft);font-size:0.95rem">A non-transferable certificate will be minted to your wallet when you claim. Permanent on-chain proof of the legacy you received.</p>
+  <p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.6rem">Phase 2 feature — placeholder for now.</p>
+</div>
+
+<footer>
+  <p>Non-custodial. These funds were always yours to inherit.</p>
+  <p><a id="verifyLink" href="#" target="_blank">Verify on Basescan ↗</a></p>
+  <p style="margin-top:1.5rem;font-size:0.75rem">Phase 1 testnet · <a href="/vault/admin" style="color:var(--text-muted)">Owner Dashboard ↗</a></p>
+</footer>
+
+<script>
+const VAULT_ADDR = "0x70167abe5f732a56aba789d97b3def117f8154bd";
+const USDC_ADDR  = "0x9d9ba25a3231b702c66c0e8aebea5c8672e5abf9";
+const POOL_ADDR  = "0xdcfecb7e3dec4972abfc836cdfabe2212d399da5";
+const CHAIN_ID_HEX = "0x14a34";
+const EXPLORER = "https://sepolia.basescan.org/address/";
+const BASE_SEPOLIA_PARAMS = { chainId: CHAIN_ID_HEX, chainName: "Base Sepolia", rpcUrls: ["https://sepolia.base.org"], nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }, blockExplorerUrls: ["https://sepolia.basescan.org"] };
+const VAULT_ABI = ["function owner() view returns (address)","function beneficiary() view returns (address)","function inactivityThreshold() view returns (uint256)","function lastHeartbeat() view returns (uint256)","function inherited() view returns (bool)","function silenceDuration() view returns (uint256)","function inheritable() view returns (bool)","function inherit()"];
+const POOL_ABI = ["function balances(address asset, address supplier) view returns (uint256)"];
+
+// Query params for demo personalization: /vault?owner=Shane&heir=Tiffany
+const params = new URLSearchParams(location.search);
+const ownerDisplayName = params.get('owner') || null;
+const heirDisplayName = params.get('heir') || null;
+
+const $ = id => document.getElementById(id);
+const short = a => a ? a.slice(0,6) + "…" + a.slice(-4) : "—";
+const fmtUSD = wei => "$" + (Number(wei) / 1e6).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtDays = s => { const d = Math.floor(Number(s) / 86400); const h = Math.floor((Number(s) % 86400) / 3600); if (d > 0) return d + (d === 1 ? " day" : " days") + (h > 0 ? " " + h + "h" : ""); if (h > 0) return h + (h === 1 ? " hour" : " hours"); return Math.floor(Number(s) / 60) + " minutes"; };
+const fmtDate = ts => { const d = new Date(ts * 1000); return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); };
+
+let provider, signer, userAddr, vault, pool;
+
+async function connect() {
+  if (!window.ethereum) { showError("Please install MetaMask to interact with this vault."); window.open("https://metamask.io/download/", "_blank"); return; }
+  try {
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    userAddr = accounts[0];
+    const chain = await window.ethereum.request({ method: "eth_chainId" });
+    if (chain !== CHAIN_ID_HEX) {
+      try { await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_ID_HEX }] }); }
+      catch (e) { if (e.code === 4902) await window.ethereum.request({ method: "wallet_addEthereumChain", params: [BASE_SEPOLIA_PARAMS] }); else throw e; }
+    }
+    provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    vault = new ethers.Contract(VAULT_ADDR, VAULT_ABI, signer);
+    pool = new ethers.Contract(POOL_ADDR, POOL_ABI, signer);
+    $("btnConnect").style.display = "none";
+    $("walletInfo").style.display = "inline";
+    $("walletAddr").textContent = short(userAddr);
+    await loadVault();
+    window.ethereum.on("accountsChanged", () => location.reload());
+    window.ethereum.on("chainChanged", () => location.reload());
+  } catch (e) { showError("Could not connect wallet: " + (e.message || e)); }
+}
+
+async function loadReadOnly() {
+  // Read-only access via public RPC — works even without wallet
+  const rpc = new ethers.JsonRpcProvider("https://sepolia.base.org");
+  vault = new ethers.Contract(VAULT_ADDR, VAULT_ABI, rpc);
+  pool = new ethers.Contract(POOL_ADDR, POOL_ABI, rpc);
+  await loadVault();
+}
+
+async function loadVault() {
+  try {
+    const [ownerAddr, beneAddr, threshold, lastBeat, silence, inhable, inh, balance] = await Promise.all([
+      vault.owner(), vault.beneficiary(), vault.inactivityThreshold(),
+      vault.lastHeartbeat(), vault.silenceDuration(), vault.inheritable(),
+      vault.inherited(), pool.balances(USDC_ADDR, VAULT_ADDR)
+    ]);
+
+    // Owner card
+    $("ownerName").textContent = ownerDisplayName || "(name not provided)";
+    $("ownerAddr").textContent = ownerAddr;
+    if (heirDisplayName) $("subtitle").textContent = `For ${heirDisplayName}, from someone you love.`;
+
+    // Balance — show all as principal (Phase 1: mock yield doesn't track real Aave interest)
+    const total = balance;
+    const principal = balance; // placeholder split until real yield tracking
+    const yieldEarned = 0n;
+    $("totalAmount").textContent = fmtUSD(total);
+    $("principalAmount").textContent = fmtUSD(principal);
+    $("yieldAmount").textContent = fmtUSD(yieldEarned);
+
+    // State machine
+    const silenceSec = Number(silence);
+    const thresholdSec = Number(threshold);
+    const remaining = thresholdSec - silenceSec;
+    const lastBeatTs = Number(lastBeat);
+    const triggerDate = new Date((lastBeatTs + thresholdSec) * 1000);
+
+    let state;
+    if (inh) state = 'claimed';
+    else if (inhable) state = 'available';
+    else if (silenceSec < thresholdSec * 0.3) state = 'active';
+    else state = 'waiting';
+
+    const card = $("statusCard");
+    const line = $("statusLine");
+    const detail = $("statusDetail");
+    const btn = $("btnClaim");
+    btn.style.display = "none";
+
+    if (state === 'active') {
+      line.className = "status active";
+      const ownerLabel = ownerDisplayName || "The owner";
+      line.textContent = `${ownerLabel} is well. Last check-in ${fmtDays(silence)} ago.`;
+      detail.textContent = "No action needed. You'll be notified if anything changes.";
+    } else if (state === 'waiting') {
+      line.className = "status waiting";
+      const ownerLabel = ownerDisplayName || "the owner";
+      line.textContent = `No check-in from ${ownerLabel} for ${fmtDays(silence)}.`;
+      detail.textContent = `This vault becomes available to you on ${triggerDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}.`;
+    } else if (state === 'available') {
+      line.className = "status available";
+      line.textContent = "This vault is yours to claim.";
+      detail.textContent = `The owner has been silent for ${fmtDays(silence)}, past the ${fmtDays(threshold)} threshold.`;
+      // Show claim button only if connected wallet is the beneficiary
+      if (userAddr && userAddr.toLowerCase() === beneAddr.toLowerCase()) {
+        btn.style.display = "inline-block";
+        btn.disabled = false;
+      } else if (userAddr) {
+        detail.textContent += " — Connect the wallet of the named beneficiary to claim.";
+      } else {
+        btn.style.display = "inline-block";
+        btn.textContent = "Connect wallet to claim";
+        btn.disabled = false;
+        btn.onclick = connect;
+      }
+    } else if (state === 'claimed') {
+      line.className = "status claimed";
+      line.textContent = "Received.";
+      detail.textContent = "This vault has been claimed. The funds are in the beneficiary's wallet.";
+      $("letterSealed").style.display = "none";
+      $("letterRevealed").style.display = "block";
+    }
+
+    $("verifyLink").href = EXPLORER + VAULT_ADDR;
+  } catch (e) {
+    showError("Could not load vault state: " + (e.message || e));
+  }
+}
+
+async function doClaim() {
+  if (!signer) { showError("Connect your wallet first."); return; }
+  try {
+    $("btnClaim").disabled = true;
+    $("btnClaim").textContent = "Claiming...";
+    const tx = await vault.inherit();
+    await tx.wait();
+    await loadVault();
+  } catch (e) {
+    const msg = e.shortMessage || e.message || String(e);
+    showError("Could not claim: " + msg);
+    $("btnClaim").disabled = false;
+    $("btnClaim").textContent = "Claim This Vault";
+  }
+}
+
+function showError(msg) {
+  const el = $("errorMsg");
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+$("btnConnect").addEventListener("click", connect);
+$("btnClaim").addEventListener("click", doClaim);
+
+// Load read-only on page load so heir sees state without needing to connect
+loadReadOnly();
+</script>
+
+</body>
+</html>

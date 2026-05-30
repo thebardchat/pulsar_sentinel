@@ -261,6 +261,20 @@ def create_app() -> FastAPI:
     async def security_page(request: Request):
         if templates:
             return templates.TemplateResponse("security.html", {"request": request})
+
+    @app.get("/vault", response_class=HTMLResponse)
+    async def vault_heir_page(request: Request) -> HTMLResponse:
+        """YourLegacy heir page — calm, dignified inheritance claim UI."""
+        if templates:
+            return templates.TemplateResponse("vault.html", {"request": request})
+        return HTMLResponse("<h1>vault.html template not found</h1>", status_code=500)
+
+    @app.get("/vault/admin", response_class=HTMLResponse)
+    async def vault_admin_page(request: Request) -> HTMLResponse:
+        """YourLegacy owner dashboard — cyberpunk admin for testing."""
+        if templates:
+            return templates.TemplateResponse("vault_admin.html", {"request": request})
+        return HTMLResponse("<h1>vault_admin.html template not found</h1>", status_code=500)
         return HTMLResponse("Security - templates not found")
 
     @app.get("/recon", response_class=HTMLResponse)

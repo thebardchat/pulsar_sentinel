@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#03030f">
+<title>YourLegacy Admin — Owner Dashboard (Base Sepolia)</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<style>
+:root { --bg: #03030f; --bg2: #0a0a1a; --bg3: #12121f; --cyan: #00f0ff; --cyan-dim: #00a0aa; --magenta: #ff00ff; --gold: #ffd700; --green: #00ff41; --red: #ff0040; --orange: #ff6b35; --text: #e0e0f0; --text-muted: #707080; --border: #1f1f3f; --font-display: 'Orbitron', sans-serif; --font-mono: 'Share Tech Mono', monospace; --font-body: 'Rajdhani', sans-serif; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; padding: 1.5rem; line-height: 1.5; }
+.hud { display: flex; gap: 1rem; padding: 0.6rem 1rem; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; align-items: center; flex-wrap: wrap; font-family: var(--font-mono); font-size: 0.85rem; margin-bottom: 1rem; }
+.hud .stat { color: var(--text-muted); }
+.hud .stat strong { color: var(--cyan); }
+.hud .ok strong { color: var(--green); }
+.hud .warn strong { color: var(--orange); }
+.hud-spacer { margin-left: auto; }
+.hero { text-align: center; padding: 1.5rem 1rem 0.5rem; }
+.hero h1 { font-family: var(--font-display); font-weight: 900; font-size: clamp(1.3rem, 3vw, 2rem); letter-spacing: 0.05em; color: var(--gold); margin-bottom: 0.3rem; }
+.hero .tagline { font-family: var(--font-mono); color: var(--cyan); font-size: 0.85rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem; }
+.card h3 { font-family: var(--font-display); color: var(--cyan); font-size: 0.95rem; letter-spacing: 0.1em; margin-bottom: 0.8rem; text-transform: uppercase; }
+.card.owner h3 { color: var(--gold); }
+.card.heir h3 { color: var(--magenta); }
+.card .desc { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 0.8rem; }
+button { background: var(--bg3); color: var(--cyan); border: 1px solid var(--cyan-dim); padding: 0.6rem 1rem; border-radius: 4px; font-family: var(--font-mono); font-size: 0.9rem; cursor: pointer; transition: all 0.15s; width: 100%; margin-bottom: 0.5rem; }
+button:hover:not(:disabled) { background: var(--cyan); color: var(--bg); border-color: var(--cyan); }
+button:disabled { color: var(--text-muted); border-color: var(--border); cursor: not-allowed; opacity: 0.5; }
+button.primary { background: var(--cyan); color: var(--bg); font-weight: 700; }
+button.danger { color: var(--red); border-color: var(--red); }
+input[type=number] { background: var(--bg3); color: var(--text); border: 1px solid var(--border); padding: 0.5rem 0.8rem; border-radius: 4px; font-family: var(--font-mono); font-size: 0.9rem; width: 100%; margin-bottom: 0.5rem; }
+.status-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 0.4rem 1rem; font-family: var(--font-mono); font-size: 0.85rem; }
+.status-grid .lbl { color: var(--text-muted); }
+.status-grid .val { color: var(--cyan); word-break: break-all; }
+.status-grid .val.good { color: var(--green); } .status-grid .val.bad { color: var(--red); } .status-grid .val.warn { color: var(--orange); }
+.status-grid a { color: inherit; text-decoration: underline dotted; }
+.tx-log { background: #000; color: var(--green); font-family: var(--font-mono); font-size: 0.8rem; padding: 0.8rem; border-radius: 4px; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); margin-top: 1rem; }
+.tx-log .err { color: var(--red); }
+.tx-log .ok { color: var(--cyan); }
+footer { margin-top: 2rem; padding: 1rem; border-top: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 0.8rem; text-align: center; }
+footer a { color: var(--cyan); }
+</style>
+</head>
+<body>
+<div class="hud">
+  <span class="stat">NETWORK <strong id="netStatus">DETECTING...</strong></span>
+  <span class="stat">WALLET <strong id="walletStatus">DISCONNECTED</strong></span>
+  <span class="stat">ROLE <strong id="roleStatus">NONE</strong></span>
+  <span class="hud-spacer"></span>
+  <span class="stat ok">ADMIN · TESTNET</span>
+</div>
+<div class="hero">
+  <h1>YOURLEGACY · OWNER DASHBOARD</h1>
+  <div class="tagline">// admin/test view — exercise the contract end-to-end · heir page lives at <a href="/vault" style="color:var(--magenta)">/vault</a></div>
+</div>
+<div class="grid">
+  <div class="card">
+    <h3>1. WALLET</h3>
+    <div class="desc">MetaMask auto-switches to Base Sepolia.</div>
+    <button class="primary" id="btnConnect">CONNECT METAMASK</button>
+  </div>
+  <div class="card owner">
+    <h3>2. OWNER ACTIONS</h3>
+    <div class="desc">Only the vault owner can call these. Mint is open to anyone for testing.</div>
+    <input type="number" id="mintAmt" placeholder="USDC amount" value="1000" min="1">
+    <button id="btnMint" disabled>MINT mUSDC (anyone)</button>
+    <button id="btnApprove" disabled>APPROVE VAULT (owner)</button>
+    <button id="btnDeposit" disabled>DEPOSIT + AUTO-SUPPLY TO AAVE (owner)</button>
+    <button id="btnPing" disabled>PING (owner heartbeat)</button>
+  </div>
+  <div class="card heir">
+    <h3>3. HEIR ACTIONS</h3>
+    <div class="desc">Only the beneficiary. Reverts with OwnerStillActive(N) if threshold hasn't elapsed.</div>
+    <button class="danger" id="btnInherit" disabled>INHERIT</button>
+    <div id="inheritHint" style="color:var(--text-muted);font-size:0.85rem;margin-top:0.5rem"></div>
+  </div>
+  <div class="card">
+    <h3>4. LIVE VAULT STATE</h3>
+    <div class="status-grid" id="vaultStatus">
+      <span class="lbl">Vault</span><span class="val"><a href="#" id="lnkVault" target="_blank">loading…</a></span>
+      <span class="lbl">Owner</span><span class="val"><a href="#" id="lnkOwner" target="_blank">—</a></span>
+      <span class="lbl">Beneficiary</span><span class="val"><a href="#" id="lnkBene" target="_blank">—</a></span>
+      <span class="lbl">USDC in Aave</span><span class="val" id="vBalance">—</span>
+      <span class="lbl">Last Heartbeat</span><span class="val" id="vHeartbeat">—</span>
+      <span class="lbl">Silence Duration</span><span class="val" id="vSilence">—</span>
+      <span class="lbl">Inactivity Threshold</span><span class="val" id="vThreshold">—</span>
+      <span class="lbl">Time Until Trigger</span><span class="val" id="vCountdown">—</span>
+      <span class="lbl">Inheritable</span><span class="val" id="vInheritable">—</span>
+      <span class="lbl">Inherited</span><span class="val" id="vInherited">—</span>
+    </div>
+    <button id="btnRefresh" style="margin-top:1rem">↻ REFRESH</button>
+  </div>
+</div>
+<div class="tx-log" id="txLog">&gt; tx log<br></div>
+<footer>
+  Owner dashboard. The dignified heir-facing page is at <a href="/vault">/vault</a>.
+</footer>
+<script>
+const VAULT_ADDR = "0x70167abe5f732a56aba789d97b3def117f8154bd";
+const USDC_ADDR  = "0x9d9ba25a3231b702c66c0e8aebea5c8672e5abf9";
+const POOL_ADDR  = "0xdcfecb7e3dec4972abfc836cdfabe2212d399da5";
+const CHAIN_ID_HEX = "0x14a34";
+const EXPLORER = "https://sepolia.basescan.org/address/";
+const BASE_SEPOLIA_PARAMS = { chainId: CHAIN_ID_HEX, chainName: "Base Sepolia", rpcUrls: ["https://sepolia.base.org"], nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }, blockExplorerUrls: ["https://sepolia.basescan.org"] };
+const VAULT_ABI = ["function owner() view returns (address)","function beneficiary() view returns (address)","function inactivityThreshold() view returns (uint256)","function lastHeartbeat() view returns (uint256)","function inherited() view returns (bool)","function silenceDuration() view returns (uint256)","function inheritable() view returns (bool)","function deposit(uint256 amount)","function ping()","function inherit()"];
+const USDC_ABI = ["function mint(address to, uint256 amount)","function approve(address spender, uint256 amount) returns (bool)","function balanceOf(address owner) view returns (uint256)","function allowance(address owner, address spender) view returns (uint256)"];
+const POOL_ABI = ["function balances(address asset, address supplier) view returns (uint256)"];
+let provider, signer, userAddr, vault, usdc, pool;
+function log(msg, cls = "") { const el = document.getElementById("txLog"); const ts = new Date().toISOString().substr(11,8); el.innerHTML += `<span class="${cls}">[${ts}] ${msg}</span><br>`; el.scrollTop = el.scrollHeight; }
+const short = a => a ? a.slice(0,6)+"…"+a.slice(-4) : "—";
+const fmtUSDC = wei => (Number(wei)/1e6).toFixed(2);
+const fmtTime = s => { s=Number(s); const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),sec=s%60; return `${d}d ${h}h ${m}m ${sec}s`; };
+async function connect() {
+  if (!window.ethereum) { log("MetaMask not installed","err"); return; }
+  try {
+    const acc = await window.ethereum.request({method:"eth_requestAccounts"}); userAddr = acc[0];
+    const chain = await window.ethereum.request({method:"eth_chainId"});
+    if (chain !== CHAIN_ID_HEX) { try { await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:CHAIN_ID_HEX}]}); } catch(e){ if(e.code===4902) await window.ethereum.request({method:"wallet_addEthereumChain",params:[BASE_SEPOLIA_PARAMS]}); else throw e; } }
+    provider = new ethers.BrowserProvider(window.ethereum); signer = await provider.getSigner();
+    vault = new ethers.Contract(VAULT_ADDR, VAULT_ABI, signer);
+    usdc = new ethers.Contract(USDC_ADDR, USDC_ABI, signer);
+    pool = new ethers.Contract(POOL_ADDR, POOL_ABI, signer);
+    document.getElementById("netStatus").textContent = "BASE SEPOLIA ✓";
+    document.getElementById("walletStatus").textContent = short(userAddr);
+    document.getElementById("btnConnect").textContent = "✓ "+short(userAddr);
+    log("Connected as "+userAddr,"ok");
+    await refresh();
+    window.ethereum.on("accountsChanged",()=>location.reload());
+    window.ethereum.on("chainChanged",()=>location.reload());
+  } catch(e) { log("Connect error: "+(e.message||e),"err"); }
+}
+async function refresh() {
+  try {
+    const ownerAddr = await vault.owner(); const beneAddr = await vault.beneficiary();
+    const threshold = await vault.inactivityThreshold(); const lastBeat = await vault.lastHeartbeat();
+    const silence = await vault.silenceDuration(); const inhable = await vault.inheritable();
+    const inh = await vault.inherited(); const balance = await pool.balances(USDC_ADDR, VAULT_ADDR);
+    document.getElementById("lnkVault").href = EXPLORER+VAULT_ADDR;
+    document.getElementById("lnkVault").textContent = short(VAULT_ADDR);
+    document.getElementById("lnkOwner").href = EXPLORER+ownerAddr;
+    document.getElementById("lnkOwner").textContent = short(ownerAddr);
+    document.getElementById("lnkBene").href = EXPLORER+beneAddr;
+    document.getElementById("lnkBene").textContent = short(beneAddr);
+    document.getElementById("vBalance").textContent = fmtUSDC(balance)+" mUSDC";
+    document.getElementById("vHeartbeat").textContent = new Date(Number(lastBeat)*1000).toISOString().replace("T"," ").substr(0,19)+" UTC";
+    document.getElementById("vSilence").textContent = fmtTime(silence);
+    document.getElementById("vThreshold").textContent = fmtTime(threshold);
+    const remaining = Number(threshold) - Number(silence);
+    document.getElementById("vCountdown").textContent = remaining>0 ? fmtTime(remaining) : "ELAPSED";
+    document.getElementById("vCountdown").className = "val " + (remaining>0?"warn":"good");
+    document.getElementById("vInheritable").textContent = inhable ? "YES ✓" : "NO";
+    document.getElementById("vInheritable").className = "val " + (inhable?"good":"bad");
+    document.getElementById("vInherited").textContent = inh ? "TRUE" : "false";
+    const isOwner = userAddr && userAddr.toLowerCase()===ownerAddr.toLowerCase();
+    const isBene = userAddr && userAddr.toLowerCase()===beneAddr.toLowerCase();
+    document.getElementById("roleStatus").textContent = isOwner?"OWNER":(isBene?"BENEFICIARY":"OTHER");
+    document.getElementById("btnMint").disabled = !userAddr;
+    document.getElementById("btnApprove").disabled = !isOwner;
+    document.getElementById("btnDeposit").disabled = !isOwner;
+    document.getElementById("btnPing").disabled = !isOwner || inh;
+    document.getElementById("btnInherit").disabled = !isBene || !inhable || inh;
+    const hint = document.getElementById("inheritHint");
+    if (!isBene) hint.textContent = "→ Connected wallet is not the beneficiary";
+    else if (inh) hint.textContent = "→ Already inherited";
+    else if (inhable) hint.textContent = "→ READY: threshold elapsed";
+    else hint.textContent = "→ Wait "+fmtTime(remaining)+" before inherit() will succeed";
+  } catch(e) { log("refresh error: "+(e.message||e),"err"); }
+}
+async function doMint() { try { const amt = BigInt(document.getElementById("mintAmt").value)*1000000n; log(`Minting ${amt/1000000n} mUSDC...`); const tx = await usdc.mint(userAddr,amt); log("  tx: "+tx.hash,"ok"); await tx.wait(); log("  mined ✓","ok"); } catch(e){ log("mint failed: "+(e.shortMessage||e.message),"err"); } }
+async function doApprove() { try { const amt = BigInt(document.getElementById("mintAmt").value)*1000000n; log(`Approving vault for ${amt/1000000n} mUSDC...`); const tx = await usdc.approve(VAULT_ADDR,amt); log("  tx: "+tx.hash,"ok"); await tx.wait(); log("  approved ✓","ok"); } catch(e){ log("approve failed: "+(e.shortMessage||e.message),"err"); } }
+async function doDeposit() { try { const amt = BigInt(document.getElementById("mintAmt").value)*1000000n; log(`Depositing ${amt/1000000n} mUSDC → Aave...`); const tx = await vault.deposit(amt); log("  tx: "+tx.hash,"ok"); await tx.wait(); log("  deposited ✓","ok"); await refresh(); } catch(e){ log("deposit failed: "+(e.shortMessage||e.message),"err"); } }
+async function doPing() { try { log("Pinging..."); const tx = await vault.ping(); log("  tx: "+tx.hash,"ok"); await tx.wait(); log("  pinged ✓","ok"); await refresh(); } catch(e){ log("ping failed: "+(e.shortMessage||e.message),"err"); } }
+async function doInherit() { try { log("Inheriting..."); const tx = await vault.inherit(); log("  tx: "+tx.hash,"ok"); await tx.wait(); log("  INHERITED ✓","ok"); await refresh(); } catch(e){ const msg = e.shortMessage||e.message||String(e); log("inherit failed: "+msg,"err"); } }
+document.getElementById("btnConnect").addEventListener("click",connect);
+document.getElementById("btnMint").addEventListener("click",doMint);
+document.getElementById("btnApprove").addEventListener("click",doApprove);
+document.getElementById("btnDeposit").addEventListener("click",doDeposit);
+document.getElementById("btnPing").addEventListener("click",doPing);
+document.getElementById("btnInherit").addEventListener("click",doInherit);
+document.getElementById("btnRefresh").addEventListener("click",refresh);
+log("Admin dashboard loaded. Connect MetaMask to start.","ok");
+</script>
+</body>
+</html>
