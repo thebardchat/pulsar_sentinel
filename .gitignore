@@ -69,3 +69,8 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Backup files from in-place patch scripts (ignored as of 2026-05-30)
+*.bak.*
+*.bak
+.env.template-backup.20260529-172254
