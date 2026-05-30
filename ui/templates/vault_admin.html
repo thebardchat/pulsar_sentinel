@@ -77,6 +77,16 @@ footer a { color: var(--cyan); }
     <button class="danger" id="btnInherit" disabled>INHERIT</button>
     <div id="inheritHint" style="color:var(--text-muted);font-size:0.85rem;margin-top:0.5rem"></div>
   </div>
+
+  <div class="card owner">
+    <h3>5. LETTER TO HEIR (PHASE 2)</h3>
+    <div class="desc">Owner-only. Plaintext on-chain (3000 char max). Revealed on heir page only after inherit() succeeds. Phase 3: encrypted to heir's pubkey.</div>
+    <textarea id="letterTxt" rows="6" placeholder="Dear one — by the time you read this..." style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:0.6rem;border-radius:4px;font-family:var(--font-body);font-size:0.95rem;width:100%;margin-bottom:0.5rem;resize:vertical;line-height:1.5"></textarea>
+    <div id="letterCount" style="color:var(--text-muted);font-size:0.78rem;text-align:right;margin-bottom:0.5rem">0 / 3000</div>
+    <button id="btnSetLetter" disabled>SAVE LETTER ON-CHAIN</button>
+    <div id="letterCurrent" style="color:var(--text-muted);font-size:0.82rem;margin-top:0.5rem">Current stored: (none yet)</div>
+  </div>
+
   <div class="card">
     <h3>4. LIVE VAULT STATE</h3>
     <div class="status-grid" id="vaultStatus">
@@ -99,13 +109,13 @@ footer a { color: var(--cyan); }
   Owner dashboard. The dignified heir-facing page is at <a href="/vault">/vault</a>.
 </footer>
 <script>
-const VAULT_ADDR = "0x70167abe5f732a56aba789d97b3def117f8154bd";
-const USDC_ADDR  = "0x9d9ba25a3231b702c66c0e8aebea5c8672e5abf9";
-const POOL_ADDR  = "0xdcfecb7e3dec4972abfc836cdfabe2212d399da5";
+const VAULT_ADDR = "0xac862c1ab37f0cfa48d4d2e487998cf72ab2c6bb";
+const USDC_ADDR  = "0x2970a3a8d7ab98fb6e078c9c74efd39c12a2c60e";
+const POOL_ADDR  = "0xff43c142ebc717313f9e0b9ef86fec0df6fe4257";
 const CHAIN_ID_HEX = "0x14a34";
 const EXPLORER = "https://sepolia.basescan.org/address/";
 const BASE_SEPOLIA_PARAMS = { chainId: CHAIN_ID_HEX, chainName: "Base Sepolia", rpcUrls: ["https://sepolia.base.org"], nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }, blockExplorerUrls: ["https://sepolia.basescan.org"] };
-const VAULT_ABI = ["function owner() view returns (address)","function beneficiary() view returns (address)","function inactivityThreshold() view returns (uint256)","function lastHeartbeat() view returns (uint256)","function inherited() view returns (bool)","function silenceDuration() view returns (uint256)","function inheritable() view returns (bool)","function deposit(uint256 amount)","function ping()","function inherit()"];
+const VAULT_ABI = ["function owner() view returns (address)","function beneficiary() view returns (address)","function inactivityThreshold() view returns (uint256)","function lastHeartbeat() view returns (uint256)","function inherited() view returns (bool)","function silenceDuration() view returns (uint256)","function inheritable() view returns (bool)","function deposit(uint256 amount)","function ping()","function inherit()","function letter() view returns (string)","function setLetter(string calldata newLetter)"];
 const USDC_ABI = ["function mint(address to, uint256 amount)","function approve(address spender, uint256 amount) returns (bool)","function balanceOf(address owner) view returns (uint256)","function allowance(address owner, address spender) view returns (uint256)"];
 const POOL_ABI = ["function balances(address asset, address supplier) view returns (uint256)"];
 let provider, signer, userAddr, vault, usdc, pool;
@@ -162,6 +172,12 @@ async function refresh() {
     document.getElementById("btnDeposit").disabled = !userAddr;
     document.getElementById("btnPing").disabled = !isOwner || inh;
     document.getElementById("btnInherit").disabled = !isBene || !inhable || inh;
+    document.getElementById("btnSetLetter").disabled = !isOwner || inh;
+    try {
+      const cur = await vault.letter();
+      document.getElementById("letterCurrent").textContent = cur ?  : 'Current stored: (none yet — write below and save)';
+      if (cur && !document.getElementById("letterTxt").value) document.getElementById("letterTxt").value = cur;
+    } catch (e) { document.getElementById("letterCurrent").textContent = 'Current stored: (could not read)'; }
     const hint = document.getElementById("inheritHint");
     if (!isBene) hint.textContent = "→ Connected wallet is not the beneficiary";
     else if (inh) hint.textContent = "→ Already inherited";
@@ -174,6 +190,20 @@ async function doApprove() { try { const amt = BigInt(document.getElementById("m
 async function doDeposit() { try { const amt = BigInt(document.getElementById("mintAmt").value)*1000000n; log(`Depositing ${amt/1000000n} mUSDC → Aave...`); const tx = await vault.deposit(amt); log("  tx: "+tx.hash,"ok"); await tx.wait(); log("  deposited ✓","ok"); await refresh(); } catch(e){ log("deposit failed: "+(e.shortMessage||e.message),"err"); } }
 async function doPing() { try { log("Pinging..."); const tx = await vault.ping(); log("  tx: "+tx.hash,"ok"); await tx.wait(); log("  pinged ✓","ok"); await refresh(); } catch(e){ log("ping failed: "+(e.shortMessage||e.message),"err"); } }
 async function doInherit() { try { log("Inheriting..."); const tx = await vault.inherit(); log("  tx: "+tx.hash,"ok"); await tx.wait(); log("  INHERITED ✓","ok"); await refresh(); } catch(e){ const msg = e.shortMessage||e.message||String(e); log("inherit failed: "+msg,"err"); } }
+async function doSetLetter() {
+  try {
+    const txt = document.getElementById("letterTxt").value;
+    if (txt.length > 3000) { log("letter too long (max 3000 chars)","err"); return; }
+    log();
+    const tx = await vault.setLetter(txt);
+    log("  tx: "+tx.hash,"ok");
+    await tx.wait();
+    log("  letter saved ✓","ok");
+    await refresh();
+  } catch(e) { log("setLetter failed: "+(e.shortMessage||e.message),"err"); }
+}
+document.getElementById("btnSetLetter").addEventListener("click",doSetLetter);
+document.getElementById("letterTxt").addEventListener("input",e=>{document.getElementById("letterCount").textContent=;});
 document.getElementById("btnConnect").addEventListener("click",connect);
 document.getElementById("btnMint").addEventListener("click",doMint);
 document.getElementById("btnApprove").addEventListener("click",doApprove);

@@ -1,18 +1,23 @@
 {
   "chain": "base-sepolia",
   "chain_id": 84532,
-  "deployed_at": "2026-05-30T04:08:12Z",
+  "version": "v2",
+  "deployed_at": "2026-05-30T07:40:48Z",
   "deployer": "0x6BFAC0d84C256d797D41cD9C713790708fa5d12F",
   "beneficiary": "0xf8D1af13e38c08b0C93fD2b485556a8B6923b790",
   "inactivity_threshold_seconds": 604800,
+  "features": ["deposit", "ping", "inherit", "letter"],
   "contracts": {
-    "LegacyVault": "0x70167abe5f732a56aba789d97b3def117f8154bd",
-    "MockUSDC": "0x9d9ba25a3231b702c66c0e8aebea5c8672e5abf9",
-    "MockAavePool": "0xdcfecb7e3dec4972abfc836cdfabe2212d399da5"
+    "LegacyVault": "0xac862c1ab37f0cfa48d4d2e487998cf72ab2c6bb",
+    "MockUSDC": "0x2970a3a8d7ab98fb6e078c9c74efd39c12a2c60e",
+    "MockAavePool": "0xff43c142ebc717313f9e0b9ef86fec0df6fe4257"
   },
   "basescan": {
-    "vault": "https://sepolia.basescan.org/address/0x70167abe5f732a56aba789d97b3def117f8154bd",
-    "usdc": "https://sepolia.basescan.org/address/0x9d9ba25a3231b702c66c0e8aebea5c8672e5abf9",
-    "pool": "https://sepolia.basescan.org/address/0xdcfecb7e3dec4972abfc836cdfabe2212d399da5"
+    "vault": "https://sepolia.basescan.org/address/0xac862c1ab37f0cfa48d4d2e487998cf72ab2c6bb",
+    "usdc": "https://sepolia.basescan.org/address/0x2970a3a8d7ab98fb6e078c9c74efd39c12a2c60e",
+    "pool": "https://sepolia.basescan.org/address/0xff43c142ebc717313f9e0b9ef86fec0df6fe4257"
+  },
+  "previous_versions": {
+    "v1": "see deployed-base-sepolia-v1.json — vault 0x70167abe5f732a56aba789d97b3def117f8154bd (no letter feature)"
   }
 }

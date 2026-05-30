@@ -95,12 +95,10 @@ footer a:hover { color: var(--rose); }
   <div class="sealed" id="letterSealed">
     <span class="icon">✉</span>
     <p id="letterStatus">Sealed until the inheritance is claimed.</p>
-    <p class="hint">Phase 2: The owner can store a letter on-chain. It will be revealed at this moment, and only at this moment.</p>
+    <p class="hint">The owner can leave a letter that reveals only when the inheritance is claimed. Stored on-chain · permanent · cannot be edited after inherit.</p>
   </div>
   <div class="letter-revealed" id="letterRevealed" style="display:none">
-    "My dear one — by the time you read this..."
-    <br><br>
-    <span style="font-size:0.85rem;color:var(--text-muted);font-style:normal">[Phase 2: actual letter will appear here from on-chain storage]</span>
+<span id="letterText">Loading...</span>
   </div>
 </div>
 
@@ -117,13 +115,13 @@ footer a:hover { color: var(--rose); }
 </footer>
 
 <script>
-const VAULT_ADDR = "0x70167abe5f732a56aba789d97b3def117f8154bd";
-const USDC_ADDR  = "0x9d9ba25a3231b702c66c0e8aebea5c8672e5abf9";
-const POOL_ADDR  = "0xdcfecb7e3dec4972abfc836cdfabe2212d399da5";
+const VAULT_ADDR = "0xac862c1ab37f0cfa48d4d2e487998cf72ab2c6bb";
+const USDC_ADDR  = "0x2970a3a8d7ab98fb6e078c9c74efd39c12a2c60e";
+const POOL_ADDR  = "0xff43c142ebc717313f9e0b9ef86fec0df6fe4257";
 const CHAIN_ID_HEX = "0x14a34";
 const EXPLORER = "https://sepolia.basescan.org/address/";
 const BASE_SEPOLIA_PARAMS = { chainId: CHAIN_ID_HEX, chainName: "Base Sepolia", rpcUrls: ["https://sepolia.base.org"], nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }, blockExplorerUrls: ["https://sepolia.basescan.org"] };
-const VAULT_ABI = ["function owner() view returns (address)","function beneficiary() view returns (address)","function inactivityThreshold() view returns (uint256)","function lastHeartbeat() view returns (uint256)","function inherited() view returns (bool)","function silenceDuration() view returns (uint256)","function inheritable() view returns (bool)","function inherit()"];
+const VAULT_ABI = ["function owner() view returns (address)","function beneficiary() view returns (address)","function inactivityThreshold() view returns (uint256)","function lastHeartbeat() view returns (uint256)","function inherited() view returns (bool)","function silenceDuration() view returns (uint256)","function inheritable() view returns (bool)","function inherit()","function letter() view returns (string)"];
 const POOL_ABI = ["function balances(address asset, address supplier) view returns (uint256)"];
 
 // Query params for demo personalization: /vault?owner=Shane&heir=Tiffany

@@ -68,11 +68,19 @@ contract LegacyVault is ReentrancyGuard {
     /// @notice Set true once inherit() succeeds. Prevents double-inherit.
     bool public inherited;
 
+    /// @notice The owner's message to the beneficiary. Plaintext on-chain (Phase 2).
+    /// @dev Phase 3 will encrypt to beneficiary's public key before storage.
+    ///      For now, anyone reading the blockchain can see this. Most letters
+    ///      worth writing wouldn't be ashamed if public.
+    string public letter;
+
     // ─── Events ──────────────────────────────────────────────────────────────
 
     event Deposited(address indexed from, uint256 amount, uint256 newHeartbeat);
     event Pinged(address indexed by, uint256 timestamp);
     event Inherited(address indexed by, uint256 amount, uint256 silenceDuration);
+    /// @notice Owner updated the legacy letter.
+    event LetterUpdated(address indexed by, uint256 timestamp, uint256 length);
 
     // ─── Custom errors (cheaper than require strings) ────────────────────────
 
@@ -145,6 +153,19 @@ contract LegacyVault is ReentrancyGuard {
 
         lastHeartbeat = block.timestamp;
         emit Pinged(msg.sender, block.timestamp);
+    }
+
+    /// @notice Owner-only. Set or update the legacy letter to the beneficiary.
+    /// @dev Letter is plaintext on-chain in Phase 2. Anyone can `cast call letter()`
+    ///      and read it. Phase 3 enhancement: encrypt with beneficiary's pubkey
+    ///      before storage so only they can decrypt on inherit().
+    /// @param newLetter The new letter content. Max 3000 chars.
+    function setLetter(string calldata newLetter) external {
+        if (msg.sender != owner) revert NotOwner();
+        if (inherited) revert AlreadyInherited();
+        require(bytes(newLetter).length <= 3000, "Letter too long (max 3000 chars)");
+        letter = newLetter;
+        emit LetterUpdated(msg.sender, block.timestamp, bytes(newLetter).length);
     }
 
     /// @notice Beneficiary claims the entire vault after threshold of silence.
