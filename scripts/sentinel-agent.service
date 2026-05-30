@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 User=__USER__
-Environment=SENTINEL_URL=http://100.67.120.6:8250
+Environment=SENTINEL_URLS=http://100.67.120.6:8250,http://100.112.169.111:8250,http://100.100.90.66:8250
 Environment=SENTINEL_KEY=shanebrain-internal-2026
 Environment=SENTINEL_NODE_ID=__NODE_ID__
 Environment=SENTINEL_INTERVAL=60

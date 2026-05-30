@@ -21,7 +21,12 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-SENTINEL_URL = os.environ.get("SENTINEL_URL", "http://shanebrain:8250").rstrip("/")
+_urls_env = os.environ.get("SENTINEL_URLS", "").strip()
+if _urls_env:
+    SENTINEL_URLS = [u.strip().rstrip("/") for u in _urls_env.split(",") if u.strip()]
+else:
+    SENTINEL_URLS = [os.environ.get("SENTINEL_URL", "http://shanebrain:8250").rstrip("/")]
+SENTINEL_URL = SENTINEL_URLS[0]  # backward-compat alias for log lines
 SENTINEL_KEY = os.environ.get("SENTINEL_KEY", "shanebrain-internal-2026")
 NODE_ID      = os.environ.get("SENTINEL_NODE_ID", socket.gethostname())
 INTERVAL     = int(os.environ.get("SENTINEL_INTERVAL", "60"))
@@ -38,20 +43,24 @@ _events_since_last = 0
 
 
 def _post(path: str, data: dict) -> bool:
-    url = f"{SENTINEL_URL}/api/v1{path}"
+    """Multi-post to all configured sentinels. Returns True if ANY succeed."""
     body = json.dumps(data).encode()
-    req = urllib.request.Request(
-        url, data=body,
-        headers={"Content-Type": "application/json",
-                 "Authorization": f"Bearer {SENTINEL_KEY}"},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=8) as r:
-            return r.status == 200
-    except Exception as e:
-        print(f"[agent] POST {path} failed: {e}", file=sys.stderr)
-        return False
+    any_ok = False
+    for url in SENTINEL_URLS:
+        full = f"{url}/api/v1{path}"
+        req = urllib.request.Request(
+            full, data=body,
+            headers={"Content-Type": "application/json",
+                     "Authorization": f"Bearer {SENTINEL_KEY}"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=8) as r:
+                if r.status == 200:
+                    any_ok = True
+        except Exception as e:
+            print(f"[agent] POST {path} to {url} failed: {e}", file=sys.stderr)
+    return any_ok
 
 
 def _cpu_pct() -> float:
@@ -178,7 +187,7 @@ def _threat_level(events: list[dict]) -> int:
 def run():
     global _events_since_last
     ip = _my_ip()
-    print(f"[agent] {NODE_ID} starting — reporting to {SENTINEL_URL}", flush=True)
+    print(f"[agent] {NODE_ID} starting — multi-posting to {len(SENTINEL_URLS)} sentinels: {SENTINEL_URLS}", flush=True)
 
     # Initialize log offsets (skip historical content on first run)
     log = _find_auth_log()
