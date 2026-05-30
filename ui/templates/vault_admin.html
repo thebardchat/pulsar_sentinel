@@ -175,7 +175,7 @@ async function refresh() {
     document.getElementById("btnSetLetter").disabled = !isOwner || inh;
     try {
       const cur = await vault.letter();
-      document.getElementById("letterCurrent").textContent = cur ?  : 'Current stored: (none yet — write below and save)';
+      document.getElementById("letterCurrent").textContent = cur ? ('Current stored: ' + cur.length + ' chars — "' + cur.slice(0,80) + (cur.length > 80 ? '...' : '') + '"') : 'Current stored: (none yet — write below and save)';
       if (cur && !document.getElementById("letterTxt").value) document.getElementById("letterTxt").value = cur;
     } catch (e) { document.getElementById("letterCurrent").textContent = 'Current stored: (could not read)'; }
     const hint = document.getElementById("inheritHint");
@@ -194,7 +194,7 @@ async function doSetLetter() {
   try {
     const txt = document.getElementById("letterTxt").value;
     if (txt.length > 3000) { log("letter too long (max 3000 chars)","err"); return; }
-    log();
+    log("Saving letter on-chain (" + txt.length + " chars)...");
     const tx = await vault.setLetter(txt);
     log("  tx: "+tx.hash,"ok");
     await tx.wait();
@@ -203,7 +203,7 @@ async function doSetLetter() {
   } catch(e) { log("setLetter failed: "+(e.shortMessage||e.message),"err"); }
 }
 document.getElementById("btnSetLetter").addEventListener("click",doSetLetter);
-document.getElementById("letterTxt").addEventListener("input",e=>{document.getElementById("letterCount").textContent=;});
+document.getElementById("letterTxt").addEventListener("input",function(e){document.getElementById("letterCount").textContent = e.target.value.length + " / 3000";});
 document.getElementById("btnConnect").addEventListener("click",connect);
 document.getElementById("btnMint").addEventListener("click",doMint);
 document.getElementById("btnApprove").addEventListener("click",doApprove);
