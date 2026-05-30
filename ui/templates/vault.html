@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#1a1410">
 <title>YourLegacy — for someone you love</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/magic-sdk/dist/magic.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
 <style>
 :root {
@@ -58,8 +59,12 @@ footer a:hover { color: var(--rose); }
 <body>
 
 <div class="wallet-bar">
-  <button class="connect" id="btnConnect">Connect Wallet</button>
-  <span id="walletInfo" style="display:none">Connected: <span class="addr" id="walletAddr">—</span></span>
+  <div id="emailLoginRow" style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+    <input type="email" id="heirEmail" placeholder="your.email@example.com" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:0.55rem 0.8rem;border-radius:4px;font-family:var(--font-sans);font-size:0.9rem;min-width:220px">
+    <button class="connect" id="btnEmailLogin" style="background:var(--rose);color:var(--bg);border:none">Sign in with email</button>
+    <button class="connect" id="btnConnect" style="font-size:0.8rem;padding:0.5rem 0.9rem;opacity:0.7">or MetaMask</button>
+  </div>
+  <span id="walletInfo" style="display:none">Signed in as <span id="walletEmail" style="color:var(--text)"></span> · <span class="addr" id="walletAddr">—</span> · <a href="#" id="btnLogout" style="color:var(--rose);margin-left:0.5rem">Sign out</a></span>
 </div>
 
 <header>
@@ -136,6 +141,71 @@ const fmtDays = s => { const d = Math.floor(Number(s) / 86400); const h = Math.f
 const fmtDate = ts => { const d = new Date(ts * 1000); return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); };
 
 let provider, signer, userAddr, vault, pool;
+
+// === Magic.link embedded wallet (Phase 2.5) ===
+const MAGIC_PUBLISHABLE_KEY = "pk_live_692478C17F51C91E";
+const magic = new Magic(MAGIC_PUBLISHABLE_KEY, {
+  network: { rpcUrl: "https://sepolia.base.org", chainId: 84532 }
+});
+let magicProvider = null;
+let userEmail = null;
+
+async function loginWithEmail() {
+  const email = document.getElementById("heirEmail").value.trim();
+  if (!email || !email.includes("@")) { showError("Enter a valid email address."); return; }
+  const btn = document.getElementById("btnEmailLogin");
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = "Check your email...";
+  try {
+    // Opens Magic's iframe modal — user enters OTP code there
+    await magic.auth.loginWithEmailOTP({ email });
+    const info = await magic.user.getInfo();
+    userEmail = info.email || email;
+    userAddr = info.publicAddress;
+    magicProvider = new ethers.BrowserProvider(magic.rpcProvider);
+    signer = await magicProvider.getSigner();
+    vault = new ethers.Contract(VAULT_ADDR, VAULT_ABI, signer);
+    pool = new ethers.Contract(POOL_ADDR, POOL_ABI, signer);
+    showLoggedIn();
+    await loadVault();
+  } catch (e) {
+    showError("Sign-in failed: " + (e.message || e));
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+
+async function logoutMagic() {
+  try { await magic.user.logout(); } catch(e) {}
+  location.reload();
+}
+
+function showLoggedIn() {
+  document.getElementById("emailLoginRow").style.display = "none";
+  document.getElementById("walletInfo").style.display = "inline";
+  document.getElementById("walletEmail").textContent = userEmail || "";
+  document.getElementById("walletAddr").textContent = userAddr ? (userAddr.slice(0,6) + "…" + userAddr.slice(-4)) : "";
+}
+
+// Auto-restore Magic session on page load
+async function restoreMagicSession() {
+  try {
+    const isLoggedIn = await magic.user.isLoggedIn();
+    if (isLoggedIn) {
+      const info = await magic.user.getInfo();
+      userEmail = info.email;
+      userAddr = info.publicAddress;
+      magicProvider = new ethers.BrowserProvider(magic.rpcProvider);
+      signer = await magicProvider.getSigner();
+      vault = new ethers.Contract(VAULT_ADDR, VAULT_ABI, signer);
+      pool = new ethers.Contract(POOL_ADDR, POOL_ABI, signer);
+      showLoggedIn();
+      return true;
+    }
+  } catch(e) { console.warn("magic restore failed:", e); }
+  return false;
+}
+
+
 
 async function connect() {
   if (!window.ethereum) { showError("Please install MetaMask to interact with this vault."); window.open("https://metamask.io/download/", "_blank"); return; }
@@ -271,10 +341,17 @@ function showError(msg) {
 }
 
 $("btnConnect").addEventListener("click", connect);
+$("btnEmailLogin").addEventListener("click", loginWithEmail);
+$("btnLogout").addEventListener("click", function(e) { e.preventDefault(); logoutMagic(); });
+$("heirEmail").addEventListener("keypress", function(e) { if (e.key === "Enter") loginWithEmail(); });
 $("btnClaim").addEventListener("click", doClaim);
 
-// Load read-only on page load so heir sees state without needing to connect
-loadReadOnly();
+// Load read-only on page load; restore Magic session if user previously logged in
+(async () => {
+  const restored = await restoreMagicSession();
+  if (!restored) loadReadOnly();
+  else await loadVault();
+})();
 </script>
 
 </body>
