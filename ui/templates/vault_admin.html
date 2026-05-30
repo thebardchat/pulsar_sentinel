@@ -158,8 +158,8 @@ async function refresh() {
     const isBene = userAddr && userAddr.toLowerCase()===beneAddr.toLowerCase();
     document.getElementById("roleStatus").textContent = isOwner?"OWNER":(isBene?"BENEFICIARY":"OTHER");
     document.getElementById("btnMint").disabled = !userAddr;
-    document.getElementById("btnApprove").disabled = !isOwner;
-    document.getElementById("btnDeposit").disabled = !isOwner;
+    document.getElementById("btnApprove").disabled = !userAddr;
+    document.getElementById("btnDeposit").disabled = !userAddr;
     document.getElementById("btnPing").disabled = !isOwner || inh;
     document.getElementById("btnInherit").disabled = !isBene || !inhable || inh;
     const hint = document.getElementById("inheritHint");
