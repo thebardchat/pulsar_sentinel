@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.1.0] - 2026-05-30
+
+### Added
+- **neworleans 3rd failover replica** — Sentinel API now active on Pi, gulfshores, and neworleans. Caddy active-passive routing with `lb_policy first` + `lb_retries 2`.
+- **/vault page** — calm, dignified heir-facing UI (YourLegacy). State-driven views: active / waiting / available / claimed. Plain dollars, no crypto jargon.
+- **/vault/admin page** — owner cyberpunk control panel: mint mUSDC, approve, deposit, ping, inherit, save letter on-chain.
+- **Phase 2 on-chain letter** — LegacyVault v2 deployed to Base Sepolia (`0xac862c1ab37f0cfa48d4d2e487998cf72ab2c6bb`). `setLetter()` + `LetterUpdated` event. Max 3000 chars, blocked after inherit.
+- **Mesh state sync** — sentinel-agent now multi-posts heartbeats to all 3 sentinels via `SENTINEL_URLS` env var. Failover is user-visible.
+- **Magic.link embedded wallet** — email OTP login on /vault. No seed phrase, no MetaMask required. Publishable key `pk_live_692478C17F51C91E`. Allowed origin: `https://sentinel.shanebrain.cloud`.
+
+### Fixed
+- Quick-wins cleanup sprint — README port, drift between Pi and gulfshores, .gitignore for .env backups.
+- Redis port mapping for cross-node access (Tailscale-bound).
+- Cloudflare tunnel routing through Caddy :8443 for failover.
+
+### Security
+- LegacyVault is non-custodial — funds always inheritable, owner ping resets threshold.
+- Testnet only — mainnet deploy gated on lawyer non-custodial framing.
+
 All notable changes to PULSAR SENTINEL will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
