@@ -7,6 +7,12 @@ Provides:
 """
 
 from core.asr_engine import AgentStateRecord, ASREngine
+from core.key_rotation import (
+    KeyExpiredError,
+    KeyRotationError,
+    KeyRotationManager,
+    KeyRotationPolicy,
+)
 from core.legacy import ECDSASigner, LegacyCrypto, TLSManager
 from core.pqc import HybridEncryptor, MLKEMKeyPair, PQCEngine
 
@@ -15,6 +21,10 @@ __all__ = [
     "AgentStateRecord",
     "ECDSASigner",
     "HybridEncryptor",
+    "KeyExpiredError",
+    "KeyRotationError",
+    "KeyRotationManager",
+    "KeyRotationPolicy",
     "LegacyCrypto",
     "MLKEMKeyPair",
     "PQCEngine",

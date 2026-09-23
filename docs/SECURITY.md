@@ -140,7 +140,11 @@ Used for Pi/MCP/cluster admin Bearer paths (`api/auth.py`, `api/routes.py`, `api
 
 ### Key Management
 
-- Key rotation: 90 days (configurable)
+- Key rotation: 90 days (configurable via `key_rotation_days` / `DEFAULT_KEY_ROTATION_DAYS`)
+- **Enforcement**: `KeyRotationManager` in `src/core/key_rotation.py` tracks key age,
+  rotates ML-KEM keys, retains retired keys for a grace period (decapsulation only),
+  rejects encapsulate against expired keys, and emits ASR `KEY_ROTATED` with a
+  verifiable signature. Covered by `tests/test_key_rotation.py`.
 - Key storage: Local filesystem or HSM
 - Key backup: User responsibility
 - Key revocation: Via admin API
