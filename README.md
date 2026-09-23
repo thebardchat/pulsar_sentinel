@@ -70,7 +70,7 @@ PULSAR SENTINEL implements a three-tier security architecture:
 ### Post-Quantum Cryptography
 - **ML-KEM-768/1024**: NIST-approved lattice-based key encapsulation
 - **Hybrid Encryption**: ML-KEM + AES-256-GCM for defense in depth
-- **Key Rotation**: Automatic 90-day key rotation (configurable)
+- **Key Rotation**: ML-KEM keys rotate on a **90-day** default interval (`KEY_ROTATION_DAYS` / `key_rotation_days` / `DEFAULT_KEY_ROTATION_DAYS`), enforced by `KeyRotationManager` via `needs_rotation()` / `rotate()` (caller-driven; not a background timer). Retired keys stay usable for decapsulation during a **7-day** grace period.
 
 ### Classical Cryptography (Legacy)
 - **AES-256-CBC**: HMAC-SHA256 authenticated encryption
@@ -193,6 +193,7 @@ pulsar_sentinel/
 ├── src/
 │   ├── core/           # Cryptographic engines
 │   │   ├── pqc.py      # ML-KEM + hybrid encryption
+│   │   ├── key_rotation.py  # KeyRotationPolicy + KeyRotationManager
 │   │   ├── legacy.py   # AES-256, ECDSA, TLS
 │   │   └── asr_engine.py  # Agent State Records
 │   ├── blockchain/     # Polygon integration

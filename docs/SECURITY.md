@@ -130,11 +130,9 @@
 
 ### Key Management
 
-- Key rotation: 90 days (configurable via `key_rotation_days` / `DEFAULT_KEY_ROTATION_DAYS`)
-- **Enforcement**: `KeyRotationManager` in `src/core/key_rotation.py` tracks key age,
-  rotates ML-KEM keys, retains retired keys for a grace period (decapsulation only),
-  rejects encapsulate against expired keys, and emits ASR `KEY_ROTATED` with a
-  verifiable signature. Covered by `tests/test_key_rotation.py`.
+- Key rotation interval: **90 days** by default (`key_rotation_days` / `DEFAULT_KEY_ROTATION_DAYS` / `KEY_ROTATION_DAYS`)
+- Grace period: **7 days** by default (`DEFAULT_KEY_GRACE_PERIOD_DAYS`) — retired keys may still **decapsulate**; new **encapsulate** against retired/expired keys is rejected
+- **Enforcement**: `KeyRotationManager` in `src/core/key_rotation.py` (caller-driven via `needs_rotation()` / `rotate()` — not a background scheduler). Tracks key age, rotates via existing PQC helpers, and when an ASR engine is injected emits `KEY_ROTATED` with verifiable signature and metadata: `old_key_id`, `new_key_id`, `algorithm`, `rotation_days`, `grace_period_days`, `rotated_at`. Covered by `tests/test_key_rotation.py`.
 - Key storage: Local filesystem or HSM
 - Key backup: User responsibility
 - Key revocation: Via admin API
