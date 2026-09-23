@@ -11,31 +11,30 @@ Run with: uvicorn api.server:app --host 0.0.0.0 --port 8000
 """
 
 import sys
-import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from api.routes import router, init_routes
+from api.agent_routes import agent_router
 from api.auth import MetaMaskAuth
+from api.recon_routes import recon_router
+from api.routes import init_routes, router
 from api.ui_routes import ui_router
 from billing.routes import billing_router, init_billing
-from api.recon_routes import recon_router
-from api.agent_routes import agent_router
+from config.logging import get_logger, setup_logging
+from config.settings import get_settings
 from core.asr_engine import ASREngine
 from governance.access_control import AccessController
 from governance.pts_calculator import PTSCalculator
 from governance.rules_engine import RulesEngine
-from config.settings import get_settings
-from config.logging import setup_logging, get_logger
 
 # Application metadata
 APP_TITLE = "PULSAR SENTINEL"
@@ -117,7 +116,7 @@ def create_app() -> FastAPI:
     Returns:
         Configured FastAPI application instance
     """
-    settings = get_settings()
+    settings = get_settings()  # noqa: F841
 
     app = FastAPI(
         title=APP_TITLE,

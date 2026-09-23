@@ -6,14 +6,14 @@ Provides:
 - Rate-limited API routes
 """
 
-from api.server import create_app, run_server
 from api.auth import MetaMaskAuth, WalletSession
 from api.routes import router
+from api.server import create_app, run_server
 
 __all__ = [
-    "create_app",
-    "run_server",
     "MetaMaskAuth",
     "WalletSession",
+    "create_app",
     "router",
+    "run_server",
 ]

@@ -12,18 +12,17 @@ Authentication Flow:
 
 import os
 import secrets
-import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import jwt
 from eth_account import Account
 from eth_account.messages import encode_defunct
 
-from config.settings import get_settings
 from config.constants import ThreatLevel
 from config.logging import SecurityEventLogger
+from config.settings import get_settings
 
 logger = SecurityEventLogger("auth")
 

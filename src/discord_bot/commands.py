@@ -3,23 +3,22 @@
 import sys
 from pathlib import Path
 
-import discord
 from discord.ext import commands
 
 # Add project root to path for config imports (do NOT add config/ directly - it shadows stdlib logging)
 _project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_project_root))
 
-from config.constants import TIER_CONFIGS, PTS_WEIGHTS, PTSThreshold
-from config.settings import get_settings
-from discord_bot.embeds import (
+from config.constants import PTS_WEIGHTS, TIER_CONFIGS, PTSThreshold  # noqa: E402
+from config.settings import get_settings  # noqa: E402
+from discord_bot.embeds import (  # noqa: E402
+    CYAN,
+    base_embed,
+    docs_embed,
     help_embed,
-    status_embed,
     pricing_embed,
     pts_embed,
-    docs_embed,
-    base_embed,
-    CYAN,
+    status_embed,
 )
 
 

@@ -11,18 +11,16 @@ These rules are hardcoded and cannot be bypassed.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 from config.constants import (
     RuleCode,
     ThreatLevel,
-    DEFAULT_STRIKE_THRESHOLD,
-    DEFAULT_HEIR_TRANSFER_DAYS,
 )
-from config.settings import get_settings
 from config.logging import SecurityEventLogger
+from config.settings import get_settings
 
 logger = SecurityEventLogger("governance")
 

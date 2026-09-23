@@ -8,10 +8,12 @@ The Recon dashboard JS fetches from /api/v1/recon/radar/ddos-l3 (etc).
 """
 import time
 from typing import Any
+
 import httpx
 from fastapi import APIRouter, HTTPException, Request
-from config.settings import get_settings
+
 from config.logging import get_logger
+from config.settings import get_settings
 
 logger = get_logger("recon")
 recon_router = APIRouter(prefix="/recon", tags=["recon"])
@@ -147,7 +149,7 @@ async def radar_panel(panel: str):
 
 
 # === HONEYPOT MESH ENDPOINTS (L.3 Phase 3a, 2026-05-28) ===
-from datetime import datetime, timezone
+from datetime import datetime, timezone  # noqa: E402
 
 HONEYPOT_WEAVIATE_URL = "http://100.100.90.66:8080"
 
@@ -225,7 +227,8 @@ async def honeypot_stats():
 
 
 # === FEDERATED THREAT FEEDS (Task #51 — DShield + URLhaus + ...) ===
-from api.threat_feeds import fetch_all_feeds
+from api.threat_feeds import fetch_all_feeds  # noqa: E402
+
 
 @recon_router.get("/feeds/external")
 async def feeds_external():
@@ -245,7 +248,8 @@ async def mesh_status():
     """Public endpoint — returns cluster node status for recon dashboard.
     Read-only: no secrets exposed, just hostnames and health metrics."""
     import time as _time
-    from api.agent_routes import _nodes, _events
+
+    from api.agent_routes import _events, _nodes
     now_ts = _time.time()
     nodes = []
     for n in _nodes.values():
@@ -276,7 +280,7 @@ async def mesh_status():
 @recon_router.get("/pi-stats")
 async def pi_stats():
     """Pi system stats — temp and uptime for the health row."""
-    import pathlib, datetime as dt
+    import pathlib
     temp_f = None
     try:
         raw = pathlib.Path("/sys/class/thermal/thermal_zone0/temp").read_text().strip()

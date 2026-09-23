@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import stripe
-from config.settings import get_settings
-from config.constants import TierType, TIER_CONFIGS
+
+from config.constants import TIER_CONFIGS, TierType
 from config.logging import get_logger
+from config.settings import get_settings
 
 logger = get_logger("billing")
 

@@ -16,14 +16,15 @@ Rate Limits (per minute):
 
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import IntEnum
-from typing import Any, Callable, Final
+from typing import Any, Final
 
-from config.constants import TierType, RATE_LIMITS, ThreatLevel
-from config.settings import get_settings
+from config.constants import RATE_LIMITS, ThreatLevel, TierType
 from config.logging import SecurityEventLogger
+from config.settings import get_settings
 
 logger = SecurityEventLogger("access_control")
 
@@ -529,7 +530,6 @@ def require_rate_limit() -> Callable:
 
 class RateLimitExceeded(Exception):
     """Exception raised when rate limit is exceeded."""
-    pass
 
 
 class TierManager:

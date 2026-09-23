@@ -11,23 +11,22 @@ Network Support:
 - Polygon Amoy Testnet (Chain ID: 80002)
 """
 
-import asyncio
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Final
+from typing import Final
 
-from web3 import Web3
-from web3.middleware import ExtraDataToPOAMiddleware
-from web3.types import TxReceipt, TxParams, Wei
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
 from eth_typing import ChecksumAddress
+from web3 import Web3
+from web3.middleware import ExtraDataToPOAMiddleware
+from web3.types import TxParams, TxReceipt, Wei
 
 from config.constants import POLYGON_CHAIN_ID_MAINNET, POLYGON_CHAIN_ID_TESTNET
-from config.settings import get_settings
 from config.logging import SecurityEventLogger
+from config.settings import get_settings
 
 # Constants
 DEFAULT_GAS_LIMIT: Final[int] = 100_000
