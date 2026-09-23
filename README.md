@@ -264,6 +264,8 @@ Key environment variables (see `.env.template`):
 | `KEY_ROTATION_DAYS` | Key rotation interval | 90 |
 | `RATE_LIMIT_DEFAULT` | Requests per minute | 5 |
 | `STRIKE_THRESHOLD` | Strikes before ban | 3 |
+| `PULSAR_SERVICE_KEY` | Internal/admin Bearer key (required when `API_DEBUG=false`) | none (fail-closed) |
+| `API_DEBUG` | Debug mode; skips service-key startup gate when true | false |
 | `DISCORD_BOT_TOKEN` | Discord bot token | |
 | `DISCORD_WEBHOOK_URL` | Discord webhook URL | |
 
