@@ -1,5 +1,4 @@
 """Sentinel Agent ingestion endpoints — heartbeats and security events from cluster nodes."""
-import os
 import time
 from datetime import datetime, timezone
 from typing import Any
@@ -7,12 +6,11 @@ from typing import Any
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
 
+from api.auth import get_internal_service_key
 from config.logging import get_logger
 
 logger = get_logger("agents")
 agent_router = APIRouter(prefix="/agents", tags=["agents"])
-
-SERVICE_KEY = os.environ.get("PULSAR_SERVICE_KEY", "shanebrain-internal-2026")
 
 # In-memory node registry — {node_id: {...}}
 _nodes: dict[str, dict[str, Any]] = {}
@@ -22,7 +20,10 @@ _MAX_EVENTS = 200
 
 
 def _auth(authorization: str | None) -> None:
-    if not authorization or authorization.replace("Bearer ", "") != SERVICE_KEY:
+    """Require Bearer token matching configured PULSAR_SERVICE_KEY (fail closed)."""
+    service_key = get_internal_service_key()
+    provided = (authorization or "").replace("Bearer ", "", 1).strip()
+    if service_key is None or not provided or provided != service_key:
         raise HTTPException(status_code=401, detail="invalid service key")
 
 
