@@ -26,8 +26,8 @@ def _make_manager(
     asr_engine=None,
     tmp_path=None,
 ):
-    from core.key_rotation import KeyRotationManager, KeyRotationPolicy
     from core.asr_engine import ASREngine
+    from core.key_rotation import KeyRotationManager, KeyRotationPolicy
 
     if asr_engine is None and tmp_path is not None:
         asr_engine = ASREngine(storage_path=tmp_path)
@@ -113,7 +113,7 @@ class TestExpiredOldKeyRejected:
     """(4) Expired old key rejected for new encapsulate."""
 
     def test_expired_old_key_rejected_for_encapsulate(self, tmp_path):
-        from core.key_rotation import KeyExpiredError, KeyRotationError
+        from core.key_rotation import KeyExpiredError
 
         mgr = _make_manager(rotation_days=10, grace_period_days=3, tmp_path=tmp_path)
         old = mgr.initialize()
@@ -174,7 +174,7 @@ class TestSettingsOverride:
 
     def test_settings_override_key_rotation_days(self):
         from config.settings import Settings
-        from core.key_rotation import KeyRotationPolicy, KeyRotationManager
+        from core.key_rotation import KeyRotationManager, KeyRotationPolicy
 
         settings = Settings(key_rotation_days=14)
         policy = KeyRotationPolicy.from_settings(settings)
