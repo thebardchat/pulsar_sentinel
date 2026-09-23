@@ -54,6 +54,16 @@
 - **Nonce**: Single-use, 5-minute expiration
 - **Storage**: No server-side password storage
 
+### Internal service key (`PULSAR_SERVICE_KEY`)
+
+Used for Pi/MCP/cluster admin Bearer paths (`api/auth.py`, `api/routes.py`, `api/agent_routes.py`).
+
+- **No hardcoded default**: unset or blank env denies the internal/admin path (fail-closed)
+- **Startup gate**: when `API_DEBUG` is false (default), missing/blank `PULSAR_SERVICE_KEY` raises `RuntimeError` and the process refuses to start (`require_service_key_unless_debug`)
+- **Grant**: matching Bearer token builds an admin `WalletSession` via `build_internal_service_session` (`metadata.role=admin`, `source=internal_service_key`)
+- **Helpers**: `get_internal_service_key()`, `require_service_key_unless_debug()`, `build_internal_service_session()` in `api/auth.py`
+- **Operator note**: rotate any deployed key that previously relied on a public default string; do not commit real secret values
+
 ### Authorization
 
 - **Model**: Role-Based Access Control (RBAC)

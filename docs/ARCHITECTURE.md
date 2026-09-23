@@ -59,6 +59,7 @@ PULSAR SENTINEL is a three-tier security framework providing:
 - JWT token issuance
 - Session management
 - Nonce generation and validation
+- Internal service key (`PULSAR_SERVICE_KEY`): fail-closed admin Bearer path for Pi/MCP/cluster; when `API_DEBUG` is false, startup requires a non-empty key (`require_service_key_unless_debug` in lifespan)
 
 #### Routes (`api/routes.py`)
 - `/auth/*`: Authentication endpoints
