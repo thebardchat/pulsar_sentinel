@@ -8,8 +8,6 @@ Tests cover:
 """
 
 import sys
-import time
-import pytest
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
@@ -159,17 +157,24 @@ class TestRulesEngine:
         assert result.action_required == "initiate_gryphon_fallback"
 
     def test_violation_recording(self):
-        """Test violation recording."""
+        """Test violation recording.
+
+        check_* methods return a RuleViolation on failure; callers (or
+        evaluate_all_rules) must call record_violation to persist it.
+        """
         from governance.rules_engine import RulesEngine
 
         engine = RulesEngine()
 
-        # Trigger a violation
-        engine.check_signature_required(
+        # Trigger a violation — check returns violation object, does not store
+        result = engine.check_signature_required(
             has_signature=False,
             signature_valid=False,
             user_id="violation_user",
         )
+        assert result.passed is False
+        assert result.violation is not None
+        engine.record_violation(result.violation)
 
         violations = engine.get_violations("violation_user")
         assert len(violations) == 1
@@ -207,15 +212,22 @@ class TestPTSCalculator:
         assert score.is_safe is True
 
     def test_pts_calculation_caution(self):
-        """Test PTS calculation for caution tier."""
+        """Test PTS calculation for caution tier.
+
+        Per-event contributions (multiplier × weight): quantum=20,
+        access=7.5, rate=2, signature=3. Seed enough events to land in
+        documented CAUTION band [50, 150) — ARCHITECTURE/README/PATENT.
+        """
         from governance.pts_calculator import PTSCalculator, PTSTier
 
         calc = PTSCalculator()
         user_id = "caution_user"
 
-        # Add some violations to reach caution tier
+        # 2×quantum(40) + 2×access(15) + 1×rate(2) = 57 → CAUTION
         calc.record_quantum_risk(user_id, "weak_cipher")
+        calc.record_quantum_risk(user_id, "weak_cipher_2")
         calc.record_access_violation(user_id, "unauthorized")
+        calc.record_access_violation(user_id, "unauthorized_2")
         calc.record_rate_limit_violation(user_id, "/api/test", 10, 5)
 
         score = calc.calculate_pts(user_id)
@@ -258,14 +270,18 @@ class TestPTSCalculator:
         assert score.breakdown["signature_failure"] > 0
 
     def test_pts_user_reset(self):
-        """Test resetting a user's PTS events."""
+        """Test resetting a user's PTS events.
+
+        5 access events = 37.5 (still SAFE under <50); use 7 (=52.5)
+        so pre-reset tier is CAUTION.
+        """
         from governance.pts_calculator import PTSCalculator, PTSTier
 
         calc = PTSCalculator()
         user_id = "reset_user"
 
-        # Add violations
-        for i in range(5):
+        # 7 × 7.5 = 52.5 → CAUTION (not SAFE)
+        for i in range(7):
             calc.record_access_violation(user_id, f"v_{i}")
 
         assert calc.calculate_pts(user_id).tier != PTSTier.SAFE
@@ -277,22 +293,53 @@ class TestPTSCalculator:
         assert calc.calculate_pts(user_id).total_score == 0
 
     def test_pts_get_critical_users(self):
-        """Test getting all critical users."""
+        """Test getting all critical users.
+
+        15 access = 112.5 (CAUTION); need ≥150 for CRITICAL → 20×7.5=150.
+        """
         from governance.pts_calculator import PTSCalculator
 
         calc = PTSCalculator()
 
-        # Make some users critical
+        # Make some users critical (≥150)
         for i in range(3):
             user_id = f"critical_{i}"
-            for j in range(15):
+            for j in range(20):
                 calc.record_access_violation(user_id, f"v_{j}")
 
-        # Make one safe user
+        # Make one safe user (single quantum = 20 < 50)
         calc.record_quantum_risk("safe_user", "minor")
 
         critical = calc.get_all_critical_users()
         assert len(critical) == 3
+        assert "safe_user" not in critical
+
+    def test_pts_tier_boundary_edges(self):
+        """Edge cases at documented SAFE/CAUTION/CRITICAL boundaries."""
+        from governance.pts_calculator import PTSCalculator, PTSTier
+
+        calc = PTSCalculator()
+
+        # Exactly at CAUTION floor: 7 access = 52.5 ∈ [50, 150)
+        for i in range(7):
+            calc.record_access_violation("edge_caution", f"v_{i}")
+        score = calc.calculate_pts("edge_caution")
+        assert score.tier == PTSTier.CAUTION
+        assert score.total_score == 52.5
+
+        # Exactly CRITICAL floor: 20 access = 150 → CRITICAL (≥150)
+        for i in range(20):
+            calc.record_access_violation("edge_critical", f"v_{i}")
+        score = calc.calculate_pts("edge_critical")
+        assert score.tier == PTSTier.CRITICAL
+        assert score.total_score == 150.0
+
+        # Just under CAUTION: 6 access = 45 → SAFE
+        for i in range(6):
+            calc.record_access_violation("edge_safe", f"v_{i}")
+        score = calc.calculate_pts("edge_safe")
+        assert score.tier == PTSTier.SAFE
+        assert score.total_score == 45.0
 
 
 class TestAccessController:

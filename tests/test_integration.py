@@ -7,11 +7,8 @@ End-to-end tests covering:
 - Governance rule enforcement
 """
 
-import os
 import sys
-import pytest
 from pathlib import Path
-from datetime import datetime, timezone
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -99,8 +96,11 @@ class TestASRWorkflow:
         engine = ASREngine(storage_path=tmp_path)
         engine._max_batch_size = 5  # Small batch for testing
 
-        # Create ASRs
+        # Create ASRs. add_to_batch auto-flushes when _max_batch_size
+        # is reached (here 5), so capture that return; only call
+        # flush_batch if the batch was not already sealed.
         created_asrs = []
+        batch = None
         for i in range(5):
             asr = engine.create_asr(
                 agent_id=f"batch_user_{i % 2}",
@@ -109,10 +109,12 @@ class TestASRWorkflow:
                 pqc_status=PQCStatus.SAFE,
             )
             created_asrs.append(asr)
-            engine.add_to_batch(asr)
+            flushed = engine.add_to_batch(asr)
+            if flushed is not None:
+                batch = flushed
 
-        # Flush should create batch
-        batch = engine.flush_batch()
+        if batch is None:
+            batch = engine.flush_batch()
         assert batch is not None
         assert len(batch.records) == 5
 
@@ -218,18 +220,20 @@ class TestGovernanceWorkflow:
         engine = RulesEngine()
         user_id = "ban_test_user"
 
-        # Issue strikes until banned
+        # Issue strikes until ban threshold
         for i in range(3):
             engine.issue_strike(user_id, f"violation_{i}")
 
-        # Check that user is banned
+        # First check issues the ban (action_required=issue_ban)
+        result = engine.check_strike_policy(user_id)
+        assert result.passed is False
+        assert result.action_required == "issue_ban"
+        assert "ban" in result.violation.description.lower()
+
+        # Subsequent checks see an active ban ("banned" in description)
         result = engine.check_strike_policy(user_id)
         assert result.passed is False
         assert "banned" in result.violation.description.lower()
-
-        # Subsequent requests should fail
-        result = engine.check_strike_policy(user_id)
-        assert result.passed is False
 
     def test_pts_monitoring_workflow(self):
         """Test PTS monitoring with tier transitions."""
@@ -248,16 +252,19 @@ class TestGovernanceWorkflow:
         score = monitor.check_user(user_id)
         assert score.tier == PTSTier.SAFE
 
-        # Add violations
-        for i in range(5):
+        # 5 access = 37.5 (still SAFE); need ≥50 for CAUTION → 7×7.5=52.5
+        for i in range(7):
             calc.record_access_violation(user_id, f"v_{i}")
 
-        # Check again - should trigger tier change
+        # Check again - should trigger SAFE → CAUTION tier change
         score = monitor.check_user(user_id)
+        assert score.tier == PTSTier.CAUTION
 
         # Verify tier change was recorded
         assert len(tier_changes) >= 1
         assert tier_changes[-1][0] == user_id
+        assert tier_changes[-1][1] == PTSTier.SAFE
+        assert tier_changes[-1][2] == PTSTier.CAUTION
 
 
 class TestMultiComponentIntegration:
@@ -298,6 +305,7 @@ class TestMultiComponentIntegration:
         key, salt = crypto.derive_key(password)
         plaintext = b"Secret data"
         ciphertext = crypto.encrypt(plaintext, key, salt)
+        assert ciphertext is not None
 
         # Log ASR
         asr = asr_engine.create_asr(
