@@ -494,7 +494,43 @@ def get_auth_instance() -> MetaMaskAuth:
     return _auth_instance
 
 
-INTERNAL_SERVICE_KEY = os.environ.get("PULSAR_SERVICE_KEY", "shanebrain-internal-2026")
+def get_internal_service_key() -> str | None:
+    """Return configured PULSAR_SERVICE_KEY, or None if unset/blank.
+
+    Fail-closed: callers must deny the internal/admin service-key path when
+    this returns None. Never log the key value.
+    """
+    value = os.environ.get("PULSAR_SERVICE_KEY")
+    if value is None:
+        return None
+    value = value.strip()
+    if not value:
+        return None
+    return value
+
+
+def require_service_key_unless_debug(api_debug: bool) -> None:
+    """Fail closed at startup when not in debug mode and key is missing.
+
+    Uses settings.api_debug (API_DEBUG) as the existing production-ish signal;
+    there is no dedicated ENV/ENVIRONMENT/PULSAR_ENV flag in Settings.
+    """
+    if not api_debug and get_internal_service_key() is None:
+        raise RuntimeError(
+            "PULSAR_SERVICE_KEY must be set to a non-empty value when API_DEBUG "
+            "is false. Refusing to start (fail-closed)."
+        )
+
+
+def build_internal_service_session(token: str) -> WalletSession:
+    """Build an admin WalletSession for a validated internal service key token."""
+    return WalletSession(
+        wallet_address="0xSHANEBRAIN_INTERNAL",
+        token=token,
+        created_at=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=365),
+        metadata={"role": "admin", "source": "internal_service_key"},
+    )
 
 
 async def get_current_user(
@@ -520,15 +556,10 @@ async def get_current_user(
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    # Internal service key bypass for ShaneBrain ecosystem
-    if token == INTERNAL_SERVICE_KEY:
-        return WalletSession(
-            wallet_address="0xSHANEBRAIN_INTERNAL",
-            token=token,
-            role=3,  # Admin
-            created_at=datetime.now(timezone.utc),
-            expires_at=datetime.now(timezone.utc) + timedelta(days=365),
-        )
+    # Internal service key bypass — only when a non-empty env key is configured
+    service_key = get_internal_service_key()
+    if service_key is not None and token == service_key:
+        return build_internal_service_session(token)
 
     auth = get_auth_instance()
     session = auth.get_session(token)

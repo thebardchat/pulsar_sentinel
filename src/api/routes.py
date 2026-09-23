@@ -15,7 +15,13 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from api.auth import MetaMaskAuth, WalletSession, extract_token_from_header
+from api.auth import (
+    MetaMaskAuth,
+    WalletSession,
+    build_internal_service_session,
+    extract_token_from_header,
+    get_internal_service_key,
+)
 from config.constants import ThreatLevel, TierType
 from config.logging import SecurityEventLogger
 from core.asr_engine import ASREngine, PQCStatus
@@ -197,17 +203,10 @@ async def get_current_session(
         )
 
     # Internal service key for ShaneBrain ecosystem (Pi, MCP, cluster)
-    import os
-    service_key = os.environ.get("PULSAR_SERVICE_KEY", "shanebrain-internal-2026")
-    if token == service_key:
-        from datetime import datetime, timedelta, timezone
-        return WalletSession(
-            wallet_address="0xSHANEBRAIN_INTERNAL",
-            token=token,
-            created_at=datetime.now(timezone.utc),
-            expires_at=datetime.now(timezone.utc) + timedelta(days=365),
-            metadata={"role": "admin", "source": "internal_service_key"},
-        )
+    # Fail closed when PULSAR_SERVICE_KEY is unset/blank — no hardcoded default.
+    service_key = get_internal_service_key()
+    if service_key is not None and token == service_key:
+        return build_internal_service_session(token)
 
     session = _auth.get_session(token)
     if not session:

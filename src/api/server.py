@@ -24,7 +24,7 @@ from fastapi.templating import Jinja2Templates
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from api.agent_routes import agent_router
-from api.auth import MetaMaskAuth
+from api.auth import MetaMaskAuth, require_service_key_unless_debug
 from api.recon_routes import recon_router
 from api.routes import init_routes, router
 from api.ui_routes import ui_router
@@ -75,6 +75,10 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting PULSAR SENTINEL server")
     setup_logging()
+
+    # Production fail-closed gate via API_DEBUG (no dedicated ENV flag in settings).
+    settings = get_settings()
+    require_service_key_unless_debug(settings.api_debug)
 
     # Initialize services
     auth = MetaMaskAuth()
