@@ -1,0 +1,3 @@
+[tool.ruff.lint]
+# Preserve the pre-0.16 defaults used by this repository
+select = ["E4", "E7", "E9", "F"]

@@ -14,17 +14,16 @@ Tiers:
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Final
 
 from config.constants import (
-    PTSThreshold,
-    PTSTier,
     PTS_WEIGHTS,
+    PTSTier,
     ThreatLevel,
 )
-from config.settings import get_settings
 from config.logging import SecurityEventLogger
+from config.settings import get_settings
 
 logger = SecurityEventLogger("pts")
 

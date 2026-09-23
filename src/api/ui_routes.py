@@ -3,18 +3,17 @@ PULSAR SENTINEL - UI API Routes
 Backend endpoints for the Cyberpunk UI portal
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Query
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+import os
+import uuid
 from datetime import datetime, timedelta
 from enum import Enum
-import uuid
-import os
+from typing import Any
 
-from api.auth import get_current_user, WalletSession
+from fastapi import APIRouter, Depends, Query
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
 
+from api.auth import WalletSession, get_current_user
 
 # Router for UI endpoints
 ui_router = APIRouter(prefix="/ui", tags=["UI"])
@@ -55,7 +54,7 @@ class Deployment(BaseModel):
     security_level: int
     created_at: datetime
     uptime_seconds: int
-    hashrate: Optional[float] = None
+    hashrate: float | None = None
     memory_mb: float
     requests_per_min: int
 
@@ -75,11 +74,11 @@ class Transaction(BaseModel):
     type: str
     amount: float
     token: str
-    from_address: Optional[str]
-    to_address: Optional[str]
+    from_address: str | None
+    to_address: str | None
     timestamp: datetime
     status: str
-    tx_hash: Optional[str]
+    tx_hash: str | None
 
 
 class MiningStats(BaseModel):
@@ -102,7 +101,7 @@ class NFTItem(BaseModel):
     price: float
     owner: str
     creator: str
-    image_url: Optional[str]
+    image_url: str | None
     pqc_signed: bool
     rarity: str
     likes: int
@@ -112,14 +111,14 @@ class NFTItem(BaseModel):
 class AIMessage(BaseModel):
     """AI chat message"""
     message: str
-    context: Optional[str] = None
+    context: str | None = None
 
 
 class AIResponse(BaseModel):
     """AI response model"""
     response: str
     confidence: float
-    suggestions: List[str]
+    suggestions: list[str]
 
 
 # ============================================================================
@@ -129,7 +128,7 @@ class AIResponse(BaseModel):
 @ui_router.get("/dashboard/stats")
 async def get_dashboard_stats(
     user: WalletSession = Depends(get_current_user)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get dashboard statistics for the authenticated user"""
     return {
         "security_score": 98.5,
@@ -159,7 +158,7 @@ async def get_dashboard_stats(
 @ui_router.get("/deployments")
 async def list_deployments(
     user: WalletSession = Depends(get_current_user)
-) -> List[Deployment]:
+) -> list[Deployment]:
     """List all deployments for the authenticated user"""
     # In production, fetch from database
     return [
@@ -215,7 +214,7 @@ async def create_deployment(
 async def delete_deployment(
     deployment_id: str,
     user: WalletSession = Depends(get_current_user)
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Delete a deployment"""
     return {"status": "deleted", "deployment_id": deployment_id}
 
@@ -224,7 +223,7 @@ async def delete_deployment(
 async def restart_deployment(
     deployment_id: str,
     user: WalletSession = Depends(get_current_user)
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Restart a deployment"""
     return {"status": "restarting", "deployment_id": deployment_id}
 
@@ -252,8 +251,8 @@ async def get_transactions(
     user: WalletSession = Depends(get_current_user),
     limit: int = Query(default=20, le=100),
     offset: int = Query(default=0),
-    tx_type: Optional[str] = None
-) -> List[Transaction]:
+    tx_type: str | None = None
+) -> list[Transaction]:
     """Get wallet transaction history"""
     # In production, fetch from blockchain/database
     transactions = [
@@ -343,7 +342,7 @@ async def stake_tokens(
     amount: float,
     duration_days: int = 90,
     user: WalletSession = Depends(get_current_user)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Stake PLS tokens"""
     apy_rates = {30: 0.08, 60: 0.10, 90: 0.125}
     apy = apy_rates.get(duration_days, 0.125)
@@ -384,7 +383,7 @@ async def start_mining(
     threads: int = 4,
     intensity: int = 75,
     user: WalletSession = Depends(get_current_user)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Start mining operation"""
     return {
         "status": "started",
@@ -398,13 +397,13 @@ async def start_mining(
 @ui_router.post("/mining/stop")
 async def stop_mining(
     user: WalletSession = Depends(get_current_user)
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Stop mining operation"""
     return {"status": "stopped"}
 
 
 @ui_router.get("/mining/pool-stats")
-async def get_pool_stats() -> Dict[str, Any]:
+async def get_pool_stats() -> dict[str, Any]:
     """Get mining pool statistics"""
     return {
         "pool_hashrate": 428.5,
@@ -422,13 +421,13 @@ async def get_pool_stats() -> Dict[str, Any]:
 
 @ui_router.get("/marketplace/items")
 async def list_marketplace_items(
-    category: Optional[str] = None,
+    category: str | None = None,
     sort: str = "recent",
-    price_min: Optional[float] = None,
-    price_max: Optional[float] = None,
+    price_min: float | None = None,
+    price_max: float | None = None,
     limit: int = Query(default=20, le=100),
     offset: int = Query(default=0)
-) -> List[NFTItem]:
+) -> list[NFTItem]:
     """List marketplace items"""
     # In production, fetch from database
     items = [
@@ -471,9 +470,9 @@ async def list_marketplace_items(
 @ui_router.post("/marketplace/create")
 async def create_nft(
     name: str,
-    description: Optional[str] = None,
+    description: str | None = None,
     price: float = 0,
-    collection: Optional[str] = None,
+    collection: str | None = None,
     category: str = "art",
     royalties: float = 10.0,
     pqc_sign: bool = True,
@@ -500,7 +499,7 @@ async def create_nft(
 async def buy_nft(
     item_id: str,
     user: WalletSession = Depends(get_current_user)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Purchase an NFT"""
     return {
         "status": "purchased",
@@ -547,7 +546,7 @@ async def ai_chat(
 async def get_ai_analytics(
     period: str = "24h",
     user: WalletSession = Depends(get_current_user)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get AI analytics data"""
     return {
         "period": period,
@@ -572,14 +571,14 @@ async def get_ai_analytics(
 @ui_router.post("/analytics/download")
 async def track_download(
     platform: str,
-    wallet: Optional[str] = None
-) -> Dict[str, str]:
+    wallet: str | None = None
+) -> dict[str, str]:
     """Track download analytics"""
     return {"status": "tracked", "platform": platform}
 
 
 @ui_router.get("/analytics/network")
-async def get_network_stats() -> Dict[str, Any]:
+async def get_network_stats() -> dict[str, Any]:
     """Get network-wide statistics"""
     return {
         "active_nodes": 2847,

@@ -14,18 +14,18 @@ Performance Targets:
 - Memory efficient for 7.4GB RAM systems
 """
 
-import os
-import time
 import hashlib
+import os
 import secrets
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Final
 
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 # Attempt to import liboqs - gracefully handle if not available
 try:
@@ -36,10 +36,9 @@ except ImportError:
     oqs = None
 
 from config.constants import (
-    PQCSecurityLevel,
-    GCM_NONCE_SIZE,
-    GCM_TAG_SIZE,
     AES_KEY_SIZE,
+    GCM_NONCE_SIZE,
+    PQCSecurityLevel,
 )
 from config.logging import SecurityEventLogger
 

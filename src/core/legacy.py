@@ -12,24 +12,23 @@ Security Note:
     long-term security against quantum adversaries (2035+).
 """
 
-import os
-import time
 import hashlib
 import hmac
-import secrets
+import os
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Final
 
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives.padding import PKCS7
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives.padding import PKCS7
 
-from config.constants import AES_KEY_SIZE, AES_BLOCK_SIZE, HMAC_DIGEST_SIZE
+from config.constants import AES_BLOCK_SIZE, AES_KEY_SIZE, HMAC_DIGEST_SIZE
 from config.logging import SecurityEventLogger
 
 # Constants
@@ -462,7 +461,9 @@ class ECDSASigner:
             )
 
             # Encode signature to DER format
-            from cryptography.hazmat.primitives.asymmetric.utils import encode_dss_signature
+            from cryptography.hazmat.primitives.asymmetric.utils import (
+                encode_dss_signature,
+            )
 
             r = int.from_bytes(signature.r, "big")
             s = int.from_bytes(signature.s, "big")

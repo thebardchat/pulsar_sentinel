@@ -6,15 +6,15 @@ Provides:
 - Immutable event logging to blockchain
 """
 
-from blockchain.polygon_client import PolygonClient, TransactionResult
-from blockchain.smart_contract import GovernanceContract, ContractConfig
 from blockchain.event_logger import BlockchainEventLogger, MerkleProof
+from blockchain.polygon_client import PolygonClient, TransactionResult
+from blockchain.smart_contract import ContractConfig, GovernanceContract
 
 __all__ = [
+    "BlockchainEventLogger",
+    "ContractConfig",
+    "GovernanceContract",
+    "MerkleProof",
     "PolygonClient",
     "TransactionResult",
-    "GovernanceContract",
-    "ContractConfig",
-    "BlockchainEventLogger",
-    "MerkleProof",
 ]

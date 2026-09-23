@@ -10,10 +10,9 @@ from discord.ext import commands
 _project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_project_root))
 
-from config.settings import get_settings
-from discord_bot import embeds
-from discord_bot import commands as pulsar_commands
-from discord_bot import alerts
+from config.settings import get_settings  # noqa: E402
+from discord_bot import alerts, embeds  # noqa: E402
+from discord_bot import commands as pulsar_commands  # noqa: E402
 
 
 def create_bot() -> commands.Bot:

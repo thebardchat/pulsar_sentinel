@@ -10,19 +10,18 @@ Features:
 - Local caching with blockchain sync
 """
 
-import hashlib
 import json
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Final
 
-from core.asr_engine import AgentStateRecord, ASRBatch, ASREngine
-from blockchain.polygon_client import PolygonClient, TransactionResult
+from blockchain.polygon_client import PolygonClient
 from blockchain.smart_contract import GovernanceContract
-from config.settings import get_settings
 from config.logging import SecurityEventLogger
+from config.settings import get_settings
+from core.asr_engine import AgentStateRecord, ASRBatch, ASREngine
 
 # Constants
 MAX_BATCH_SIZE: Final[int] = 50

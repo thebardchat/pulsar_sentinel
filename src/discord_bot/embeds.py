@@ -1,7 +1,8 @@
 """Themed embed builders for PULSAR SENTINEL Discord bot."""
 
-import discord
 from datetime import datetime, timezone
+
+import discord
 
 # Brand colors
 CYAN = 0x00FFFF

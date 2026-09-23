@@ -10,14 +10,12 @@ Contract Features:
 - Role-based permissions
 """
 
-import json
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import Any, Final
 
 from web3 import Web3
 from web3.contract import Contract
-from eth_typing import ChecksumAddress
 
 from blockchain.polygon_client import PolygonClient, TransactionResult
 from config.logging import SecurityEventLogger

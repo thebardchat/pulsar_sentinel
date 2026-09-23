@@ -11,27 +11,25 @@ Provides REST API endpoints for:
 
 import base64
 from datetime import datetime, timezone
-from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Header, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from api.auth import MetaMaskAuth, extract_token_from_header, WalletSession
-from core.pqc import HybridEncryptor, HybridCiphertext, get_pqc_engine, LIBOQS_AVAILABLE
-from core.legacy import LegacyCrypto, AESCiphertext
-from core.asr_engine import ASREngine, AgentStateRecord, PQCStatus, determine_pqc_status
-from governance.access_control import (
-    AccessController,
-    UserRole,
-    PERMISSION_ENCRYPT,
-    PERMISSION_DECRYPT,
-    PERMISSION_ASR_READ,
-    RateLimitExceeded,
-)
-from governance.pts_calculator import PTSCalculator
-from governance.rules_engine import RulesEngine, UserState
+from api.auth import MetaMaskAuth, WalletSession, extract_token_from_header
 from config.constants import ThreatLevel, TierType
 from config.logging import SecurityEventLogger
+from core.asr_engine import ASREngine, PQCStatus
+from core.legacy import AESCiphertext, LegacyCrypto
+from core.pqc import LIBOQS_AVAILABLE, HybridCiphertext, HybridEncryptor
+from governance.access_control import (
+    PERMISSION_ASR_READ,
+    PERMISSION_DECRYPT,
+    PERMISSION_ENCRYPT,
+    AccessController,
+    UserRole,
+)
+from governance.pts_calculator import PTSCalculator
+from governance.rules_engine import RulesEngine
 
 logger = SecurityEventLogger("api")
 
@@ -202,7 +200,7 @@ async def get_current_session(
     import os
     service_key = os.environ.get("PULSAR_SERVICE_KEY", "shanebrain-internal-2026")
     if token == service_key:
-        from datetime import datetime, timezone, timedelta
+        from datetime import datetime, timedelta, timezone
         return WalletSession(
             wallet_address="0xSHANEBRAIN_INTERNAL",
             token=token,
