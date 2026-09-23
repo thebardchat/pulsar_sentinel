@@ -12,6 +12,9 @@ Performance Targets:
 - Key generation: < 500ms
 - Encryption: < 100ms
 - Memory efficient for 7.4GB RAM systems
+
+Key lifecycle / 90-day rotation is enforced by ``core.key_rotation.KeyRotationManager``
+(not this module). Use that manager for age checks, rotate(), and ASR KEY_ROTATED.
 """
 
 import hashlib
