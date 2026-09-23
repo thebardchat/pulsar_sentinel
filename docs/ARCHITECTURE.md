@@ -28,10 +28,10 @@ PULSAR SENTINEL is a three-tier security framework providing:
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Core Layer                                │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐  │
-│  │  PQC Engine │  │   Legacy    │  │    ASR Engine           │  │
-│  │  (ML-KEM)   │  │   Crypto    │  │                         │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────────┘  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────────────┐  │
+│  │   PQC    │ │   Key    │ │  Legacy  │ │    ASR Engine      │  │
+│  │ (ML-KEM) │ │ Rotation │ │  Crypto  │ │                    │  │
+│  └──────────┘ └──────────┘ └──────────┘ └────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -119,6 +119,25 @@ Key Operations:
 ├── generate_keypair(): < 500ms
 ├── encapsulate(): < 50ms
 └── decapsulate(): < 50ms
+```
+
+#### Key Rotation (`core/key_rotation.py`)
+```
+KeyRotationPolicy:
+├── rotation_days: default DEFAULT_KEY_ROTATION_DAYS (90)
+├── grace_period_days: default DEFAULT_KEY_GRACE_PERIOD_DAYS (7)
+└── from_settings(): reads settings.key_rotation_days
+
+KeyRotationManager:
+├── initialize / needs_rotation / rotate(force=optional)
+├── Retains retired keys for grace (decapsulate only)
+├── Rejects encapsulate against retired/expired keys
+├── Emits ASR KEY_ROTATED when asr_engine is injected
+│   metadata: old_key_id, new_key_id, algorithm,
+│             rotation_days, grace_period_days, rotated_at
+└── Uses existing PQC generate/encapsulate helpers (not inside pqc.py)
+
+Note: Caller-driven API — no background rotation daemon.
 ```
 
 #### Legacy Crypto (`core/legacy.py`)
