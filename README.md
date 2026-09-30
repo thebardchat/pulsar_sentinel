@@ -29,6 +29,14 @@ This project operates under the [ShaneTheBrain Constitution](https://github.com/
 
 ---
 
+## How It Works — Animated Walkthrough
+
+<div align="center"><img src=".github/assets/how-it-works.gif" alt="Pulsar Sentinel animated walkthrough: a node heartbeat with a valid key gets accepted, a stale key gets rejected fail-closed, data gets locked with ML-KEM + AES-256, and the live PTS trust score stays in the safe tier" width="100%"></div>
+
+A node checks in with its key → a valid key is accepted and logged; a stale/missing key is **rejected outright (fail closed)**, never silently waved through. Sensitive data gets locked with quantum-resistant hybrid encryption before it's stored. A live trust score (PTS) tracks the whole cluster's health in real time. See the [Security Diagnostic](#security-diagnostic--how-its-supposed-to-work-vs-how-its-actually-running) below for a real incident where this exact fail-closed behavior mattered.
+
+---
+
 ## Live Status
 
 | Endpoint | Status |
