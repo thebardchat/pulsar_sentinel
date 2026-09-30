@@ -306,6 +306,8 @@ Key environment variables (see `.env.template`):
 | `RATE_LIMIT_DEFAULT` | Requests per minute | 5 |
 | `STRIKE_THRESHOLD` | Strikes before ban | 3 |
 | `PULSAR_SERVICE_KEY` | Internal/admin Bearer key (required when `API_DEBUG=false`) | none (fail-closed) |
+| `SENTINEL_KEY` | Node agent Bearer key (must match server `PULSAR_SERVICE_KEY`; no built-in default) | none (fail-closed) |
+| `SENTINEL_KEY_FILE` | Alternate agent key path (e.g. docker secret); used when `SENTINEL_KEY` unset | none |
 | `API_DEBUG` | Debug mode; skips service-key startup gate when true | false |
 | `DISCORD_BOT_TOKEN` | Discord bot token | |
 | `DISCORD_WEBHOOK_URL` | Discord webhook URL | |
