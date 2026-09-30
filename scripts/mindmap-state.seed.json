@@ -138,7 +138,7 @@
         {"title": "ML-KEM-768 (CRYSTALS-Kyber)", "status": "built", "date": "2026-05-12", "what": "NIST-approved lattice-based KEM via liboqs-python v0.15.0."},
         {"title": "HybridEncryptor (ML-KEM → HKDF → AES-256-GCM)", "status": "built", "date": "2026-05-12", "what": "End-to-end hybrid PQC encryption."},
         {"title": "MetaMask JWT auth", "status": "built", "date": "2026-05-12", "what": "Wallet signs nonce → 24h JWT for user-facing API."},
-        {"title": "Internal service key", "status": "built", "date": "2026-05-12", "what": "Bearer shanebrain-internal-2026 for MCP tools + scripts."},
+        {"title": "Internal service key", "status": "built", "date": "2026-05-12", "what": "Bearer $PULSAR_SERVICE_KEY for MCP tools + scripts."},
         {"title": "Stripe billing (live mode)", "status": "built", "date": "2026-05-12", "what": "Three tiers: Legacy $10.99, Sentinel $24.99, Guild $49.99/mo."},
         {"title": "/security page", "status": "built", "date": "2026-05-12", "what": "Q-Day countdown, YourLegacy waitlist, RSA vs ML-KEM demo. Live at sentinel.shanebrain.cloud/security."}
       ],
