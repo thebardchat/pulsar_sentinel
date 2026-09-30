@@ -76,6 +76,32 @@ Think of Pulsar Sentinel as the front-desk guard for the whole ShaneBrain cluste
 - Sentinel also locks up sensitive data with **quantum-resistant encryption (ML-KEM)** — a vault a future quantum computer still can't pick — and keeps a running **trust score (PTS)** that turns red if something starts acting suspicious (bad logins, rate-limit abuse, etc).
 - Every change to Sentinel's own code has to pass automated tests and get a human click to merge on GitHub — so a bad change can't sneak into the guard's rulebook unnoticed.
 
+## How it works (visual)
+
+<div align="center">
+  <a href="https://thebardchat.github.io/pulsar_sentinel/docs/pulsar-sentinel-animation.html"><img src="docs/how-it-works-animated.svg" alt="How Pulsar Sentinel works (animated)" width="100%"></a>
+</div>
+
+<p align="center">
+  <a href="https://thebardchat.github.io/pulsar_sentinel/docs/pulsar-sentinel-animation.html"><img src="https://img.shields.io/badge/%E2%96%B6%20View-interactive%20animation-00f0ff?style=for-the-badge&labelColor=0a0a0f" alt="View interactive animation"></a>
+</p>
+
+1. **Cluster radio.** Pi 5 core plus alaska / biloxi / gulfshores / mexico / neworleans agents check in about every 20–30 seconds.
+2. **Fail closed.** Agent sends `SENTINEL_KEY`. Server expects `PULSAR_SERVICE_KEY`. Miss or mismatch → `401`. No hardcoded default.
+3. **Hybrid lock.** ML-KEM-768/1024 wraps the AES-256-GCM key. Rotate on 90 days. Retired keys may decapsulate for 7 days; they cannot encapsulate.
+4. **ASR trail.** Each event writes an Agent State Record. Batches of 100 build a Merkle tree and go to the chain logger.
+5. **PTS gauge.** `PTS = quantum_risk×0.4 + access_violations×0.3 + rate_limit_hits×0.2 + signature_failures×0.1`  
+   Safe `< 50` · Caution `50–149` · Critical `≥ 150`
+
+Interactive walkthrough (open in a browser; GitHub README will not play the HTML): [docs/how-it-works.html](docs/how-it-works.html)
+
+<details>
+<summary>Static diagram</summary>
+
+![How Pulsar Sentinel works (static)](docs/how-it-works.svg)
+
+</details>
+
 ### How it was actually running (found + fixed 2026-09-29/30)
 
 On 2026-09-23 the master key was rotated as a security fix (closing [issue #7](https://github.com/thebardchat/pulsar_sentinel/issues/7) — the server used to accept a hardcoded default key if none was set, like a guard shack whose backup password was printed in the manual). The server-side fix was correct, but nobody had told the guards on patrol: every caller — the MCP security tools, the Bouncer watchdog, the nightly encrypted-memory backup, the mindmap tool, and every cluster-node agent — kept showing up with the *old* key.

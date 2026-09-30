@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PULSAR SENTINEL — How It Works</title>
+  <meta name="theme-color" content="#00f0ff">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cyan: #00f0ff;
+      --cyan-dim: #00a0aa;
+      --magenta: #ff00ff;
+      --gold: #ffd700;
+      --green: #00ff41;
+      --orange: #ff6b35;
+      --red: #ff0040;
+      --bg: #0a0a0f;
+      --bg2: #0d0d15;
+      --bg3: #12121a;
+      --bg4: #1a1a25;
+      --text: #e0e0f0;
+      --text2: #a0a0b0;
+      --mono: "Share Tech Mono", ui-monospace, monospace;
+      --display: "Orbitron", sans-serif;
+      --body: "Rajdhani", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--body); }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,240,255,.12), transparent 50%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255,0,255,.08), transparent 50%),
+        var(--bg);
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 32px; }
+    header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+    .brand { font-family: var(--display); letter-spacing: .12em; font-size: 13px; color: var(--cyan); }
+    h1 { font-family: var(--display); font-size: clamp(22px, 4vw, 34px); line-height: 1.15; }
+    h1 span { color: var(--cyan); }
+    .sub { color: var(--text2); font-size: 16px; max-width: 62ch; margin-top: 6px; }
+    .badge {
+      font-family: var(--mono); font-size: 11px; color: var(--gold);
+      border: 1px solid rgba(255,215,0,.35); padding: 6px 10px; border-radius: 999px;
+    }
+    .stage {
+      position: relative;
+      background: linear-gradient(180deg, #101018, #0b0b12);
+      border: 1px solid #2a2a3a;
+      border-radius: 16px;
+      overflow: hidden;
+      min-height: 520px;
+      box-shadow: 0 0 0 1px rgba(0,240,255,.08), 0 20px 60px rgba(0,0,0,.45);
+    }
+    svg.canvas { width: 100%; height: 420px; display: block; }
+    .caption {
+      padding: 14px 18px 16px;
+      border-top: 1px solid #2a2a3a;
+      min-height: 92px;
+    }
+    .beat { font-family: var(--mono); font-size: 11px; color: var(--cyan); letter-spacing: .14em; }
+    .line { font-size: 22px; font-weight: 700; margin-top: 2px; }
+    .note { color: var(--text2); font-size: 15px; margin-top: 2px; }
+    .controls { display: flex; gap: 8px; align-items: center; margin: 12px 0 8px; flex-wrap: wrap; }
+    button {
+      font-family: var(--mono); font-size: 12px; letter-spacing: .08em;
+      background: #15151f; color: var(--text); border: 1px solid #333348;
+      padding: 8px 12px; border-radius: 8px; cursor: pointer;
+    }
+    button:hover { border-color: var(--cyan); color: var(--cyan); }
+    button.active { background: rgba(0,240,255,.12); border-color: var(--cyan); color: var(--cyan); }
+    .dots { display: flex; gap: 6px; margin-left: auto; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #2a2a3a; cursor: pointer; }
+    .dot.on { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+    .bar { height: 3px; background: #1c1c28; border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+    .bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--cyan), var(--magenta)); }
+    .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+    .fact {
+      background: var(--bg3); border: 1px solid #2a2a3a; border-radius: 10px; padding: 12px 14px;
+    }
+    .fact b { display: block; font-family: var(--display); font-size: 11px; letter-spacing: .1em; color: var(--cyan); margin-bottom: 4px; }
+    .fact p { font-size: 14px; color: var(--text2); }
+    .warn { margin-top: 14px; font-size: 13px; color: #c8c8a0; border-left: 3px solid var(--gold); padding-left: 10px; }
+    a { color: var(--cyan); }
+    .node { fill: #151520; stroke: var(--cyan); stroke-width: 2; }
+    .lbl { font-family: var(--mono); font-size: 11px; fill: var(--text); }
+    .lbl-dim { font-family: var(--mono); font-size: 10px; fill: var(--text2); }
+    .pulse { transform-box: fill-box; transform-origin: center; }
+    @keyframes ping { 0% { opacity: .9; r: 6; } 100% { opacity: 0; r: 22; } }
+    @keyframes hop { 0% { offset-distance: 0%; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+    @keyframes glow { 0%,100% { filter: drop-shadow(0 0 2px #00f0ff); } 50% { filter: drop-shadow(0 0 10px #00f0ff); } }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+    .pkt { offset-rotate: 0deg; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="brand">THEBARDCHAT / PULSAR_SENTINEL</div>
+        <h1>How the guard <span>actually works</span></h1>
+        <p class="sub">Simple loop for viewers. Built from README + docs/ARCHITECTURE.md + docs/SECURITY.md on main (SHA 214e60ba). No invented steps.</p>
+      </div>
+      <div class="badge">PORT 8250 · FAIL CLOSED</div>
+    </header>
+
+    <div class="controls">
+      <button id="play" class="active">PAUSE</button>
+      <button id="prev">PREV</button>
+      <button id="next">NEXT</button>
+      <div class="dots" id="dots"></div>
+    </div>
+    <div class="bar"><i id="prog"></i></div>
+
+    <div class="stage">
+      <svg class="canvas" viewBox="0 0 1100 420" role="img" aria-label="Pulsar Sentinel animation">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#00f0ff"/><stop offset="1" stop-color="#ff00ff"/>
+          </linearGradient>
+          <filter id="soft"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect x="0" y="0" width="1100" height="420" fill="#0b0b12"/>
+        <g id="scene"></g>
+      </svg>
+      <div class="caption">
+        <div class="beat" id="beat">BEAT 01 / 07</div>
+        <div class="line" id="line">Cluster radio check</div>
+        <div class="note" id="note">Every node proves it is alive. No key, no entry.</div>
+      </div>
+    </div>
+
+    <div class="facts" style="margin-top:16px">
+      <div class="fact">
+        <b>IMPLEMENTED PTS</b>
+        <p>PTS = quantum_risk×0.4 + access_violations×0.3 + rate_limit_hits×0.2 + signature_failures×0.1<br>Safe &lt;50 · Caution 50–149 · Critical ≥150</p>
+      </div>
+      <div class="fact">
+        <b>KEYS</b>
+        <p>Agents send SENTINEL_KEY. Server expects PULSAR_SERVICE_KEY. Missing key = process refuses to start. Encapsulate uses ML-KEM + AES-256-GCM.</p>
+      </div>
+      <div class="fact">
+        <b>ROTATION</b>
+        <p>90-day default. 7-day grace: old keys can still decapsulate, cannot encapsulate. Caller-driven — no background timer.</p>
+      </div>
+      <div class="fact">
+        <b>AUDIT</b>
+        <p>Each event writes an ASR. Batches of 50 build a Merkle tree and go to the chain logger. Public /health only. Everything else needs auth.</p>
+      </div>
+    </div>
+    <p class="warn">
+      Patent-folder docs describe a different PTS (0–100, quarantine at ≥75) plus Layer 3/4 quarantine and dual-chain shield.
+      That is design text, not the shipped calculator in README/ARCHITECTURE. This animation follows the shipped loop.
+      Source: <a href="https://github.com/thebardchat/pulsar_sentinel">thebardchat/pulsar_sentinel</a>
+    </p>
+  </div>
+
+<script>
+const beats = [
+  {
+    id: 1, beat: "BEAT 01 / 07", line: "The cluster radios in",
+    note: "Pi 5 controller + alaska, biloxi, gulfshores, mexico, neworleans. Agents check in about every 20–30 seconds.",
+    draw(g) {
+      const nodes = [
+        [550, 70, "PULSAR SENTINEL", "Pi 5 · :8250"],
+        [140, 280, "alaska", "agent"],
+        [330, 330, "biloxi", "agent"],
+        [550, 350, "gulfshores", "agent"],
+        [770, 330, "mexico", "agent"],
+        [960, 280, "neworleans", "agent"],
+      ];
+      g.innerHTML = `
+        <text class="lbl" x="40" y="36">SHANEBRAIN CLUSTER</text>
+        <circle cx="550" cy="70" r="34" fill="none" stroke="url(#g1)" stroke-width="3" filter="url(#soft)"/>
+        <circle cx="550" cy="70" r="22" fill="#101018" stroke="#00f0ff" stroke-width="2"/>
+        <text class="lbl" x="550" y="74" text-anchor="middle" font-size="10">CORE</text>
+        ${nodes.slice(1).map(([x,y,n,s],i)=>`
+          <rect x="${x-48}" y="${y-22}" width="96" height="44" rx="8" class="node"/>
+          <text class="lbl" x="${x}" y="${y-2}" text-anchor="middle">${n}</text>
+          <text class="lbl-dim" x="${x}" y="${y+14}" text-anchor="middle">${s}</text>
+          <path d="M ${x} ${y-22} Q ${ (x+550)/2 } ${ (y+70)/2 - 40 } 550 92" fill="none" stroke="#00f0ff22" stroke-width="2"/>
+          <circle class="pkt" r="5" fill="#00f0ff">
+            <animateMotion dur="${1.6 + i*0.25}s" repeatCount="indefinite" path="M ${x} ${y-22} Q ${ (x+550)/2 } ${ (y+70)/2 - 40 } 550 92"/>
+          </circle>
+        `).join("")}
+        <text class="lbl-dim" x="550" y="118" text-anchor="middle">heartbeat: I'm alive · nothing's wrong</text>
+      `;
+    }
+  },
+  {
+    id: 2, beat: "BEAT 02 / 07", line: "Fail closed. Wrong key = door stays shut.",
+    note: "SENTINEL_KEY must match PULSAR_SERVICE_KEY. No hardcoded default. 401. The Sep 23 rotation proved this: old keys were rejected everywhere.",
+    draw(g) {
+      g.innerHTML = `
+        <text class="lbl" x="40" y="36">KEY GATE</text>
+        <rect x="80" y="150" width="220" height="90" rx="10" class="node"/>
+        <text class="lbl" x="190" y="188" text-anchor="middle">AGENT</text>
+        <text class="lbl-dim" x="190" y="208" text-anchor="middle">Bearer SENTINEL_KEY</text>
+        <rect x="430" y="120" width="240" height="160" rx="12" fill="#151520" stroke="#ffd700" stroke-width="2"/>
+        <text class="lbl" x="550" y="160" text-anchor="middle" fill="#ffd700">GUARD SHACK</text>
+        <text class="lbl-dim" x="550" y="184" text-anchor="middle">compare key</text>
+        <text class="lbl-dim" x="550" y="206" text-anchor="middle">PULSAR_SERVICE_KEY</text>
+        <text class="lbl" x="550" y="240" text-anchor="middle" fill="#00ff41" id="gateok">MATCH → ENTER</text>
+        <rect x="800" y="150" width="220" height="90" rx="10" fill="#1a1014" stroke="#ff0040" stroke-width="2"/>
+        <text class="lbl" x="910" y="188" text-anchor="middle" fill="#ff0040">WRONG / EMPTY</text>
+        <text class="lbl-dim" x="910" y="208" text-anchor="middle">401 Unauthorized</text>
+        <circle cx="360" cy="195" r="6" fill="#00f0ff">
+          <animate attributeName="cx" values="300;430;300" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="670" cy="195" r="6" fill="#ff0040">
+          <animate attributeName="cx" values="670;800;670" dur="2.4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="1;0.2;1" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+      `;
+    }
+  },
+  {
+    id: 3, beat: "BEAT 03 / 07", line: "Request walks three rooms",
+    note: "Public: /health and rate-limited /auth/nonce. Authenticated: encrypt, decrypt, own ASR/PTS. Admin: any id, strikes, management.",
+    draw(g) {
+      const rooms = [
+        [90, 130, 280, 180, "#00f0ff", "PUBLIC", "/health\n/auth/nonce"],
+        [410, 130, 280, 180, "#ffd700", "AUTHENTICATED", "/encrypt /decrypt\n/asr /pts (own)"],
+        [730, 130, 280, 180, "#ff00ff", "ADMIN", "/asr any · /pts any\nstrikes · users"],
+      ];
+      g.innerHTML = `
+        <text class="lbl" x="40" y="36">SECURITY BOUNDARIES</text>
+        ${rooms.map(([x,y,w,h,c,t,s])=>`
+          <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="#12121a" stroke="${c}" stroke-width="2"/>
+          <text class="lbl" x="${x+w/2}" y="${y+40}" text-anchor="middle" fill="${c}">${t}</text>
+          <text class="lbl-dim" x="${x+w/2}" y="${y+78}" text-anchor="middle">${s.split("\\n")[0]}</text>
+          <text class="lbl-dim" x="${x+w/2}" y="${y+98}" text-anchor="middle">${s.split("\\n")[1]||""}</text>
+        `).join("")}
+        <path d="M 370 220 H 410" stroke="#fff" stroke-width="2" marker-end="url(#arr)"/>
+        <path d="M 690 220 H 730" stroke="#fff" stroke-width="2"/>
+        <text class="lbl-dim" x="390" y="210" text-anchor="middle">JWT / key</text>
+        <text class="lbl-dim" x="710" y="210" text-anchor="middle">role ADMIN</text>
+        <circle r="7" fill="#00f0ff">
+          <animateMotion dur="3.2s" repeatCount="indefinite" path="M 140 300 C 300 360, 550 80, 870 300"/>
+        </circle>
+      `;
+    }
+  },
+  {
+    id: 4, beat: "BEAT 04 / 07", line: "Hybrid lock: ML-KEM wraps AES",
+    note: "NIST ML-KEM-768/1024 makes a shared secret. AES-256-GCM encrypts the payload. Quantum harvest-now-decrypt-later does not get a usable key.",
+    draw(g) {
+      g.innerHTML = `
+        <text class="lbl" x="40" y="36">PQC ENGINE · src/core/pqc.py</text>
+        <rect x="70" y="150" width="180" height="80" rx="10" class="node"/>
+        <text class="lbl" x="160" y="196" text-anchor="middle">PLAINTEXT</text>
+        <rect x="330" y="130" width="200" height="120" rx="10" fill="#101820" stroke="#00f0ff" stroke-width="2"/>
+        <text class="lbl" x="430" y="178" text-anchor="middle">AES-256-GCM</text>
+        <text class="lbl-dim" x="430" y="200" text-anchor="middle">locks the data</text>
+        <rect x="610" y="130" width="200" height="120" rx="10" fill="#181028" stroke="#ff00ff" stroke-width="2"/>
+        <text class="lbl" x="710" y="178" text-anchor="middle" fill="#ff00ff">ML-KEM</text>
+        <text class="lbl-dim" x="710" y="200" text-anchor="middle">wraps the AES key</text>
+        <rect x="880" y="150" width="160" height="80" rx="10" fill="#101018" stroke="#00ff41" stroke-width="2"/>
+        <text class="lbl" x="960" y="196" text-anchor="middle" fill="#00ff41">CIPHERTEXT</text>
+        <path d="M 250 190 H 330" stroke="#00f0ff" stroke-width="2"/>
+        <path d="M 530 190 H 610" stroke="#ff00ff" stroke-width="2"/>
+        <path d="M 810 190 H 880" stroke="#00ff41" stroke-width="2"/>
+        <text class="lbl-dim" x="550" y="320" text-anchor="middle">rotate every 90 days · retired keys decapsulate 7 more days · cannot encapsulate</text>
+        <circle r="6" fill="#00f0ff"><animateMotion dur="2.8s" repeatCount="indefinite" path="M 160 150 C 430 60, 710 60, 960 150"/></circle>
+      `;
+    }
+  },
+  {
+    id: 5, beat: "BEAT 05 / 07", line: "Every move becomes an ASR",
+    note: "Agent State Record: id, time, agent, action, threat 1–5, PQC status, SHA-256 signature. Batch of 50 → Merkle tree → chain logger.",
+    draw(g) {
+      const cards = Array.from({length:6}, (_,i)=> {
+        const x = 80 + i*70;
+        return `<rect x="${x}" y="${180 - i*6}" width="58" height="72" rx="6" fill="#151520" stroke="#00f0ff" stroke-opacity="${0.4+i*0.1}"/>`;
+      }).join("");
+      g.innerHTML = `
+        <text class="lbl" x="40" y="36">ASR ENGINE · MERKLE BATCH</text>
+        ${cards}
+        <text class="lbl-dim" x="250" y="280" text-anchor="middle">pending ASRs</text>
+        <path d="M 500 210 L 620 140 L 740 210 L 620 280 Z" fill="#12121a" stroke="#ffd700" stroke-width="2"/>
+        <text class="lbl" x="620" y="216" text-anchor="middle" fill="#ffd700">MERKLE</text>
+        <rect x="860" y="170" width="170" height="80" rx="10" fill="#101018" stroke="#ff00ff" stroke-width="2"/>
+        <text class="lbl" x="945" y="204" text-anchor="middle" fill="#ff00ff">POLYGON</text>
+        <text class="lbl-dim" x="945" y="224" text-anchor="middle">event logger</text>
+        <path d="M 500 216 H 430" stroke="#00f0ff" stroke-width="2"/>
+        <path d="M 740 210 H 860" stroke="#ff00ff" stroke-width="2"/>
+        <circle r="5" fill="#ffd700"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 280 200 L 620 210 L 945 210"/></circle>
+      `;
+    }
+  },
+  {
+    id: 6, beat: "BEAT 06 / 07", line: "PTS is the live threat gauge",
+    note: "Four weighted inputs. Green under 50, yellow 50–149, red at 150+. Discord alerts fire when the tier changes.",
+    draw(g) {
+      g.innerHTML = `
+        <text class="lbl" x="40" y="36">PTS CALCULATOR</text>
+        <text class="lbl-dim" x="40" y="58">quantum_risk × 0.4</text>
+        <text class="lbl-dim" x="40" y="76">access_violations × 0.3</text>
+        <text class="lbl-dim" x="40" y="94">rate_limit_hits × 0.2</text>
+        <text class="lbl-dim" x="40" y="112">signature_failures × 0.1</text>
+        <rect x="360" y="160" width="620" height="28" rx="14" fill="#1a1a25"/>
+        <rect x="360" y="160" width="200" height="28" rx="14" fill="#00ff41"/>
+        <rect x="560" y="160" width="260" height="28" fill="#ffd700"/>
+        <rect x="820" y="160" width="160" height="28" rx="14" fill="#ff0040"/>
+        <text class="lbl" x="460" y="152" text-anchor="middle" fill="#00ff41">SAFE &lt;50</text>
+        <text class="lbl" x="690" y="152" text-anchor="middle" fill="#ffd700">CAUTION 50–149</text>
+        <text class="lbl" x="900" y="152" text-anchor="middle" fill="#ff0040">CRITICAL ≥150</text>
+        <circle id="needle" r="10" fill="#fff" cx="430" cy="174">
+          <animate attributeName="cx" values="430;900;430" dur="6s" repeatCount="indefinite"/>
+        </circle>
+        <text class="lbl-dim" x="670" y="230" text-anchor="middle">GET /api/v1/pts/{user_id} · live snapshot on 2026-09-30 read PTS 0.0 safe</text>
+      `;
+    }
+  },
+  {
+    id: 7, beat: "BEAT 07 / 07", line: "Rules + rotation keep the rulebook honest",
+    note: "RC 1.01 signature required. RC 1.02 heir after 90 days silent. RC 2.01 three strikes. RC 3.02 Gryphon TX fallback. Code change still needs tests + human merge.",
+    draw(g) {
+      const rules = [
+        ["RC 1.01", "Signature required"],
+        ["RC 1.02", "90-day heir transfer"],
+        ["RC 2.01", "3 strikes → ban"],
+        ["RC 3.02", "Gryphon TX fallback"],
+      ];
+      g.innerHTML = `
+        <text class="lbl" x="40" y="36">GOVERNANCE · KEY ROTATION</text>
+        ${rules.map((r,i)=>`
+          <rect x="${80+i*250}" y="120" width="230" height="90" rx="10" class="node"/>
+          <text class="lbl" x="${195+i*250}" y="156" text-anchor="middle" fill="#00f0ff">${r[0]}</text>
+          <text class="lbl-dim" x="${195+i*250}" y="180" text-anchor="middle">${r[1]}</text>
+        `).join("")}
+        <rect x="200" y="260" width="700" height="80" rx="10" fill="#101018" stroke="#ffd700" stroke-width="2"/>
+        <text class="lbl" x="550" y="294" text-anchor="middle" fill="#ffd700">KEY ROTATION MANAGER</text>
+        <text class="lbl-dim" x="550" y="316" text-anchor="middle">needs_rotation() → rotate() → ASR KEY_ROTATED · 90d / 7d grace</text>
+      `;
+    }
+  }
+];
+
+const scene = document.getElementById("scene");
+const beatEl = document.getElementById("beat");
+const lineEl = document.getElementById("line");
+const noteEl = document.getElementById("note");
+const dots = document.getElementById("dots");
+const prog = document.getElementById("prog");
+const playBtn = document.getElementById("play");
+let i = 0, playing = true, t0 = performance.now();
+const HOLD = 6500;
+
+beats.forEach((_, idx) => {
+  const d = document.createElement("div");
+  d.className = "dot" + (idx===0 ? " on" : "");
+  d.onclick = () => jump(idx);
+  dots.appendChild(d);
+});
+
+function render() {
+  beats[i].draw(scene);
+  beatEl.textContent = beats[i].beat;
+  lineEl.textContent = beats[i].line;
+  noteEl.textContent = beats[i].note;
+  [...dots.children].forEach((d, n) => d.classList.toggle("on", n===i));
+  t0 = performance.now();
+}
+function jump(n) { i = (n + beats.length) % beats.length; render(); }
+function tick(now) {
+  const p = Math.min(1, (now - t0) / HOLD);
+  prog.style.width = (p*100) + "%";
+  if (playing && p >= 1) jump(i+1);
+  requestAnimationFrame(tick);
+}
+document.getElementById("next").onclick = () => jump(i+1);
+document.getElementById("prev").onclick = () => jump(i-1);
+playBtn.onclick = () => {
+  playing = !playing;
+  playBtn.textContent = playing ? "PAUSE" : "PLAY";
+  playBtn.classList.toggle("active", playing);
+  if (playing) t0 = performance.now() - (parseFloat(prog.style.width)||0)/100*HOLD;
+};
+render();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
