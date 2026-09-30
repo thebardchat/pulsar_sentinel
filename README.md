@@ -7,7 +7,7 @@
 [![Constitution](https://img.shields.io/badge/Constitution-ShaneTheBrain-blue)](https://github.com/thebardchat/constitution)
 [![Status](https://img.shields.io/badge/Status-LIVE%20on%20Pi%205-brightgreen)](https://github.com/thebardchat/pulsar_sentinel)
 [![PQC](https://img.shields.io/badge/PQC-ML--KEM--768%20%2B%20AES--256-purple)](https://github.com/thebardchat/pulsar_sentinel)
-[![Cluster](https://img.shields.io/badge/Cluster-4%20Nodes-blue)](https://github.com/thebardchat/shanebrain-core)
+[![Cluster](https://img.shields.io/badge/Cluster-6%20Nodes-blue)](https://github.com/thebardchat/shanebrain-core)
 [![Sponsor](https://img.shields.io/badge/Sponsor-thebardchat-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/thebardchat)
 [![Hugging Face](https://img.shields.io/badge/HuggingFace-thebardchat-yellow?logo=huggingface)](https://huggingface.co/thebardchat)
 
@@ -21,9 +21,9 @@
 
 **Post-Quantum Cryptography Security Framework — LIVE on Port 8250**
 
-A production-grade blockchain-integrated security layer providing quantum-resistant encryption (ML-KEM-768/1024), immutable audit trails (Agent State Records with Merkle proofs), real-time threat scoring (PTS), and role-based access control. Protecting the ShaneBrain 4-node cluster and the 800M Windows users facing security update deprecation.
+A production-grade blockchain-integrated security layer providing quantum-resistant encryption (ML-KEM-768/1024), immutable audit trails (Agent State Records with Merkle proofs), real-time threat scoring (PTS), and role-based access control. Protecting the ShaneBrain cluster and the 800M Windows users facing security update deprecation.
 
-**Currently protecting:** ShaneBrain ecosystem — 42 MCP tools, 4-node Ollama cluster, Mega Dashboard, Angel Cloud Gateway, Weaviate vector DB.
+**Currently protecting:** ShaneBrain ecosystem — 44 MCP tools, the 6-node Docker Swarm cluster (Pi 5 + alaska, biloxi, gulfshores, mexico, neworleans), Mega Dashboard, Angel Cloud Gateway, Weaviate vector DB.
 
 This project operates under the [ShaneTheBrain Constitution](https://github.com/thebardchat/constitution/blob/main/CONSTITUTION.md).
 
@@ -39,9 +39,49 @@ This project operates under the [ShaneTheBrain Constitution](https://github.com/
 
 ---
 
+## Security Diagnostic — How It's Supposed to Work vs. How It's Actually Running
+
+_Diagnostic run 2026-09-30. Snapshot in time — re-verify live before trusting old numbers here._
+
+### How it's supposed to work, in plain terms
+
+Think of Pulsar Sentinel as the front-desk guard for the whole ShaneBrain cluster:
+
+- Every machine (the Pi, alaska, biloxi, gulfshores, mexico, neworleans) runs a small **agent** that checks in every ~20–30 seconds ("I'm alive, nothing's wrong") — like a guard radioing in on a schedule.
+- To check in, an agent has to show a **secret key** (`SENTINEL_KEY` / `PULSAR_SERVICE_KEY`). No key, or the wrong key, and the guard shack turns you away (`401 Unauthorized`). This is "fail closed" — when in doubt, lock the door, don't wave people through.
+- Sentinel also locks up sensitive data with **quantum-resistant encryption (ML-KEM)** — a vault a future quantum computer still can't pick — and keeps a running **trust score (PTS)** that turns red if something starts acting suspicious (bad logins, rate-limit abuse, etc).
+- Every change to Sentinel's own code has to pass automated tests and get a human click to merge on GitHub — so a bad change can't sneak into the guard's rulebook unnoticed.
+
+### How it was actually running (found + fixed 2026-09-29/30)
+
+On 2026-09-23 the master key was rotated as a security fix (closing [issue #7](https://github.com/thebardchat/pulsar_sentinel/issues/7) — the server used to accept a hardcoded default key if none was set, like a guard shack whose backup password was printed in the manual). The server-side fix was correct, but nobody had told the guards on patrol: every caller — the MCP security tools, the Bouncer watchdog, the nightly encrypted-memory backup, the mindmap tool, and every cluster-node agent — kept showing up with the *old* key.
+
+Because the server was now doing the right thing (fail closed instead of quietly letting the old key through), every one of those callers got turned away with 401s — silently, with no alert firing. In practice that meant:
+
+- The nightly quantum-encrypted memory backup failed **6 nights straight** (Sep 23–29) with nobody notified.
+- The `shanebrain_sentinel_health` / `shanebrain_sentinel_status` MCP tools were broken.
+- The Bouncer watchdog and the memory-vault sync script were both running on a rejected key.
+
+**Fixed the night of 2026-09-29** (Claude Code session on pulsar00100, diagnosing a swarm/cluster issue): rotated the correct key out to every caller — 4 systemd agents, 2 API replicas, and the Docker Swarm secret (`sentinel_key`) — verified the old key now gets rejected everywhere and the new one works, rebuilt the MCP server, and manually re-ran the missed backup. The permanent fix (agents now fail closed instead of ever falling back to a public default key) shipped as [PR #15](https://github.com/thebardchat/pulsar_sentinel/pull/15), merged the same night.
+
+### Confirmed live right now
+
+| Check | Result |
+|---|---|
+| `pulsar-sentinel.service` (Pi) | active, up 1 week |
+| `GET /api/v1/health` | `healthy`, `pqc_available: true` |
+| `GET /api/v1/status` | `operational`, role `ADMIN`, PTS `0.0` (safe tier) |
+| Swarm `sentinel-agent` service | 5/5 replicas running (alaska, biloxi, gulfshores, mexico, neworleans) on the rotated key |
+| Test suite | 126/126 passing, 48% coverage |
+| CI on `main` | green |
+
+**Still open — not yet closed, needs Shane's click:** a docs-sync PR ([#16](https://github.com/thebardchat/pulsar_sentinel/pull/16), draft) recording this fix in the repo's own audit trail is waiting on a human merge; the Discord webhook that got printed in that fix session's transcript still needs rotating; two older repo clones (on neworleans and gulfshores) are still on May-30 code and need a `git pull`.
+
+---
+
 ## Infrastructure
 
-Runs on the ShaneBrain 4-node cluster — Pi 5 controller + 3 headless Windows worker nodes.
+Runs on the ShaneBrain cluster — Pi 5 controller (Docker Swarm manager) + 5 Linux worker nodes (alaska, biloxi, gulfshores, mexico, neworleans) running a `sentinel-agent` replica each, plus `pulsar00100` as a separate Windows utility node.
 
 | Component | Details |
 |-----------|---------|
