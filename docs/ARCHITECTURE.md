@@ -60,6 +60,7 @@ PULSAR SENTINEL is a three-tier security framework providing:
 - Session management
 - Nonce generation and validation
 - Internal service key (`PULSAR_SERVICE_KEY`): fail-closed admin Bearer path for Pi/MCP/cluster; when `API_DEBUG` is false, startup requires a non-empty key (`require_service_key_unless_debug` in lifespan)
+- Node agent key (`scripts/sentinel_agent.py`): clients send the same value as `SENTINEL_KEY` or via `SENTINEL_KEY_FILE` (docker secrets); agent refuses to start if neither yields a key. systemd unit loads it from `EnvironmentFile=/etc/pulsar-sentinel/agent.env` (not an inline `Environment=`)
 
 #### Routes (`api/routes.py`)
 - `/auth/*`: Authentication endpoints

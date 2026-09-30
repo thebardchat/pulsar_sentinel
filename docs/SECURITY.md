@@ -64,6 +64,15 @@ Used for Pi/MCP/cluster admin Bearer paths (`api/auth.py`, `api/routes.py`, `api
 - **Helpers**: `get_internal_service_key()`, `require_service_key_unless_debug()`, `build_internal_service_session()` in `api/auth.py`
 - **Operator note**: rotate any deployed key that previously relied on a public default string; do not commit real secret values
 
+### Node agent key (`SENTINEL_KEY`)
+
+Node agents (`scripts/sentinel_agent.py`) authenticate to the server with the same secret the server expects as `PULSAR_SERVICE_KEY`.
+
+- **No hardcoded default**: agent exits on startup if `SENTINEL_KEY` is unset/blank and `SENTINEL_KEY_FILE` is unset or unreadable (`_load_key()` fail-closed; see PR #15)
+- **`SENTINEL_KEY_FILE`**: optional path to a file holding the key (e.g. docker secret at `/run/secrets/sentinel_key`); used only when `SENTINEL_KEY` itself is empty
+- **systemd**: unit template `scripts/sentinel-agent.service` uses `EnvironmentFile=/etc/pulsar-sentinel/agent.env` (root-owned 0600) instead of an inline `Environment=SENTINEL_KEY=...`
+- **Operator note**: do not put the key in the unit file or in git; value lives in vault / env file / docker secret
+
 ### Authorization
 
 - **Model**: Role-Based Access Control (RBAC)
