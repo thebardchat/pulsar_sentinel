@@ -85,7 +85,13 @@ Think of Pulsar Sentinel as the front-desk guard for the whole ShaneBrain cluste
 
 ## How it works (visual)
 
-![How Pulsar Sentinel works](docs/how-it-works.svg)
+<div align="center">
+  <a href="https://thebardchat.github.io/pulsar_sentinel/docs/pulsar-sentinel-animation.html"><img src="docs/how-it-works-animated.svg" alt="How Pulsar Sentinel works (animated)" width="100%"></a>
+</div>
+
+<p align="center">
+  <a href="https://thebardchat.github.io/pulsar_sentinel/docs/pulsar-sentinel-animation.html"><img src="https://img.shields.io/badge/%E2%96%B6%20View-interactive%20animation-00f0ff?style=for-the-badge&labelColor=0a0a0f" alt="View interactive animation"></a>
+</p>
 
 1. **Cluster radio.** Pi 5 core plus alaska / biloxi / gulfshores / mexico / neworleans agents check in about every 20–30 seconds.
 2. **Fail closed.** Agent sends `SENTINEL_KEY`. Server expects `PULSAR_SERVICE_KEY`. Miss or mismatch → `401`. No hardcoded default.
@@ -95,6 +101,13 @@ Think of Pulsar Sentinel as the front-desk guard for the whole ShaneBrain cluste
    Safe `< 50` · Caution `50–149` · Critical `≥ 150`
 
 Interactive walkthrough (open in a browser; GitHub README will not play the HTML): [docs/how-it-works.html](docs/how-it-works.html)
+
+<details>
+<summary>Static diagram</summary>
+
+![How Pulsar Sentinel works (static)](docs/how-it-works.svg)
+
+</details>
 
 ### How it was actually running (found + fixed 2026-09-29/30)
 
