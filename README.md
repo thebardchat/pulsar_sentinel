@@ -37,28 +37,6 @@ A node checks in with its key → a valid key is accepted and logged; a stale/mi
 
 ---
 
-## 🛡️ How Pulsar Sentinel Works
-
-Watch a simple, 60-second animated walkthrough of Pulsar Sentinel’s
-intended security design.
-
-### [▶ Watch the Pulsar Sentinel Animation](https://thebardchat.github.io/pulsar_sentinel/pulsar-sentinel-explainer.html)
-
-The animation explains:
-
-1. **Check in** — Agents report machine health and security events.
-2. **Verify** — Sentinel checks credentials and permissions.
-3. **Deny** — Missing or incorrect credentials are rejected.
-4. **Protect data** — Hybrid encryption protects submitted data.
-5. **Spot trouble** — Risk signals contribute to a threat score.
-6. **Keep evidence** — Audit records support later verification.
-
-Includes automatic looping, pause, chapter selection, and full-screen viewing.
-
-*Illustrates the intended design, not live system status.
-Alerts and blockchain anchoring depend on configured integrations.*
-
----
 
 ## Live Status
 
