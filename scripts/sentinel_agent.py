@@ -6,7 +6,10 @@ No venv required — stdlib only (Python 3.6+).
 
 Config via env vars:
   SENTINEL_URL       - Pi server, e.g. http://shanebrain:8250
-  SENTINEL_KEY       - service key (default: shanebrain-internal-2026)
+  SENTINEL_KEY       - service key (REQUIRED — no default; must match the server's
+                       PULSAR_SERVICE_KEY)
+  SENTINEL_KEY_FILE  - alternative: path to a file holding the key (e.g. a docker
+                       secret at /run/secrets/sentinel_key)
   SENTINEL_NODE_ID   - this node's ID (default: hostname)
   SENTINEL_INTERVAL  - heartbeat interval seconds (default: 60)
 """
@@ -27,7 +30,21 @@ if _urls_env:
 else:
     SENTINEL_URLS = [os.environ.get("SENTINEL_URL", "http://shanebrain:8250").rstrip("/")]
 SENTINEL_URL = SENTINEL_URLS[0]  # backward-compat alias for log lines
-SENTINEL_KEY = os.environ.get("SENTINEL_KEY", "shanebrain-internal-2026")
+def _load_key() -> str:
+    key = os.environ.get("SENTINEL_KEY", "").strip()
+    key_file = os.environ.get("SENTINEL_KEY_FILE", "").strip()
+    if not key and key_file:
+        try:
+            key = Path(key_file).read_text(encoding="utf-8").strip()
+        except OSError as e:
+            sys.exit(f"[agent] cannot read SENTINEL_KEY_FILE {key_file}: {e}")
+    if not key:
+        # Fail closed: never fall back to a built-in key (see PR #12).
+        sys.exit("[agent] SENTINEL_KEY or SENTINEL_KEY_FILE is required - refusing to start")
+    return key
+
+
+SENTINEL_KEY = _load_key()
 NODE_ID      = os.environ.get("SENTINEL_NODE_ID", socket.gethostname())
 INTERVAL     = int(os.environ.get("SENTINEL_INTERVAL", "60"))
 

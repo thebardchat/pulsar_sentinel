@@ -6,7 +6,9 @@ After=network.target
 Type=simple
 User=__USER__
 Environment=SENTINEL_URLS=http://100.67.120.6:8250,http://100.112.169.111:8250,http://100.100.90.66:8250
-Environment=SENTINEL_KEY=shanebrain-internal-2026
+# SENTINEL_KEY lives in a root-owned 0600 file, never in this unit:
+#   /etc/pulsar-sentinel/agent.env  ->  SENTINEL_KEY=<value from vault>
+EnvironmentFile=/etc/pulsar-sentinel/agent.env
 Environment=SENTINEL_NODE_ID=__NODE_ID__
 Environment=SENTINEL_INTERVAL=60
 ExecStart=/usr/bin/python3 /opt/sentinel/sentinel_agent.py

@@ -93,8 +93,9 @@ Both `src/` AND the project root must be in PYTHONPATH. `config/` lives at proje
 - `Authorization: Bearer <jwt>`
 
 ### 2. Internal Service Key (automation, MCP, Pi tools)
-- `Authorization: Bearer shanebrain-internal-2026`
-- Set via `PULSAR_SERVICE_KEY` env var (default is `shanebrain-internal-2026`)
+- `Authorization: Bearer $PULSAR_SERVICE_KEY`
+- Set via `PULSAR_SERVICE_KEY` env var — **required, no default** (fail-closed since #12). Value lives in the vault, never in code.
+- Node agents send the same value as `SENTINEL_KEY` (from `/etc/pulsar-sentinel/agent.env`, or `SENTINEL_KEY_FILE` for docker secrets)
 - Permanent, Admin role, no MetaMask needed
 - **Use this for all MCP tools, scripts, and internal calls**
 
@@ -113,7 +114,7 @@ async def shanebrain_sentinel_health() -> dict:
 # Status — internal service key, NOT a vaulted JWT
 @mcp.tool()
 async def shanebrain_sentinel_status() -> dict:
-    headers = {"Authorization": "Bearer shanebrain-internal-2026"}
+    headers = {"Authorization": f"Bearer {os.environ['PULSAR_SERVICE_KEY']}"}
     async with httpx.AsyncClient() as client:
         r = await client.get("http://localhost:8250/api/v1/status", headers=headers, timeout=5)
         return r.json()

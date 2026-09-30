@@ -32,6 +32,7 @@ _API_SOURCES = (
     SRC / "api" / "auth.py",
     SRC / "api" / "routes.py",
     SRC / "api" / "agent_routes.py",
+    ROOT / "scripts" / "sentinel_agent.py",
 )
 
 
